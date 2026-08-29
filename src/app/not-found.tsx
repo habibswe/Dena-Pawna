@@ -15,7 +15,7 @@ export default function NotFound() {
         <p className="text-muted-foreground mb-10 leading-relaxed">
           We couldn't find the page you're looking for. It might have been moved, deleted, or perhaps it never existed in your ledger!
         </p>
-        <Link href="/" className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto font-medium flex items-center justify-center gap-2"}>
+        <Link href="/dashboard" className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto font-medium flex items-center justify-center gap-2"}>
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
         </Link>

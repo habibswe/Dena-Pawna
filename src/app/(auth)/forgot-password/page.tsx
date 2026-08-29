@@ -84,10 +84,6 @@ export default function ForgotPasswordPage() {
           </div>
         </CardFooter>
       </Card>
-      
-      {/* Background decoration matching login page */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl mix-blend-multiply opacity-70 animate-pulse-slow pointer-events-none" />
-      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl mix-blend-multiply opacity-70 animate-pulse-slow pointer-events-none" style={{ animationDelay: '2s' }} />
     </div>
   );
 }

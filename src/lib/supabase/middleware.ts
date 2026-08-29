@@ -39,10 +39,13 @@ export async function updateSession(request: NextRequest) {
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
 
+  const isPublicRoute = request.nextUrl.pathname === '/';
+
   if (
     !user &&
     !isAuthRoute &&
-    !isAdminRoute
+    !isAdminRoute &&
+    !isPublicRoute
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
@@ -50,10 +53,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute) {
-      // user is logged in, redirect away from auth pages
+  if (user && (isAuthRoute || isPublicRoute)) {
+      // user is logged in, redirect away from auth and public landing pages
       const url = request.nextUrl.clone()
-      url.pathname = '/'
+      url.pathname = '/dashboard'
       return NextResponse.redirect(url)
   }
 

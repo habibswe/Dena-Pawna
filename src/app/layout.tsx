@@ -34,6 +34,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <div className="fixed top-0 -left-4 w-72 h-72 bg-primary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse pointer-events-none z-[-1]" />
+          <div className="fixed top-0 -right-4 w-72 h-72 bg-secondary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse pointer-events-none z-[-1]" style={{ animationDelay: '2s' }} />
+          <div className="fixed -bottom-8 left-20 w-72 h-72 bg-destructive rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse pointer-events-none z-[-1]" style={{ animationDelay: '4s' }} />
+          
           {children}
           <Toaster richColors position="top-center" />
         </ThemeProvider>

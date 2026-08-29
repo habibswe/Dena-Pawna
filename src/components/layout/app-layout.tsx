@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Users, ArrowRightLeft, PieChart, Settings } from 'lucide-react';
+import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: 'Home', href: '/', icon: Home },
+  { label: 'Overview', href: '/dashboard', icon: Home },
   { label: 'People', href: '/people', icon: Users },
   { label: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
   { label: 'Summary', href: '/summary', icon: PieChart },
@@ -22,7 +22,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 glass-panel">
         <div className="p-6 h-16 flex items-center gap-3">
-          <Image src="/logo-icon.jpg" alt="Dena Pawna Logo" width={32} height={32} className="rounded-md" />
+          <div className="bg-primary/10 p-2 rounded-xl glass-panel">
+            <Activity className="w-5 h-5 text-primary" />
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-primary">Dena Pawna</h1>
         </div>
         <nav className="flex-1 space-y-2 p-4">
@@ -52,7 +54,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <header className="md:hidden h-14 border-b flex items-center justify-between px-4 glass-panel sticky top-0 z-30">
           <div className="flex items-center gap-2">
-            <Image src="/logo-icon.jpg" alt="Dena Pawna Logo" width={28} height={28} className="rounded-md" />
+            <div className="bg-primary/10 p-2 rounded-xl glass-panel">
+              <Activity className="w-5 h-5 text-primary" />
+            </div>
             <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
           </div>
         </header>
