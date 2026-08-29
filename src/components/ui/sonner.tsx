@@ -3,14 +3,24 @@
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
+  const [isDesktop, setIsDesktop] = useState(true)
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      position={isDesktop ? "top-right" : "top-center"}
       icons={{
         success: (
           <CircleCheckIcon className="size-4" />
