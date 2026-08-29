@@ -8,6 +8,7 @@ import { AdminSearch } from '@/components/admin/admin-search';
 import { AdminDateFilter } from '@/components/admin/admin-date-filter';
 import { AdminPagination } from '@/components/admin/admin-pagination';
 import { EditTransactionModal } from '@/components/admin/edit-transaction-modal';
+import { DeleteButton } from '@/components/ui/delete-button';
 
 export default async function AdminTransactionsPage({
   searchParams,
@@ -94,14 +95,13 @@ export default async function AdminTransactionsPage({
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <EditTransactionModal transaction={tx} />
-                          <form action={async () => {
-                            'use server';
-                            await deleteTransaction(tx.id);
-                          }}>
-                            <Button variant="destructive" size="sm" type="submit">
-                              <Trash2 className="h-4 w-4 mr-2" /> Delete
-                            </Button>
-                          </form>
+                          <DeleteButton 
+                            onDelete={async () => {
+                              'use server';
+                              return await deleteTransaction(tx.id);
+                            }} 
+                            itemType="Transaction" 
+                          />
                         </div>
                       </td>
                     </tr>

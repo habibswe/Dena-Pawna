@@ -1,10 +1,14 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowRight, Wallet, Users, ShieldCheck, Activity } from 'lucide-react';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-foreground overflow-hidden relative">
+      <div className="absolute top-6 right-6 z-50">
+        <ModeToggle />
+      </div>
 
       {/* Main Content Area */}
       <main className="relative z-10 container mx-auto px-6 flex flex-col items-center text-center max-w-4xl pt-20 pb-16">

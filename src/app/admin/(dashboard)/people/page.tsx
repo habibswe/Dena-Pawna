@@ -8,6 +8,8 @@ import { AdminSearch } from '@/components/admin/admin-search';
 import { AdminDateFilter } from '@/components/admin/admin-date-filter';
 import { AdminPagination } from '@/components/admin/admin-pagination';
 import { EditPersonModal } from '@/components/admin/edit-person-modal';
+import { CreatePersonModal } from '@/components/admin/create-person-modal';
+import { DeleteButton } from '@/components/ui/delete-button';
 
 export default async function AdminPeoplePage({
   searchParams,
@@ -82,14 +84,13 @@ export default async function AdminPeoplePage({
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <EditPersonModal person={person} />
-                        <form action={async () => {
-                          'use server';
-                          await deletePerson(person.id);
-                        }}>
-                          <Button variant="destructive" size="sm" type="submit">
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
-                          </Button>
-                        </form>
+                        <DeleteButton 
+                          onDelete={async () => {
+                            'use server';
+                            return await deletePerson(person.id);
+                          }} 
+                          itemType="Person" 
+                        />
                       </div>
                     </td>
                   </tr>

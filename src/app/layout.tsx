@@ -34,11 +34,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="fixed top-0 -left-4 w-72 h-72 bg-primary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse pointer-events-none z-[-1]" />
-          <div className="fixed top-0 -right-4 w-72 h-72 bg-secondary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse pointer-events-none z-[-1]" style={{ animationDelay: '2s' }} />
-          <div className="fixed -bottom-8 left-20 w-72 h-72 bg-destructive rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse pointer-events-none z-[-1]" style={{ animationDelay: '4s' }} />
+          {/* Global Background Gradients */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="absolute top-0 -left-4 w-72 h-72 bg-primary rounded-full blur-[100px] opacity-30 dark:opacity-20 animate-pulse" />
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-secondary rounded-full blur-[100px] opacity-30 dark:opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-destructive rounded-full blur-[100px] opacity-20 dark:opacity-10 animate-pulse" style={{ animationDelay: '4s' }} />
+          </div>
           
-          {children}
+          <div className="relative z-10 flex flex-col min-h-screen">
+            {children}
+          </div>
+          
           <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>

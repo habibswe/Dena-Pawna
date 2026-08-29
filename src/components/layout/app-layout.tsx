@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: Home },
@@ -59,6 +60,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
           </div>
+          <ModeToggle />
         </header>
 
         <div className="flex-1 overflow-y-auto pb-20 md:pb-0 p-4 md:p-8">

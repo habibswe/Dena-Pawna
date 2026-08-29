@@ -7,22 +7,22 @@ export async function deletePerson(personId: string) {
   const supabase = createAdminClient();
   const { error } = await supabase.from('people').delete().eq('id', personId);
   if (error) {
-    console.error('Failed to delete person:', error);
-    throw new Error(error.message);
+    return { error: error.message };
   }
   revalidatePath('/admin/people');
   revalidatePath('/', 'layout');
+  return { success: true };
 }
 
 export async function deleteTransaction(transactionId: string) {
   const supabase = createAdminClient();
   const { error } = await supabase.from('transactions').delete().eq('id', transactionId);
   if (error) {
-    console.error('Failed to delete transaction:', error);
-    throw new Error(error.message);
+    return { error: error.message };
   }
   revalidatePath('/admin/transactions');
   revalidatePath('/', 'layout');
+  return { success: true };
 }
 
 export async function updatePerson(personId: string, formData: FormData) {
@@ -138,9 +138,9 @@ export async function deleteSystemUser(userId: string) {
   
   const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) {
-    console.error('Failed to delete system user:', error);
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   revalidatePath('/admin/users');
+  return { success: true };
 }

@@ -9,9 +9,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,6 +24,10 @@ export default function LoginPage() {
     if (result?.error) {
       toast.error(result.error);
       setIsLoading(false);
+    } else if (result?.success) {
+      toast.success('Logged in successfully!');
+      router.push('/dashboard');
+      router.refresh();
     }
   };
 

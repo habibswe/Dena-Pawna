@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { AdminPagination } from '@/components/admin/admin-pagination';
 import { CreateUserModal } from '@/components/admin/create-user-modal';
 import { EditUserModal } from '@/components/admin/edit-user-modal';
+import { DeleteButton } from '@/components/ui/delete-button';
 
 export default async function AdminUsersPage({
   searchParams,
@@ -88,14 +89,13 @@ export default async function AdminUsersPage({
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <EditUserModal user={user} />
-                        <form action={async () => {
-                          'use server';
-                          await deleteSystemUser(user.id);
-                        }}>
-                          <Button variant="destructive" size="sm" type="submit">
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
-                          </Button>
-                        </form>
+                        <DeleteButton 
+                          onDelete={async () => {
+                            'use server';
+                            return await deleteSystemUser(user.id);
+                          }} 
+                          itemType="System User" 
+                        />
                       </div>
                     </td>
                   </tr>
