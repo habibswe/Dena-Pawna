@@ -28,7 +28,7 @@ export function CreateUserModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button className="glass-panel" />}>
+      <DialogTrigger render={<Button />}>
         <UserPlus className="h-4 w-4 mr-2" /> New User
       </DialogTrigger>
       <DialogContent className="glass-panel">

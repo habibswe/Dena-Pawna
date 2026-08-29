@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { LayoutDashboard, Users, ArrowLeftRight, LogOut, ShieldAlert, UserCog } from 'lucide-react';
+import { ShieldAlert, LogOut } from 'lucide-react';
+import { AdminNav } from '@/components/admin/admin-nav';
 import { Button } from '@/components/ui/button';
 import { logoutAdmin } from '../actions';
 
@@ -14,28 +15,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             <h1 className="text-xl font-bold tracking-tight">Super Admin</h1>
           </div>
           
-          <nav className="space-y-1">
-            <Link href="/admin">
-              <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground">
-                <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-              </Button>
-            </Link>
-            <Link href="/admin/people">
-              <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground">
-                <Users className="mr-2 h-4 w-4" /> People
-              </Button>
-            </Link>
-            <Link href="/admin/transactions">
-              <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground">
-                <ArrowLeftRight className="mr-2 h-4 w-4" /> Transactions
-              </Button>
-            </Link>
-            <Link href="/admin/users">
-              <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground">
-                <UserCog className="mr-2 h-4 w-4" /> System Users
-              </Button>
-            </Link>
-          </nav>
+          <AdminNav />
         </div>
 
         <div className="pt-6 border-t mt-auto">

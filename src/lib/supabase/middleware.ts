@@ -39,7 +39,12 @@ export async function updateSession(request: NextRequest) {
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
 
-  const isPublicRoute = request.nextUrl.pathname === '/';
+  const isPublicRoute = 
+    request.nextUrl.pathname === '/' || 
+    request.nextUrl.pathname === '/manifest.webmanifest' ||
+    request.nextUrl.pathname.startsWith('/icon') ||
+    request.nextUrl.pathname.startsWith('/sw.js') ||
+    request.nextUrl.pathname.startsWith('/workbox-');
 
   if (
     !user &&

@@ -26,7 +26,7 @@ export default async function NewTransactionPage({
         </div>
       </div>
 
-      <div className="pt-4">
+      <div className="pt-8 pb-10">
         <AddTransactionForm people={people || []} defaultPersonId={person} />
       </div>
     </div>
