@@ -8,7 +8,6 @@ import { AdminSearch } from '@/components/admin/admin-search';
 import { AdminDateFilter } from '@/components/admin/admin-date-filter';
 import { AdminPagination } from '@/components/admin/admin-pagination';
 import { EditPersonModal } from '@/components/admin/edit-person-modal';
-import { CreatePersonModal } from '@/components/admin/create-person-modal';
 import { DeleteButton } from '@/components/ui/delete-button';
 
 export default async function AdminPeoplePage({

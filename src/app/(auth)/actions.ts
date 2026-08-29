@@ -37,10 +37,14 @@ export async function signup(formData: FormData) {
     return { error: error.message }
   }
 
-  // If Supabase returns no user and no error, it usually means the email is already taken 
-  // (due to email enumeration protection).
+  // When email enumeration protection is ON, Supabase returns a fake user object
+  // for existing emails. We can detect this because the identities array will be empty.
+  if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+    return { error: 'A user with this email address already exists. Please log in.' }
+  }
+
   if (!authData.user) {
-    return { error: 'If this email is already registered, please try logging in.' }
+    return { error: 'Failed to create user account. Please try again.' }
   }
 
   // If session is null but we have a user, email confirmation is required
