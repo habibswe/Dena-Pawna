@@ -70,7 +70,15 @@ export function AddTransactionForm({
               <div className="flex-1">
                 <Select value={personId} onValueChange={(val) => setPersonId(val || '')} required>
                   <SelectTrigger className="w-full glass-panel border-primary/20">
-                    <SelectValue placeholder="Select a person" />
+                    {personId ? (
+                      <span className="flex flex-1 text-left truncate">
+                        {localPeople.find(p => p.id === personId)?.name || 'Unknown Person'}
+                      </span>
+                    ) : (
+                      <span className="flex flex-1 text-left text-muted-foreground truncate">
+                        Select a person
+                      </span>
+                    )}
                   </SelectTrigger>
                   <SelectContent className="glass-panel border-primary/20 shadow-2xl">
                     {localPeople.map(person => (
