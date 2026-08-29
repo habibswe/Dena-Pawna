@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 export default async function NewTransactionPage({
   searchParams,
 }: {
-  searchParams: { person?: string };
+  searchParams: Promise<{ person?: string }>;
 }) {
   const supabase = await createClient();
   const { person } = await searchParams;

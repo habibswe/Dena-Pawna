@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default async function PersonDetailsPage({ params }: { params: { id: string } }) {
+export default async function PersonDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 

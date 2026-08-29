@@ -13,7 +13,7 @@ import { TransactionSearch } from '@/components/transactions/transaction-search'
 export default async function TransactionsPage({
   searchParams,
 }: {
-  searchParams: { filter?: string, from?: string, to?: string, search?: string };
+  searchParams: Promise<{ filter?: string, from?: string, to?: string, search?: string }>;
 }) {
   const supabase = await createClient();
   const searchParamsResolved = await searchParams;

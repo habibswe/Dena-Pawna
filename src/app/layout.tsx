@@ -10,7 +10,6 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: 'Dena Pawna - Simple Money Ledger',
   description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
-  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {

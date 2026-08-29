@@ -13,7 +13,7 @@ import { DeleteButton } from '@/components/ui/delete-button';
 export default async function AdminPeoplePage({
   searchParams,
 }: {
-  searchParams: { search?: string, from?: string, to?: string, page?: string };
+  searchParams: Promise<{ search?: string, from?: string, to?: string, page?: string }>;
 }) {
   const supabase = createAdminClient();
   const searchParamsResolved = await searchParams;
