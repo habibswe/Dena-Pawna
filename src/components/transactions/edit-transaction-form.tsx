@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { addTransaction } from '@/app/(dashboard)/transactions/actions';
+import { updateTransaction } from '@/app/(dashboard)/transactions/actions';
 import { AddPersonDialog } from '../people/add-person-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -17,33 +17,32 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-export function AddTransactionForm({ 
+export function EditTransactionForm({ 
+  transaction,
   people, 
   accounts,
   categories,
-  defaultPersonId,
-  defaultType 
 }: { 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transaction: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   people: any[], 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   accounts: any[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   categories: any[],
-  defaultPersonId?: string,
-  defaultType?: string
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [type, setType] = useState(defaultType || 'EXPENSE');
+  const [type, setType] = useState(transaction.type || 'EXPENSE');
   
-  const [personId, setPersonId] = useState(defaultPersonId || '');
-  const [accountId, setAccountId] = useState('');
-  const [toAccountId, setToAccountId] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [personId, setPersonId] = useState(transaction.person_id || '');
+  const [accountId, setAccountId] = useState(transaction.account_id || '');
+  const [toAccountId, setToAccountId] = useState(transaction.to_account_id || '');
+  const [categoryId, setCategoryId] = useState(transaction.category_id || '');
   
   const [localPeople, setLocalPeople] = useState(people);
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [dueDate, setDueDate] = useState<Date | undefined>(transaction.due_date ? new Date(transaction.due_date) : undefined);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,14 +79,14 @@ export function AddTransactionForm({
       return;
     }
 
-    const result = await addTransaction(formData);
+    const result = await updateTransaction(transaction.id, formData);
     
     setIsLoading(false);
     
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Transaction added successfully');
+      toast.success('Transaction updated successfully');
       router.push('/dashboard');
     }
   };
@@ -102,7 +101,7 @@ export function AddTransactionForm({
   return (
     <Card className="glass-panel max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle>Add Transaction</CardTitle>
+        <CardTitle>Edit Transaction</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4 pb-6">
@@ -276,7 +275,7 @@ export function AddTransactionForm({
           {['INCOME', 'EXPENSE'].includes(type) && (
             <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
               <Label>Recurring Transaction (Optional)</Label>
-              <Select name="recurrence" defaultValue="">
+              <Select name="recurrence" defaultValue={transaction.recurrence || ""}>
                 <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
                   <SelectValue placeholder="One-time (Not recurring)" />
                 </SelectTrigger>
@@ -292,7 +291,7 @@ export function AddTransactionForm({
 
           <div className="space-y-2">
             <Label htmlFor="amount">Amount (৳)</Label>
-            <Input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required className="glass-panel border-primary/20" />
+            <Input id="amount" name="amount" type="number" step="0.01" min="0.01" defaultValue={transaction.amount} placeholder="0.00" required className="glass-panel border-primary/20" />
           </div>
 
           <div className="space-y-2">
@@ -302,14 +301,14 @@ export function AddTransactionForm({
               name="transaction_date" 
               type="date" 
               required 
-              defaultValue={new Date().toISOString().split('T')[0]}
+              defaultValue={transaction.transaction_date}
               className="glass-panel border-primary/20" 
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="note">Note (Optional)</Label>
-            <Input id="note" name="note" placeholder="Add a short note" className="glass-panel border-primary/20" />
+            <Input id="note" name="note" defaultValue={transaction.note || ''} placeholder="Add a short note" className="glass-panel border-primary/20" />
           </div>
 
           <div className="pt-4 flex gap-3">

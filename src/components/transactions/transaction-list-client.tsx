@@ -4,21 +4,24 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPaginatedTransactions } from '@/app/(dashboard)/transactions/actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { deleteTransaction } from '@/app/(dashboard)/transactions/actions';
+import { toast } from 'sonner';
 
 export function TransactionListClient({ 
   initialTransactions, 
   totalCount,
   filter,
-  from,
-  to,
+  month,
   search
 }: {
   initialTransactions: any[];
   totalCount: number;
   filter?: string;
-  from?: string;
-  to?: string;
+  month?: string;
   search?: string;
 }) {
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -26,14 +29,31 @@ export function TransactionListClient({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialTransactions.length < totalCount);
   
+  const router = useRouter();
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this transaction?")) return;
+    
+    setLoading(true);
+    const result = await deleteTransaction(id);
+    setLoading(false);
+    
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Transaction deleted successfully");
+      setTransactions(prev => prev.filter(tx => tx.id !== id));
+      router.refresh();
+    }
+  };
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     
     const nextPage = page + 1;
-    const { data } = await getPaginatedTransactions(nextPage, filter, from, to, search);
+    const { data } = await getPaginatedTransactions(nextPage, filter, month, search);
     
     if (data && data.length > 0) {
       setTransactions(prev => {
@@ -49,7 +69,7 @@ export function TransactionListClient({
     }
     
     setLoading(false);
-  }, [page, loading, hasMore, filter, from, to, search, totalCount]);
+  }, [page, loading, hasMore, filter, month, search, totalCount]);
 
   useEffect(() => {
     // Reset state if filters change (initialTransactions will update)
@@ -100,6 +120,8 @@ export function TransactionListClient({
         if (tx.type === 'BORROWED') actionText = 'You borrowed';
         if (tx.type === 'RETURNED') actionText = 'You returned';
 
+        const isOverdue = tx.due_date ? new Date(tx.due_date) < new Date(new Date().setHours(0, 0, 0, 0)) : false;
+
         return (
           <div key={tx.id} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center hover:bg-secondary/20 transition-colors">
             <div className="flex items-center gap-4 sm:w-[40%]">
@@ -116,20 +138,47 @@ export function TransactionListClient({
               </div>
             </div>
             
-            <div className="hidden sm:block flex-1 pr-4 min-w-0">
+            <div className="hidden sm:flex flex-col flex-1 pr-4 min-w-0 justify-center">
               {tx.note && (
                 <p className="text-sm text-muted-foreground italic truncate">"{tx.note}"</p>
+              )}
+              {tx.due_date && (
+                <p className={`text-xs mt-1 font-medium ${isOverdue ? 'text-destructive' : 'text-primary'}`}>
+                  {isOverdue ? '⚠️ Overdue' : '⏳ Due'}: {format(new Date(tx.due_date), 'dd MMM yyyy')}
+                </p>
               )}
             </div>
 
             <div className="flex items-center justify-between sm:justify-end sm:w-[120px] mt-4 sm:mt-0">
-              <div className="sm:hidden flex-1 pr-4 min-w-0">
+              <div className="sm:hidden flex flex-col flex-1 pr-4 min-w-0 justify-center">
                 {tx.note && (
                   <p className="text-sm text-muted-foreground italic truncate">"{tx.note}"</p>
+                )}
+                {tx.due_date && (
+                  <p className={`text-xs mt-1 font-medium ${isOverdue ? 'text-destructive' : 'text-primary'}`}>
+                    {isOverdue ? '⚠️ Overdue' : '⏳ Due'}: {format(new Date(tx.due_date), 'dd MMM yyyy')}
+                  </p>
                 )}
               </div>
               <div className={`font-bold ${txColor} text-lg whitespace-nowrap`}>
                 {sign}৳{Number(tx.amount).toLocaleString()}
+              </div>
+              <div className="ml-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" />}>
+                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => router.push(`/transactions/${tx.id}/edit`)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(tx.id)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

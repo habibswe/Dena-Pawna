@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity } from 'lucide-react';
+import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: Home },
+  { label: 'Accounts', href: '/accounts', icon: Activity },
+  { label: 'Categories', href: '/categories', icon: PieChart },
+  { label: 'Budgets', href: '/budgets', icon: Target },
   { label: 'People', href: '/people', icon: Users },
   { label: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
-  { label: 'Summary', href: '/summary', icon: PieChart },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
 

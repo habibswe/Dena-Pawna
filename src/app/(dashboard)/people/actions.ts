@@ -38,3 +38,64 @@ export async function addPerson(formData: FormData) {
   revalidatePath('/transactions/new');
   return { success: true, data };
 }
+
+export async function updatePerson(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Unauthorized' };
+  }
+
+  const name = formData.get('name') as string;
+  const phone = formData.get('phone') as string;
+  const email = formData.get('email') as string;
+
+  if (!name || name.trim() === '') {
+    return { error: 'Name is required' };
+  }
+
+  const { data, error } = await supabase
+    .from('people')
+    .update({
+      name,
+      phone: phone || null,
+      email: email || null,
+    })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/people');
+  revalidatePath(`/people/${id}`);
+  revalidatePath('/transactions/new');
+  return { success: true, data };
+}
+
+export async function deletePerson(id: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Unauthorized' };
+  }
+
+  const { error } = await supabase
+    .from('people')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/people');
+  revalidatePath('/transactions/new');
+  return { success: true };
+}

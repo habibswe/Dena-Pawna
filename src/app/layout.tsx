@@ -10,6 +10,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: 'Dena Pawna - Simple Money Ledger',
   description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
+  icons: {
+    apple: '/logo-icon.jpg',
+  },
 };
 
 export const viewport: Viewport = {
@@ -26,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased font-sans ${outfit.variable}`}>
+      <body className={`antialiased font-sans ${outfit.variable}`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

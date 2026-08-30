@@ -5,21 +5,19 @@ import { format } from 'date-fns';
 import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { DateFilter } from '@/components/ui/date-filter';
+import { MonthSelector } from '@/components/dashboard/month-selector';
 import { ExportButtons } from '@/components/ui/export-buttons';
 import { TransactionListClient } from '@/components/transactions/transaction-list-client';
 import { TransactionSearch } from '@/components/transactions/transaction-search';
+import { Suspense } from 'react';
+import DashboardLoading from '@/components/ui/dashboard-loading';
 
-export default async function TransactionsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ filter?: string, from?: string, to?: string, search?: string }>;
-}) {
+async function TransactionsContent({ searchParamsResolved }: { searchParamsResolved: { filter?: string, month?: string, search?: string } }) {
   const supabase = await createClient();
-  const searchParamsResolved = await searchParams;
+
   const filter = searchParamsResolved.filter;
-  const from = searchParamsResolved.from;
-  const to = searchParamsResolved.to;
+  const month = searchParamsResolved.month;
+  const currentMonth = month || format(new Date(), 'yyyy-MM');
   const search = searchParamsResolved.search;
 
   let query = supabase.from('transactions').select('*, people!inner(name)', { count: 'exact' }).order('transaction_date', { ascending: false });
@@ -32,13 +30,7 @@ export default async function TransactionsPage({
     query = query.or(`people.name.ilike.%${search}%,note.ilike.%${search}%,type.ilike.%${search}%`);
   }
 
-  if (from && to) {
-    query = query.gte('transaction_date', new Date(from).toISOString()).lte('transaction_date', new Date(`${to}T23:59:59.999Z`).toISOString());
-  } else if (from) {
-    query = query.gte('transaction_date', new Date(from).toISOString());
-  } else if (to) {
-    query = query.lte('transaction_date', new Date(`${to}T23:59:59.999Z`).toISOString());
-  }
+  query = query.gte('transaction_date', `${currentMonth}-01`).lte('transaction_date', `${currentMonth}-31`);
 
   query = query.range(0, 19);
 
@@ -58,16 +50,16 @@ export default async function TransactionsPage({
           <p className="text-muted-foreground">Your complete financial history.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full xl:w-auto">
-          <DateFilter />
+          <MonthSelector currentMonth={currentMonth} />
           <div className="flex flex-row items-center justify-between sm:justify-start gap-3 sm:border-l sm:border-border sm:pl-4 w-full sm:w-auto">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-              <Link href={`/transactions?filter=ALL${from ? `&from=${from}` : ''}${to ? `&to=${to}` : ''}`} className={buttonVariants({ variant: filter === 'ALL' || !filter ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'ALL' || !filter ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=ALL${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'ALL' || !filter ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'ALL' || !filter ? '' : 'glass-panel'}` })}>
                 All
               </Link>
-              <Link href={`/transactions?filter=GIVEN${from ? `&from=${from}` : ''}${to ? `&to=${to}` : ''}`} className={buttonVariants({ variant: filter === 'GIVEN' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'GIVEN' ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=GIVEN${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'GIVEN' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'GIVEN' ? '' : 'glass-panel'}` })}>
                 Given
               </Link>
-              <Link href={`/transactions?filter=RECEIVED${from ? `&from=${from}` : ''}${to ? `&to=${to}` : ''}`} className={buttonVariants({ variant: filter === 'RECEIVED' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'RECEIVED' ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=RECEIVED${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'RECEIVED' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'RECEIVED' ? '' : 'glass-panel'}` })}>
                 Received
               </Link>
             </div>
@@ -98,12 +90,26 @@ export default async function TransactionsPage({
             initialTransactions={transactions} 
             totalCount={count || 0}
             filter={filter}
-            from={from}
-            to={to}
+            month={currentMonth}
             search={search}
           />
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string, month?: string, search?: string }>;
+}) {
+  const searchParamsResolved = await searchParams;
+  const suspenseKey = JSON.stringify(searchParamsResolved);
+  
+  return (
+    <Suspense key={suspenseKey} fallback={<DashboardLoading />}>
+      <TransactionsContent searchParamsResolved={searchParamsResolved} />
+    </Suspense>
   );
 }

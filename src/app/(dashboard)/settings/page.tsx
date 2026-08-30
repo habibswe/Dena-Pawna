@@ -10,9 +10,11 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import DashboardLoading from '@/components/ui/dashboard-loading';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -23,19 +25,21 @@ export default function SettingsPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setEmail(user.email || '');
         setUserId(user.id);
-        supabase.from('profiles').select('full_name').eq('id', user.id).single()
-          .then(({ data }) => {
-            if (data?.full_name) {
-              setFullName(data.full_name);
-            }
-          });
+        const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+        if (data?.full_name) {
+          setFullName(data.full_name);
+        }
       }
-    });
+      setIsLoadingPage(false);
+    };
+    
+    fetchUser();
   }, []);
 
   const handleSaveProfile = async () => {
@@ -43,7 +47,7 @@ export default function SettingsPage() {
     setIsSaving(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.from('profiles').update({ full_name: fullName }).eq('id', userId);
+      const { error } = await supabase.from('profiles').upsert({ id: userId, full_name: fullName });
       if (error) {
         console.error('Error saving profile:', error);
         toast.error('Failed to save profile. Please try again.');
@@ -88,6 +92,10 @@ export default function SettingsPage() {
       setIsChangingPassword(false);
     }
   };
+
+  if (isLoadingPage) {
+    return <DashboardLoading />;
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">

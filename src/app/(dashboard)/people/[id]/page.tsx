@@ -6,6 +6,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { format } from 'date-fns';
+import { EditPersonButton } from '@/components/people/edit-person-button';
 
 export default async function PersonDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -35,6 +36,9 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{person.name}</h2>
           {person.phone && <p className="text-sm text-muted-foreground">{person.phone}</p>}
+        </div>
+        <div className="ml-auto">
+          <EditPersonButton person={person} />
         </div>
       </div>
 
