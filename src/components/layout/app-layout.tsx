@@ -21,7 +21,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-full bg-background/50">
+    <div className="flex h-[100dvh] w-full bg-background/50">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 glass-panel">
         <div className="p-6 h-16 flex items-center gap-3">
