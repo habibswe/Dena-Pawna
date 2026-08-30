@@ -8,7 +8,12 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
-  /* config options here */
+  experimental: {
+    staleTimes: {
+      dynamic: 300,
+      static: 1800,
+    },
+  },
 };
 
 export default withPWA(nextConfig);
