@@ -1,27 +1,29 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/ui/mode-toggle';
-
-const navItems = [
-  { label: 'Overview', href: '/dashboard', icon: Home },
-  { label: 'Accounts', href: '/accounts', icon: Activity },
-  { label: 'Categories', href: '/categories', icon: PieChart },
-  { label: 'Budgets', href: '/budgets', icon: Target },
-  { label: 'People', href: '/people', icon: Users },
-  { label: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
-  { label: 'Settings', href: '/settings', icon: Settings },
-];
+import { LanguageToggle } from '@/components/ui/language-toggle';
+import { useTranslation } from '@/i18n/client';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { label: t.nav.overview, href: '/dashboard', icon: Home },
+    { label: t.nav.accounts, href: '/accounts', icon: Activity },
+    { label: t.nav.categories, href: '/categories', icon: PieChart },
+    { label: t.nav.budgets, href: '/budgets', icon: Target },
+    { label: t.nav.people, href: '/people', icon: Users },
+    { label: t.nav.transactions, href: '/transactions', icon: ArrowRightLeft },
+    { label: t.nav.settings, href: '/settings', icon: Settings },
+  ];
 
   return (
-    <div className="flex h-[100dvh] w-full bg-background/50">
+    <div className="flex h-[100dvh] w-full bg-transparent">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 glass-panel">
         <div className="p-6 h-16 flex items-center gap-3">
@@ -51,10 +53,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        <div className="p-4 border-t border-border/40 flex items-center justify-between gap-2">
+          {/* <LanguageToggle /> */}
+          {/* <ModeToggle /> */}
+        </div>
       </aside>
 
+
+
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <header className="md:hidden h-14 border-b flex items-center justify-between px-4 glass-panel sticky top-0 z-30">
           <div className="flex items-center gap-2">
             <div className="bg-primary/10 p-2 rounded-xl glass-panel">
@@ -62,7 +70,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
           </div>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            {/* <LanguageToggle /> */}
+            {/* <ModeToggle /> */}
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto pb-20 md:pb-0 p-4 md:p-8">
@@ -83,13 +94,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               href={item.href}
               className={cn(
                 'flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors',
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                isActive ? 'text-primary' : 'text-foreground hover:text-primary/80'
               )}
             >
               <div className={cn('p-1.5 rounded-full transition-all', isActive && 'bg-primary/10')}>
-                <Icon className="h-5 w-5" />
+                <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5px]")} />
               </div>
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
             </Link>
           );
         })}

@@ -9,9 +9,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useTranslation } from '@/i18n/client'
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,9 +39,9 @@ export default function SignupPage() {
               <span className="text-2xl font-bold text-primary">৳</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t.auth.signupTitle}</CardTitle>
           <CardDescription>
-            Enter your email below to create your account
+            {t.auth.signupSubtitle}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -49,18 +51,18 @@ export default function SignupPage() {
               <Input id="name" name="name" type="text" placeholder="e.g. John Doe" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.auth.emailLabel}</Label>
               <Input id="email" name="email" type="email" placeholder="m@example.com" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.auth.passwordLabel}</Label>
               <Input id="password" name="password" type="password" required />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign Up
+              {t.auth.signUpBtn}
             </Button>
 
             <div className="relative w-full">
@@ -101,9 +103,9 @@ export default function SignupPage() {
             </Button>
 
             <div className="text-center text-sm">
-              Already have an account?{' '}
+              {t.auth.hasAccount}{' '}
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Sign in
+                {t.auth.signInBtn}
               </Link>
             </div>
           </CardFooter>

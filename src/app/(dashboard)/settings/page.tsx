@@ -11,9 +11,12 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 import DashboardLoading from '@/components/ui/dashboard-loading';
+import { useTranslation } from '@/i18n/client';
+import { Languages } from 'lucide-react';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { locale, setLocale, t } = useTranslation();
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -163,24 +166,55 @@ export default function SettingsPage() {
           <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" /> Preferences</CardTitle>
           <CardDescription>Customize your experience</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
+        <CardContent className="space-y-8">
+          <div className="space-y-3">
             <Label>Appearance</Label>
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={theme === 'light' ? 'default' : 'outline'} 
-                onClick={() => setTheme('light')}
-              >
-                <Sun className="mr-2 h-4 w-4" /> Light Mode
-              </Button>
-              <Button 
-                variant={theme === 'dark' ? 'default' : 'outline'} 
-                onClick={() => setTheme('dark')}
-              >
-                <Moon className="mr-2 h-4 w-4" /> Dark Mode
-              </Button>
+            
+            <div 
+              className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full max-w-xs cursor-pointer border border-border"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {/* Sliding Pill Background */}
+              <div 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  theme === 'dark' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                }`} 
+              />
+              
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme !== 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                <Sun className="h-4 w-4 mr-2" /> Light
+              </div>
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme === 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                <Moon className="h-4 w-4 mr-2" /> Dark
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Select your preferred theme.</p>
+            
+            <p className="text-xs text-muted-foreground">Tap or swipe to switch between light and dark mode.</p>
+          </div>
+
+          <div className="space-y-3 pt-4 border-t border-border">
+            <Label>Language / ভাষা</Label>
+            
+            <div 
+              className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full max-w-xs cursor-pointer border border-border"
+              onClick={() => setLocale(locale === 'en' ? 'bn' : 'en')}
+            >
+              {/* Sliding Pill Background */}
+              <div 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  locale === 'bn' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                }`} 
+              />
+              
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${locale === 'en' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                English
+              </div>
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${locale === 'bn' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                বাংলা
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">Select your preferred language.</p>
           </div>
 
           <div className="space-y-2 pt-4 border-t border-border">

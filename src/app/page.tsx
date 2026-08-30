@@ -2,12 +2,17 @@ import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowRight, Wallet, Users, ShieldCheck, Activity } from 'lucide-react';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { LanguageToggle } from '@/components/ui/language-toggle';
+import { getDictionary } from '@/i18n/server';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const t = await getDictionary();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-foreground overflow-hidden relative">
-      <div className="absolute top-6 right-6 z-50">
-        <ModeToggle />
+      <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
+        {/* <LanguageToggle /> */}
+        {/* <ModeToggle /> */}
       </div>
 
       {/* Main Content Area */}
@@ -18,15 +23,15 @@ export default function LandingPage() {
           <div className="bg-primary/10 p-3 rounded-2xl glass-panel">
             <Activity className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary">Dena Pawna</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-primary">{t.landing.title}</h1>
         </div>
 
         {/* Hero Section */}
         <h2 className="text-5xl sm:text-6xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
-          Manage Your Financial Relationships with Ease.
+          {t.landing.headline}
         </h2>
         <p className="text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
-          Keep track of exactly who owes you money and who you owe. Dena Pawna gives you a crystal-clear overview of your personal financial network.
+          {t.landing.subhead}
         </p>
 
         {/* Call to Actions */}
@@ -35,13 +40,13 @@ export default function LandingPage() {
             href="/signup" 
             className={buttonVariants({ size: "lg", className: "w-full sm:w-auto text-lg h-14 px-8 rounded-full shadow-lg hover:shadow-primary/25 transition-all" })}
           >
-            Get Started Free <ArrowRight className="ml-2 w-5 h-5" />
+            {t.landing.getStarted} <ArrowRight className="ml-2 w-5 h-5" />
           </Link>
           <Link 
             href="/login" 
             className={buttonVariants({ variant: "outline", size: "lg", className: "w-full sm:w-auto text-lg h-14 px-8 rounded-full glass-panel border-primary/20" })}
           >
-            Log In
+            {t.landing.login}
           </Link>
         </div>
 
@@ -51,31 +56,31 @@ export default function LandingPage() {
             <div className="bg-primary/10 p-3 rounded-lg mb-4 text-primary">
               <Wallet className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold mb-2">Track Balances</h3>
-            <p className="text-sm text-muted-foreground">Instantly see your net balance and detailed transaction history for every person in your network.</p>
+            <h3 className="text-lg font-bold mb-2">{t.landing.feature1_title}</h3>
+            <p className="text-sm text-muted-foreground">{t.landing.feature1_desc}</p>
           </div>
 
           <div className="glass-panel p-6 rounded-2xl flex flex-col items-start hover:-translate-y-1 transition-transform duration-300">
             <div className="bg-primary/10 p-3 rounded-lg mb-4 text-primary">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold mb-2">Manage Contacts</h3>
-            <p className="text-sm text-muted-foreground">Categorize people as customers, suppliers, or employees to keep your finances organized.</p>
+            <h3 className="text-lg font-bold mb-2">{t.landing.feature2_title}</h3>
+            <p className="text-sm text-muted-foreground">{t.landing.feature2_desc}</p>
           </div>
 
           <div className="glass-panel p-6 rounded-2xl flex flex-col items-start hover:-translate-y-1 transition-transform duration-300">
             <div className="bg-primary/10 p-3 rounded-lg mb-4 text-primary">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold mb-2">Secure & Private</h3>
-            <p className="text-sm text-muted-foreground">Your financial data is securely stored and isolated. You have total control over your ledger.</p>
+            <h3 className="text-lg font-bold mb-2">{t.landing.feature3_title}</h3>
+            <p className="text-sm text-muted-foreground">{t.landing.feature3_desc}</p>
           </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="relative z-10 py-6 text-center text-muted-foreground text-sm border-t border-border/40 w-full mt-auto glass-panel rounded-none">
-        <p>&copy; {new Date().getFullYear()} Dena Pawna. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} {t.landing.footer}</p>
       </footer>
     </div>
   );

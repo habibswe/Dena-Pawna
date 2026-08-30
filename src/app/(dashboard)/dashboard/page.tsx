@@ -10,6 +10,7 @@ import { MonthSelector } from '@/components/dashboard/month-selector';
 import { ExpenseBreakdown } from '@/components/dashboard/expense-breakdown';
 import { Suspense } from 'react';
 import DashboardLoading from '@/components/ui/dashboard-loading';
+import { getDictionary } from '@/i18n/server';
 
 async function DashboardContent({ month }: { month?: string }) {
   const supabase = await createClient();
@@ -17,6 +18,7 @@ async function DashboardContent({ month }: { month?: string }) {
 
   if (!user) return null;
 
+  const t = await getDictionary();
   const currentMonth = month || format(new Date(), 'yyyy-MM');
 
   const [
@@ -57,13 +59,13 @@ async function DashboardContent({ month }: { month?: string }) {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
-          <p className="text-muted-foreground">Your financial health at a glance.</p>
+          <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.title}</h2>
+          <p className="text-muted-foreground">{t.dashboard.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector currentMonth={currentMonth} />
           <Link href="/transactions/new" className={buttonVariants()}>
-            + Add Transaction
+            {t.dashboard.addTransaction}
           </Link>
         </div>
       </div>
@@ -72,7 +74,7 @@ async function DashboardContent({ month }: { month?: string }) {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
         <Card className="glass-panel border-primary/20 col-span-2 md:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available (Month)</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.available}</CardTitle>
             <Wallet className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
@@ -84,7 +86,7 @@ async function DashboardContent({ month }: { month?: string }) {
         </Card>
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Income</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.income}</CardTitle>
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
@@ -95,7 +97,7 @@ async function DashboardContent({ month }: { month?: string }) {
         </Card>
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.expenses}</CardTitle>
             <TrendingDown className="h-4 w-4 text-rose-500" />
           </CardHeader>
           <CardContent>
@@ -107,7 +109,7 @@ async function DashboardContent({ month }: { month?: string }) {
         </Card>
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saved</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.saved}</CardTitle>
             <PiggyBank className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
@@ -118,7 +120,7 @@ async function DashboardContent({ month }: { month?: string }) {
         </Card>
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lent</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.lent}</CardTitle>
             <ArrowUpRight className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -138,7 +140,7 @@ async function DashboardContent({ month }: { month?: string }) {
         {/* MONEY FLOW */}
         <Card className="lg:col-span-2 glass-panel">
           <CardHeader>
-            <CardTitle>Money Flow ({format(new Date(currentMonth + '-01'), 'MMMM yyyy')})</CardTitle>
+            <CardTitle>{t.dashboard.moneyFlow} ({format(new Date(currentMonth + '-01'), 'MMMM yyyy')})</CardTitle>
             <CardDescription>Visual representation of your cash movement</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -146,7 +148,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                   <div className="flex items-center gap-3">
                     <TrendingUp className="h-5 w-5 text-emerald-500" />
-                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Total Income</span>
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400">{t.dashboard.totalIncome}</span>
                   </div>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">+৳{monthlySummary.income.toLocaleString()}</span>
                 </div>
@@ -154,7 +156,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 ml-6">
                   <div className="flex items-center gap-3">
                     <TrendingDown className="h-5 w-5 text-rose-500" />
-                    <span className="font-medium text-rose-600 dark:text-rose-400">Expenses</span>
+                    <span className="font-medium text-rose-600 dark:text-rose-400">{t.dashboard.expenses}</span>
                   </div>
                   <span className="font-bold text-rose-600 dark:text-rose-400">-৳{monthlySummary.expense.toLocaleString()}</span>
                 </div>
@@ -162,7 +164,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 ml-6">
                   <div className="flex items-center gap-3">
                     <PiggyBank className="h-5 w-5 text-amber-500" />
-                    <span className="font-medium text-amber-600 dark:text-amber-400">Savings</span>
+                    <span className="font-medium text-amber-600 dark:text-amber-400">{t.dashboard.saved}</span>
                   </div>
                   <span className="font-bold text-amber-600 dark:text-amber-400">-৳{monthlySummary.savings.toLocaleString()}</span>
                 </div>
@@ -170,7 +172,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 ml-6">
                   <div className="flex items-center gap-3">
                     <ArrowUpRight className="h-5 w-5 text-blue-500" />
-                    <span className="font-medium text-blue-600 dark:text-blue-400">Lent (Given Out)</span>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">{t.dashboard.lent} ({t.dashboard.given} Out)</span>
                   </div>
                   <span className="font-bold text-blue-600 dark:text-blue-400">-৳{monthlySummary.lent.toLocaleString()}</span>
                 </div>
@@ -178,7 +180,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 ml-6">
                   <div className="flex items-center gap-3">
                     <ArrowDownLeft className="h-5 w-5 text-purple-500" />
-                    <span className="font-medium text-purple-600 dark:text-purple-400">Borrowed (In)</span>
+                    <span className="font-medium text-purple-600 dark:text-purple-400">{t.dashboard.borrowed} (In)</span>
                   </div>
                   <span className="font-bold text-purple-600 dark:text-purple-400">+৳{monthlySummary.borrowed.toLocaleString()}</span>
                 </div>
@@ -186,7 +188,7 @@ async function DashboardContent({ month }: { month?: string }) {
                 <div className="flex items-center justify-between p-4 rounded-xl bg-primary/10 border border-primary/20 mt-2">
                   <div className="flex items-center gap-3">
                     <Wallet className="h-6 w-6 text-primary" />
-                    <span className="font-bold text-lg text-primary">Monthly Remaining</span>
+                    <span className="font-bold text-lg text-primary">{t.dashboard.monthlyRemaining}</span>
                   </div>
                   <span className="font-bold text-xl text-primary">৳{monthlySummary.remaining.toLocaleString()}</span>
                 </div>
@@ -200,21 +202,21 @@ async function DashboardContent({ month }: { month?: string }) {
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Overall Debt Summary</CardTitle>
-              <CardDescription>Total outstanding balances across all time</CardDescription>
+              <CardTitle>{t.dashboard.overallDebt}</CardTitle>
+              <CardDescription>{t.dashboard.debtSubtitle}</CardDescription>
             </div>
             <Link href="/people" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-              View All <ArrowRight className="ml-2 h-4 w-4" />
+              {t.dashboard.viewAll} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 mb-6">
                <div className="p-4 rounded-xl border bg-card/50">
-                 <p className="text-sm text-muted-foreground mb-1">People Owe You</p>
+                 <p className="text-sm text-muted-foreground mb-1">{t.dashboard.peopleOweYou}</p>
                  <p className="text-xl font-bold text-primary">৳{youAreOwed.toLocaleString()}</p>
                </div>
                <div className="p-4 rounded-xl border bg-card/50">
-                 <p className="text-sm text-muted-foreground mb-1">You Owe Others</p>
+                 <p className="text-sm text-muted-foreground mb-1">{t.dashboard.youOweOthers}</p>
                  <p className="text-xl font-bold text-destructive">৳{youOwe.toLocaleString()}</p>
                </div>
             </div>
@@ -233,7 +235,7 @@ async function DashboardContent({ month }: { month?: string }) {
                       <div className="space-y-1">
                         <p className="text-sm font-medium leading-none">{person.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {isPositive ? 'Owes you' : 'You owe'}
+                          {isPositive ? t.dashboard.owesYou : t.dashboard.youOwe}
                         </p>
                       </div>
                     </div>
@@ -251,17 +253,17 @@ async function DashboardContent({ month }: { month?: string }) {
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest financial activities</CardDescription>
+              <CardTitle>{t.dashboard.recentTransactions}</CardTitle>
+              <CardDescription>{t.dashboard.latestActivities}</CardDescription>
             </div>
             <Link href="/transactions" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-              View All <ArrowRight className="ml-2 h-4 w-4" />
+              {t.dashboard.viewAll} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentTransactions.length === 0 ? (
-                <div className="text-center text-muted-foreground py-4">No transactions yet.</div>
+                <div className="text-center text-muted-foreground py-4">{t.dashboard.noTransactions}</div>
               ) : (
                 recentTransactions.map(tx => {
                   const person = allPeople.find(p => p.id === tx.person_id);
