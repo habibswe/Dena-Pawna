@@ -60,7 +60,7 @@ async function DashboardContent({ month }: { month?: string }) {
           <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
           <p className="text-muted-foreground">Your financial health at a glance.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <MonthSelector currentMonth={currentMonth} />
           <Link href="/transactions/new?type=INCOME" className={buttonVariants({ variant: "outline", size: "sm", className: "text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" })}>
             + Income
