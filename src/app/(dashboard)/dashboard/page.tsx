@@ -65,9 +65,11 @@ async function DashboardContent({ month }: { month?: string }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector currentMonth={currentMonth} />
+          {/* 
           <Link href="/transactions/new" className={buttonVariants({ className: 'hidden md:inline-flex' })}>
             {t.dashboard.addTransaction}
           </Link>
+          */}
         </div>
       </div>
 

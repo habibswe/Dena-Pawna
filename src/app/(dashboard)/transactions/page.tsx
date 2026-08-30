@@ -73,9 +73,11 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
         <div className="flex-1 w-full">
           <TransactionSearch placeholder="Search name, note..." />
         </div>
-        <Link href="/transactions/new" className={buttonVariants({ size: "sm", className: "hidden md:inline-flex whitespace-nowrap" })}>
-          <Plus className="mr-2 h-4 w-4" /> Add New
-        </Link>
+        <div className="hidden md:block">
+          <Link href="/transactions/new" className={buttonVariants({ size: "sm", className: "whitespace-nowrap" })}>
+            <Plus className="mr-2 h-4 w-4" /> Add New
+          </Link>
+        </div>
       </div>
 
       <ExpandableFab href="/transactions/new" label="Add Transaction" />
