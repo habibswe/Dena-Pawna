@@ -8,6 +8,10 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || 
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  ),
   title: 'Dena Pawna - Simple Money Ledger',
   description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
   icons: {
