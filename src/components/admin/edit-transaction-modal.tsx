@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit } from 'lucide-react';
-import { updateTransaction } from '@/app/admin/(dashboard)/actions';
+import { updateTransaction } from '@/app/super-admin/(dashboard)/actions';
 import { toast } from 'sonner';
 
 export function EditTransactionModal({ transaction }: { transaction: any }) {

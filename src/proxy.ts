@@ -2,14 +2,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function proxy(request: NextRequest) {
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-  const isAdminLogin = request.nextUrl.pathname === '/admin/login';
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/super-admin');
+  const isAdminLogin = request.nextUrl.pathname === '/super-admin/login';
 
   if (isAdminRoute && !isAdminLogin) {
     const adminToken = request.cookies.get('admin_token');
     if (!adminToken || adminToken.value !== 'true') {
       const url = request.nextUrl.clone();
-      url.pathname = '/admin/login';
+      url.pathname = '/super-admin/login';
       return NextResponse.redirect(url);
     }
   }

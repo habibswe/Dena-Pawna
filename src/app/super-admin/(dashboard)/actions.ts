@@ -9,7 +9,7 @@ export async function deletePerson(personId: string) {
   if (error) {
     return { error: error.message };
   }
-  revalidatePath('/admin/people');
+  revalidatePath('/super-admin/people');
   revalidatePath('/', 'layout');
   return { success: true };
 }
@@ -20,7 +20,7 @@ export async function deleteTransaction(transactionId: string) {
   if (error) {
     return { error: error.message };
   }
-  revalidatePath('/admin/transactions');
+  revalidatePath('/super-admin/transactions');
   revalidatePath('/', 'layout');
   return { success: true };
 }
@@ -41,7 +41,7 @@ export async function updatePerson(personId: string, formData: FormData) {
     console.error('Failed to update person:', error);
     throw new Error(error.message);
   }
-  revalidatePath('/admin/people');
+  revalidatePath('/super-admin/people');
   revalidatePath('/', 'layout');
 }
 
@@ -67,7 +67,7 @@ export async function updateTransaction(transactionId: string, formData: FormDat
     console.error('Failed to update transaction:', error);
     throw new Error(error.message);
   }
-  revalidatePath('/admin/transactions');
+  revalidatePath('/super-admin/transactions');
   revalidatePath('/', 'layout');
 }
 
@@ -92,9 +92,9 @@ export async function createSystemUser(formData: FormData) {
   }
 
   if (authData.user) {
-    const { error: profileError } = await supabase.from('profiles').insert([
-      { id: authData.user.id, full_name: fullName }
-    ]);
+    const { error: profileError } = await supabase.from('profiles')
+      .update({ full_name: fullName })
+      .eq('id', authData.user.id);
     
     if (profileError) {
       await supabase.auth.admin.deleteUser(authData.user.id);
@@ -103,7 +103,7 @@ export async function createSystemUser(formData: FormData) {
     }
   }
 
-  revalidatePath('/admin/users');
+  revalidatePath('/super-admin/users');
 }
 
 export async function updateSystemUser(userId: string, formData: FormData) {
@@ -128,7 +128,7 @@ export async function updateSystemUser(userId: string, formData: FormData) {
     }
   }
 
-  revalidatePath('/admin/users');
+  revalidatePath('/super-admin/users');
 }
 
 export async function deleteSystemUser(userId: string) {
@@ -141,6 +141,6 @@ export async function deleteSystemUser(userId: string) {
     return { error: error.message };
   }
 
-  revalidatePath('/admin/users');
+  revalidatePath('/super-admin/users');
   return { success: true };
 }

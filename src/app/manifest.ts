@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Dena Pawna - Simple Money Ledger',
+    name: 'Dena Pawna',
     short_name: 'Dena Pawna',
     description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
     start_url: '/',

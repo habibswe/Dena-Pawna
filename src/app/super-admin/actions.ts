@@ -24,11 +24,11 @@ export async function loginAdmin(prevState: any, formData: FormData) {
     return { error: 'Invalid password' };
   }
   
-  redirect('/admin');
+  redirect('/super-admin');
 }
 
 export async function logoutAdmin() {
   const cookieStore = await cookies();
   cookieStore.delete('admin_token');
-  redirect('/admin/login');
+  redirect('/super-admin/login');
 }

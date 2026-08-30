@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Edit } from 'lucide-react';
-import { updatePerson } from '@/app/admin/(dashboard)/actions';
+import { updatePerson } from '@/app/super-admin/(dashboard)/actions';
 import { toast } from 'sonner';
 
 export function EditPersonModal({ person }: { person: any }) {

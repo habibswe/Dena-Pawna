@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -26,9 +27,22 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const name = formData.get('name') as string;
+
+  if (!name || name.trim() === '') {
+    return { error: 'Name is required' };
+  }
+
   const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+    email,
+    password,
+    options: {
+      data: {
+        full_name: name,
+      }
+    }
   }
 
   const { data: authData, error } = await supabase.auth.signUp(data)
@@ -46,6 +60,10 @@ export async function signup(formData: FormData) {
   if (!authData.user) {
     return { error: 'Failed to create user account. Please try again.' }
   }
+
+  // Update profile with the name using admin client (bypasses RLS since user is not logged in yet)
+  const adminClient = createAdminClient();
+  await adminClient.from('profiles').update({ full_name: name }).eq('id', authData.user.id);
 
   // If session is null but we have a user, email confirmation is required
   if (authData.user && !authData.session) {
@@ -70,7 +88,8 @@ export async function sendPasswordResetEmail(formData: FormData) {
     return { error: 'Email is required' }
   }
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 
+                 (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/reset-password`,

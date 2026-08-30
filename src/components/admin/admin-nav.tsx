@@ -10,16 +10,16 @@ export function AdminNav() {
   const pathname = usePathname();
 
   const links = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/people', label: 'People', icon: Users },
-    { href: '/admin/transactions', label: 'Transactions', icon: ArrowLeftRight },
-    { href: '/admin/users', label: 'System Users', icon: UserCog },
+    { href: '/super-admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/super-admin/people', label: 'People', icon: Users },
+    { href: '/super-admin/transactions', label: 'Transactions', icon: ArrowLeftRight },
+    { href: '/super-admin/users', label: 'System Users', icon: UserCog },
   ];
 
   return (
     <nav className="space-y-1">
       {links.map((link) => {
-        const isActive = link.href === '/admin' ? pathname === '/admin' : pathname.startsWith(link.href);
+        const isActive = link.href === '/super-admin' ? pathname === '/super-admin' : pathname.startsWith(link.href);
         return (
           <Link key={link.href} href={link.href}>
             <Button 
