@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { addPerson } from '@/app/(dashboard)/people/actions';
+import { ExpandableFab } from '@/components/ui/expandable-fab';
 
 export function AddPersonDialog({ children, onSuccess }: { children?: React.ReactElement, onSuccess?: (person: any) => void }) {
   const [open, setOpen] = useState(false);
@@ -40,14 +41,16 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={
-        children || (
-          <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" /> Add Person
-          </Button>
-        )
-      } />
+    <>
+      {!children && <ExpandableFab onClick={() => setOpen(true)} label="Add Person" />}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger render={
+          children || (
+            <Button size="sm" className="hidden md:flex">
+              <Plus className="mr-2 h-4 w-4" /> Add Person
+            </Button>
+          )
+        } />
       <DialogContent className="sm:max-w-[425px] glass-panel border-primary/20">
         <DialogHeader>
           <DialogTitle>Add Person</DialogTitle>
@@ -79,5 +82,6 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

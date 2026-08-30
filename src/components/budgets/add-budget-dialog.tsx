@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { addBudget } from '@/app/(dashboard)/budgets/actions';
 import { Loader2, Plus, Target } from 'lucide-react';
+import { ExpandableFab } from '@/components/ui/expandable-fab';
 
 export function AddBudgetDialog({ 
   categories,
@@ -53,14 +54,16 @@ export function AddBudgetDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Set Budget
-        </Button>
-      } />
-      <DialogContent className="sm:max-w-[425px] glass-panel">
+    <>
+      <ExpandableFab onClick={() => setOpen(true)} label="Set Budget" />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger render={
+          <Button className="hidden md:flex gap-2">
+            <Plus className="h-4 w-4" />
+            Set Budget
+          </Button>
+        } />
+        <DialogContent className="sm:max-w-[425px] glass-panel">
         <DialogHeader>
           <DialogTitle>Set Budget</DialogTitle>
           <DialogDescription>
@@ -99,5 +102,6 @@ export function AddBudgetDialog({
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

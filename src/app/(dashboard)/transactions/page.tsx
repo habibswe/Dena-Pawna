@@ -11,6 +11,7 @@ import { TransactionListClient } from '@/components/transactions/transaction-lis
 import { TransactionSearch } from '@/components/transactions/transaction-search';
 import { Suspense } from 'react';
 import DashboardLoading from '@/components/ui/dashboard-loading';
+import { ExpandableFab } from '@/components/ui/expandable-fab';
 
 async function TransactionsContent({ searchParamsResolved }: { searchParamsResolved: { filter?: string, month?: string, search?: string } }) {
   const supabase = await createClient();
@@ -53,13 +54,13 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
           <MonthSelector currentMonth={currentMonth} />
           <div className="flex flex-row items-center justify-between sm:justify-start gap-3 sm:border-l sm:border-border sm:pl-4 w-full sm:w-auto">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-              <Link href={`/transactions?filter=ALL${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'ALL' || !filter ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'ALL' || !filter ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=ALL${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'ALL' || !filter ? 'default' : 'outline', size: "sm", className: "whitespace-nowrap" })}>
                 All
               </Link>
-              <Link href={`/transactions?filter=GIVEN${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'GIVEN' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'GIVEN' ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=GIVEN${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'GIVEN' ? 'default' : 'outline', size: "sm", className: "whitespace-nowrap" })}>
                 Given
               </Link>
-              <Link href={`/transactions?filter=RECEIVED${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'RECEIVED' ? 'default' : 'outline', size: "sm", className: `whitespace-nowrap ${filter === 'RECEIVED' ? '' : 'glass-panel'}` })}>
+              <Link href={`/transactions?filter=RECEIVED${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'RECEIVED' ? 'default' : 'outline', size: "sm", className: "whitespace-nowrap" })}>
                 Received
               </Link>
             </div>
@@ -72,10 +73,12 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
         <div className="flex-1 w-full">
           <TransactionSearch placeholder="Search name, note..." />
         </div>
-        <Link href="/transactions/new" className={buttonVariants({ size: "sm", className: "w-full sm:w-auto whitespace-nowrap" })}>
+        <Link href="/transactions/new" className={buttonVariants({ size: "sm", className: "hidden md:inline-flex whitespace-nowrap" })}>
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Link>
       </div>
+
+      <ExpandableFab href="/transactions/new" label="Add Transaction" />
 
       <Card className="glass-panel">
         <CardContent className="p-0">

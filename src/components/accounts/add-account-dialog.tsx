@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { addAccount } from '@/app/(dashboard)/accounts/actions';
 import { Loader2, Plus } from 'lucide-react';
+import { ExpandableFab } from '@/components/ui/expandable-fab';
 
 export function AddAccountDialog() {
   const [open, setOpen] = useState(false);
@@ -36,14 +37,16 @@ export function AddAccountDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Account
-        </Button>
-      } />
-      <DialogContent className="sm:max-w-[425px] glass-panel">
+    <>
+      <ExpandableFab onClick={() => setOpen(true)} label="Add Account" />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger render={
+          <Button className="hidden md:flex gap-2">
+            <Plus className="h-4 w-4" />
+            Add Account
+          </Button>
+        } />
+        <DialogContent className="sm:max-w-[425px] glass-panel">
         <DialogHeader>
           <DialogTitle>Add Account</DialogTitle>
           <DialogDescription>
@@ -83,5 +86,6 @@ export function AddAccountDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

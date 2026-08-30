@@ -11,6 +11,7 @@ import { ExpenseBreakdown } from '@/components/dashboard/expense-breakdown';
 import { Suspense } from 'react';
 import DashboardLoading from '@/components/ui/dashboard-loading';
 import { getDictionary } from '@/i18n/server';
+import { ExpandableFab } from '@/components/ui/expandable-fab';
 
 async function DashboardContent({ month }: { month?: string }) {
   const supabase = await createClient();
@@ -64,11 +65,13 @@ async function DashboardContent({ month }: { month?: string }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector currentMonth={currentMonth} />
-          <Link href="/transactions/new" className={buttonVariants()}>
+          <Link href="/transactions/new" className={buttonVariants({ className: 'hidden md:inline-flex' })}>
             {t.dashboard.addTransaction}
           </Link>
         </div>
       </div>
+
+      <ExpandableFab href="/transactions/new" label={t.dashboard.addTransaction} />
 
       {/* MONTHLY FINANCIAL SUMMARY */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">

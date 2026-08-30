@@ -7,19 +7,19 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
+    background_color: '#121514',
     theme_color: '#10b981',
     icons: [
       {
-        src: '/icon.svg',
+        src: '/icon-192.png',
         sizes: '192x192',
-        type: 'image/svg+xml',
+        type: 'image/png',
         purpose: 'any'
       },
       {
-        src: '/icon.svg',
+        src: '/icon-512.png',
         sizes: '512x512',
-        type: 'image/svg+xml',
+        type: 'image/png',
         purpose: 'maskable'
       },
     ],

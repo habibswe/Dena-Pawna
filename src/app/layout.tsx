@@ -28,6 +28,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { LanguageProvider } from '@/i18n/client';
 import { getLocale } from '@/i18n/server';
+import { SplashScreen } from '@/components/ui/splash-screen';
 
 export default async function RootLayout({
   children,
@@ -38,6 +39,21 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                var hasSeen = sessionStorage.getItem('hasSeenSplash');
+                if (!isPWA || hasSeen) {
+                  document.documentElement.classList.add('hide-splash');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className={`antialiased font-sans ${outfit.variable}`} suppressHydrationWarning>
         <LanguageProvider initialLocale={locale}>
           <ThemeProvider
@@ -46,6 +62,8 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <SplashScreen />
+            
             {/* Global Background Gradients (Liquid Mesh) */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
               {/* Base gradient layer for depth */}
