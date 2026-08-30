@@ -10,6 +10,7 @@ import { deleteCategory } from '@/app/(dashboard)/categories/actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { EditCategoryDialog } from './edit-category-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Category {
   id: string;
@@ -21,24 +22,28 @@ interface Category {
 export function CategoryList({ categories: initialCategories }: { categories: Category[] }) {
   const [categories, setCategories] = useState(initialCategories);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setCategories(initialCategories);
   }, [initialCategories]);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this category? It will be removed from all linked transactions.")) return;
-    
-    const result = await deleteCategory(id);
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
+    const result = await deleteCategory(deletingId);
     
     if (result.error) {
       toast.error(result.error);
     } else {
       toast.success("Category deleted successfully");
-      setCategories(prev => prev.filter(c => c.id !== id));
+      setCategories(prev => prev.filter(c => c.id !== deletingId));
+      setDeletingId(null);
       router.refresh();
     }
+    setIsDeleting(false);
   };
 
   if (categories.length === 0) {
@@ -80,7 +85,7 @@ export function CategoryList({ categories: initialCategories }: { categories: Ca
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(cat.id)}>
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(cat.id)}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -101,6 +106,15 @@ export function CategoryList({ categories: initialCategories }: { categories: Ca
           }} 
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => !isDeleting && setDeletingId(null)}
+        onConfirm={handleDelete}
+        title="Delete Category?"
+        description="Are you sure you want to delete this category? It will be removed from all linked transactions."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

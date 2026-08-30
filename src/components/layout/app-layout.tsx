@@ -25,7 +25,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col md:flex-row h-[100dvh] w-full bg-transparent">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 glass-panel z-20">
+      <aside className="hidden md:flex w-64 flex-col border-r bg-background/60 glass-panel z-20">
         <div className="p-6 h-16 flex items-center gap-3">
           <div className="bg-primary/10 p-2 rounded-xl glass-panel">
             <Activity className="w-5 h-5 text-primary" />
@@ -68,8 +68,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
         </div>
         <div className="flex items-center gap-2">
-          {/* <LanguageToggle /> */}
-          {/* <ModeToggle /> */}
+          <Link href="/settings" className="bg-primary/10 p-2 rounded-full glass-panel hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+            <Settings className="w-5 h-5 text-primary" />
+          </Link>
         </div>
       </header>
 
@@ -82,7 +83,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation (flex item, doesn't overlap scroll) */}
       <nav className="md:hidden h-16 w-full glass-panel border-t flex items-center justify-around px-2 shrink-0 z-20 pb-safe">
-        {navItems.map((item) => {
+        {navItems.filter(item => item.href !== '/settings').map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
           return (

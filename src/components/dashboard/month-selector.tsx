@@ -34,15 +34,16 @@ export function MonthSelector({ currentMonth }: { currentMonth: string }) {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-background/50 border rounded-full p-1 shadow-sm glass-panel w-fit">
-      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handlePrev}>
+    <div className="flex items-center gap-1 sm:gap-2 bg-background/50 border rounded-full p-0.5 sm:p-1 shadow-sm glass-panel w-fit shrink-0">
+      <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 rounded-full shrink-0" onClick={handlePrev}>
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <div className="flex items-center gap-2 px-2 text-sm font-medium min-w-[140px] whitespace-nowrap justify-center cursor-pointer hover:text-primary transition-colors" onClick={handleCurrent}>
-        <CalendarIcon className="h-4 w-4 shrink-0" />
-        <span>{format(date, 'MMMM yyyy')}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-2 text-xs sm:text-sm font-medium sm:min-w-[140px] whitespace-nowrap justify-center cursor-pointer hover:text-primary transition-colors" onClick={handleCurrent}>
+        <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0 hidden sm:block" />
+        <span className="hidden sm:inline">{format(date, 'MMMM yyyy')}</span>
+        <span className="sm:hidden tracking-tight">{format(date, 'MMM yyyy')}</span>
       </div>
-      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleNext}>
+      <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 rounded-full shrink-0" onClick={handleNext}>
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>

@@ -9,6 +9,7 @@ import { deleteAccount } from '@/app/(dashboard)/accounts/actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { EditAccountDialog } from './edit-account-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Account {
   id: string;
@@ -20,24 +21,29 @@ interface Account {
 export function AccountList({ accounts: initialAccounts }: { accounts: Account[] }) {
   const [accounts, setAccounts] = useState(initialAccounts);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setAccounts(initialAccounts);
   }, [initialAccounts]);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this account? It will be removed from all linked transactions.")) return;
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
     
-    const result = await deleteAccount(id);
+    const result = await deleteAccount(deletingId);
     
     if (result.error) {
       toast.error(result.error);
     } else {
       toast.success("Account deleted successfully");
-      setAccounts(prev => prev.filter(a => a.id !== id));
+      setAccounts(prev => prev.filter(a => a.id !== deletingId));
+      setDeletingId(null);
       router.refresh();
     }
+    setIsDeleting(false);
   };
 
   if (accounts.length === 0) {
@@ -86,7 +92,7 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(acc.id)}>
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(acc.id)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </DropdownMenuItem>
@@ -116,6 +122,15 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
           }} 
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => !isDeleting && setDeletingId(null)}
+        onConfirm={handleDelete}
+        title="Delete Account?"
+        description="Are you sure you want to delete this account? It will be removed from all linked transactions."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

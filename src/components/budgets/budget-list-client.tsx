@@ -9,6 +9,7 @@ import { deleteBudget } from '@/app/(dashboard)/budgets/actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { EditBudgetDialog } from './edit-budget-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function BudgetListClient({ 
   initialBudgets, 
@@ -23,24 +24,28 @@ export function BudgetListClient({
 }) {
   const [budgets, setBudgets] = useState(initialBudgets);
   const [editingBudget, setEditingBudget] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setBudgets(initialBudgets);
   }, [initialBudgets]);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this budget limit?")) return;
-    
-    const result = await deleteBudget(id);
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
+    const result = await deleteBudget(deletingId);
     
     if (result.error) {
       toast.error(result.error);
     } else {
       toast.success("Budget deleted successfully");
-      setBudgets(prev => prev.filter(b => b.id !== id));
+      setBudgets(prev => prev.filter(b => b.id !== deletingId));
+      setDeletingId(null);
       router.refresh();
     }
+    setIsDeleting(false);
   };
 
   if (budgets.length === 0) {
@@ -88,7 +93,7 @@ export function BudgetListClient({
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(budget.id)}>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(budget.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
@@ -142,6 +147,15 @@ export function BudgetListClient({
           }} 
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => !isDeleting && setDeletingId(null)}
+        onConfirm={handleDelete}
+        title="Delete Budget?"
+        description="Are you sure you want to delete this budget limit?"
+        isDeleting={isDeleting}
+      />
     </>
   );
 }

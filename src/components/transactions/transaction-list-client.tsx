@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { deleteTransaction } from '@/app/(dashboard)/transactions/actions';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function TransactionListClient({ 
   initialTransactions, 
@@ -28,24 +29,26 @@ export function TransactionListClient({
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialTransactions.length < totalCount);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const router = useRouter();
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this transaction?")) return;
-    
-    setLoading(true);
-    const result = await deleteTransaction(id);
-    setLoading(false);
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
+    const result = await deleteTransaction(deletingId);
     
     if (result.error) {
       toast.error(result.error);
     } else {
       toast.success("Transaction deleted successfully");
-      setTransactions(prev => prev.filter(tx => tx.id !== id));
+      setTransactions(prev => prev.filter(tx => tx.id !== deletingId));
+      setDeletingId(null);
       router.refresh();
     }
+    setIsDeleting(false);
   };
 
   const loadMore = useCallback(async () => {
@@ -173,7 +176,7 @@ export function TransactionListClient({
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(tx.id)}>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(tx.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
@@ -190,6 +193,15 @@ export function TransactionListClient({
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => !isDeleting && setDeletingId(null)}
+        onConfirm={handleDelete}
+        title="Delete Transaction?"
+        description="Are you sure you want to delete this transaction? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

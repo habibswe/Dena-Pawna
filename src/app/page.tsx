@@ -9,7 +9,7 @@ export default async function LandingPage() {
   const t = await getDictionary();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-foreground overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-foreground overflow-y-auto overflow-x-hidden relative">
       <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
         {/* <LanguageToggle /> */}
         {/* <ModeToggle /> */}

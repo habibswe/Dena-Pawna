@@ -190,3 +190,16 @@
 html.hide-splash .splash-screen {
   display: none !important;
 }
+
+/* Hide scrollbars completely on mobile devices but keep scroll functionality */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  * {
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important; /* Firefox */
+  }
+}

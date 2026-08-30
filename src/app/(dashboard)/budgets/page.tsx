@@ -39,13 +39,20 @@ async function BudgetsContent({ month }: { month?: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Budgets</h2>
-          <p className="text-muted-foreground">Manage your spending limits.</p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex items-start justify-between w-full sm:w-auto gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Budgets</h2>
+            <p className="text-muted-foreground">Manage your spending limits.</p>
+          </div>
+          <div className="sm:hidden mt-1 shrink-0">
+            <MonthSelector currentMonth={currentMonth} />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <MonthSelector currentMonth={currentMonth} />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden sm:block">
+            <MonthSelector currentMonth={currentMonth} />
+          </div>
           <AddBudgetDialog categories={allCategories} defaultMonth={currentMonth} />
         </div>
       </div>

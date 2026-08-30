@@ -46,12 +46,19 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
   return (
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
-          <p className="text-muted-foreground">Your complete financial history.</p>
+        <div className="flex items-start justify-between w-full xl:w-auto gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+            <p className="text-muted-foreground">Your complete financial history.</p>
+          </div>
+          <div className="sm:hidden mt-1 shrink-0">
+            <MonthSelector currentMonth={currentMonth} />
+          </div>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full xl:w-auto">
-          <MonthSelector currentMonth={currentMonth} />
+          <div className="hidden sm:block">
+            <MonthSelector currentMonth={currentMonth} />
+          </div>
           <div className="flex flex-row items-center justify-between sm:justify-start gap-3 sm:border-l sm:border-border sm:pl-4 w-full sm:w-auto">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
               <Link href={`/transactions?filter=ALL${month ? `&month=${month}` : ''}`} className={buttonVariants({ variant: filter === 'ALL' || !filter ? 'default' : 'outline', size: "sm", className: "whitespace-nowrap" })}>

@@ -13,29 +13,32 @@ import { deletePerson } from '@/app/(dashboard)/people/actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { EditPersonDialog } from './edit-person-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) {
   const [query, setQuery] = useState('');
   const [editingPerson, setEditingPerson] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   
   const filteredPeople = peopleBalances.filter(person => 
     person.name.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
     
-    if (!window.confirm("Are you sure you want to delete this person? They will be removed from all associated transactions.")) return;
-    
-    const result = await deletePerson(id);
+    const result = await deletePerson(deletingId);
     if (result.error) {
       toast.error(result.error);
     } else {
       toast.success("Person deleted successfully");
+      setDeletingId(null);
       router.refresh();
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -95,7 +98,7 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => handleDelete(person.id, e)}>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeletingId(person.id); }}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
@@ -122,6 +125,15 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
           }} 
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => !isDeleting && setDeletingId(null)}
+        onConfirm={handleDelete}
+        title="Delete Person?"
+        description="Are you sure you want to delete this person? They will be removed from all associated transactions."
+        isDeleting={isDeleting}
+      />
     </>
   );
 }
