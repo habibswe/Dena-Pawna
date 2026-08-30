@@ -62,11 +62,8 @@ async function DashboardContent({ month }: { month?: string }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector currentMonth={currentMonth} />
-          <Link href="/transactions/new?type=INCOME" className={buttonVariants({ variant: "outline", size: "sm", className: "text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" })}>
-            + Income
-          </Link>
-          <Link href="/transactions/new?type=EXPENSE" className={buttonVariants({ size: "sm" })}>
-            + Expense
+          <Link href="/transactions/new" className={buttonVariants()}>
+            + Add Transaction
           </Link>
         </div>
       </div>
