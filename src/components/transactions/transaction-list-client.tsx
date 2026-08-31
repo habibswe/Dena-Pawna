@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useOptimistic } from 'react';
 import { getPaginatedTransactions } from '@/app/(dashboard)/transactions/actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
@@ -35,18 +35,32 @@ export function TransactionListClient({
   const router = useRouter();
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  const [optimisticTransactions, addOptimisticTransaction] = useOptimistic(
+    transactions,
+    (state, idToRemove: string) => state.filter((tx) => tx.id !== idToRemove)
+  );
+
   const handleDelete = async () => {
     if (!deletingId) return;
+    const idToDelete = deletingId;
     setIsDeleting(true);
-    const result = await deleteTransaction(deletingId);
+    
+    // Store previous state for fallback
+    const previousTransactions = [...transactions];
+    
+    // Optimistically remove from UI
+    addOptimisticTransaction(idToDelete);
+    setDeletingId(null); // Close dialog instantly
+    
+    const result = await deleteTransaction(idToDelete);
     
     if (result.error) {
       toast.error(result.error);
+      // Revert optimistic update
+      setTransactions(previousTransactions);
     } else {
       toast.success("Transaction deleted successfully");
-      setTransactions(prev => prev.filter(tx => tx.id !== deletingId));
-      setDeletingId(null);
-      router.refresh();
+      router.refresh(); // Update server cache for dashboard
     }
     setIsDeleting(false);
   };
@@ -112,7 +126,7 @@ export function TransactionListClient({
 
   return (
     <div className="divide-y">
-      {transactions.map(tx => {
+      {optimisticTransactions.map(tx => {
         const isTxPositive = tx.type === 'GIVEN' || tx.type === 'RETURNED';
         const txColor = isTxPositive ? 'text-primary' : 'text-destructive';
         const sign = isTxPositive ? '+' : '-';

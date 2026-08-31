@@ -27,9 +27,9 @@ async function DashboardContent({ month }: { month?: string }) {
     { data: transactions },
     { data: categories }
   ] = await Promise.all([
-    supabase.from('people').select('*'),
-    supabase.from('transactions').select('*').order('transaction_date', { ascending: false }),
-    supabase.from('categories').select('*')
+    supabase.from('people').select('id, name'),
+    supabase.from('transactions').select('id, person_id, category_id, type, amount, transaction_date, note, due_date').order('transaction_date', { ascending: false }),
+    supabase.from('categories').select('id, name')
   ]);
 
   const allTransactions = (transactions || []) as Transaction[];

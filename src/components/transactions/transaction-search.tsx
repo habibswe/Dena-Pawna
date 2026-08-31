@@ -32,7 +32,7 @@ export function TransactionSearch({ placeholder = 'Search transactions...' }: { 
       if (value !== currentSearch) {
         handleSearch(value);
       }
-    }, 400);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [value, handleSearch, currentSearch]);
