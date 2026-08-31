@@ -46,8 +46,8 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={
           children || (
-            <Button size="sm" className="hidden md:flex">
-              <Plus className="mr-2 h-4 w-4" /> Add Person
+            <Button className="hidden md:flex gap-2">
+              <Plus className="h-4 w-4" /> Add Person
             </Button>
           )
         } />

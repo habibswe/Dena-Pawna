@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ArrowDownLeft, ArrowUpRight, Wallet, ArrowRight, TrendingUp, TrendingDown, PiggyBank, Target, ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { MonthSelector } from '@/components/dashboard/month-selector';
@@ -72,11 +73,9 @@ async function DashboardContent({ month }: { month?: string }) {
           <div className="hidden sm:block">
             <MonthSelector currentMonth={currentMonth} />
           </div>
-          {/* 
-          <Link href="/transactions/new" className={buttonVariants({ className: 'hidden md:inline-flex' })}>
+          <Link href="/transactions/new" className={cn(buttonVariants(), 'hidden md:inline-flex')}>
             {t.dashboard.addTransaction}
           </Link>
-          */}
         </div>
       </div>
 
