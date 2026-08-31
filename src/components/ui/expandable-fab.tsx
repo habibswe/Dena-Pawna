@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
+import { createPortal } from 'react-dom';
 
 interface ExpandableFabProps {
   href?: string;
@@ -20,7 +21,14 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
   const router = useRouter();
   const pathname = usePathname();
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Handle clicking outside to collapse
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -42,11 +50,19 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
       const target = e.target as HTMLElement;
       const currentScrollY = target.scrollTop;
       
-      if (currentScrollY > lastScrollY.current + 10) {
+      // Always show at the very top (within 20px)
+      if (currentScrollY <= 20) {
+        setIsScrollingDown(false);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      // Hide when scrolling down, show immediately when scrolling up
+      if (currentScrollY > lastScrollY.current + 5) {
         setIsScrollingDown(true); // Scrolled down
         setIsExpanded(false); // Also collapse if expanded
         lastScrollY.current = currentScrollY;
-      } else if (currentScrollY < lastScrollY.current - 10) {
+      } else if (currentScrollY < lastScrollY.current - 2) {
         setIsScrollingDown(false); // Scrolled up
         lastScrollY.current = currentScrollY;
       }
@@ -64,14 +80,17 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
     };
   }, [pathname]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div 
       ref={containerRef}
       className={cn(
-        "fixed bottom-20 right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none transition-transform duration-300 ease-in-out",
+        "fixed right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none transition-transform duration-300 ease-in-out",
         isScrollingDown ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100",
         className
       )}
+      style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}
     >
       <div
         className={cn(
@@ -120,6 +139,7 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
           {label}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

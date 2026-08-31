@@ -22,12 +22,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       const target = e.target as HTMLElement;
       const currentScrollY = target.scrollTop;
       
-      // Add a small threshold (10px) to prevent jitter on tiny scrolls
-      if (currentScrollY > lastScrollY.current + 10) {
-        setIsScrollingDown(true); // Scrolled down
+      // Always show at the very top (within 20px)
+      if (currentScrollY <= 20) {
+        setIsScrollingDown(false);
         lastScrollY.current = currentScrollY;
-      } else if (currentScrollY < lastScrollY.current - 10) {
-        setIsScrollingDown(false); // Scrolled up
+        return;
+      }
+
+      // Hide when scrolling down, show immediately when scrolling up
+      if (currentScrollY > lastScrollY.current + 5) {
+        setIsScrollingDown(true); // Scrolled down (hide)
+        lastScrollY.current = currentScrollY;
+      } else if (currentScrollY < lastScrollY.current - 2) {
+        setIsScrollingDown(false); // Scrolled up (show immediately)
         lastScrollY.current = currentScrollY;
       }
     };
@@ -111,37 +118,42 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content Area (Scrollable flex area) */}
-      <main id="main-scroll-container" className="flex-1 min-w-0 overflow-y-auto relative z-10 p-4 md:p-8 pt-20 md:pt-8">
+      <main id="main-scroll-container" className="flex-1 min-w-0 overflow-y-auto relative z-10 p-4 md:p-8 pt-20 pb-28 md:pt-8 md:pb-8">
         <div className="hidden md:flex justify-end mb-4">
           <NotificationBell />
         </div>
-        <div className="max-w-4xl mx-auto pb-4">
+        <div className="max-w-4xl mx-auto">
           {children}
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation (flex item, doesn't overlap scroll) */}
-      <nav className="md:hidden h-16 w-full glass-panel border-t flex items-center justify-around px-2 shrink-0 z-20 pb-safe">
-        {navItems.filter(item => item.href !== '/settings').map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors',
-                isActive ? 'text-primary' : 'text-foreground hover:text-primary/80'
-              )}
-            >
-              <div className={cn('p-1.5 rounded-full transition-all', isActive && 'bg-primary/10')}>
-                <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5px]")} />
-              </div>
-              <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Mobile Bottom Navigation (Floating Pill Overlay) */}
+      <div 
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full px-4 z-40 pointer-events-none"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      >
+        <nav className="h-16 w-full glass-panel bg-background/85 backdrop-blur-xl border flex items-center justify-around px-2 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] pointer-events-auto">
+          {navItems.filter(item => item.href !== '/settings').map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors',
+                  isActive ? 'text-primary' : 'text-foreground hover:text-primary/80'
+                )}
+              >
+                <div className={cn('p-1.5 rounded-full transition-all', isActive && 'bg-primary/10')}>
+                  <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5px]")} />
+                </div>
+                <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 }
