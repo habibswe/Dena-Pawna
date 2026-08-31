@@ -1,4 +1,4 @@
-import { calculateBalance, calculateAccountBalance, calculateMonthlySummary, Transaction } from './calculations';
+import { calculateBalance, calculateAccountBalance, calculateTimeframeSummary, Transaction } from './calculations';
 import { describe, it, expect } from 'vitest';
 
 describe('calculateBalance', () => {
@@ -68,7 +68,7 @@ describe('calculateAccountBalance', () => {
   });
 });
 
-describe('calculateMonthlySummary', () => {
+describe('calculateTimeframeSummary', () => {
   it('should aggregate monthly stats correctly', () => {
     const transactions: Transaction[] = [
       { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-08-05' },
@@ -78,7 +78,7 @@ describe('calculateMonthlySummary', () => {
       { id: '5', type: 'INCOME', amount: 1000, transaction_date: '2026-07-29' } // outside month
     ];
 
-    const summary = calculateMonthlySummary(transactions, '2026-08');
+    const summary = calculateTimeframeSummary(transactions, '2026-08');
     expect(summary.income).toBe(5000);
     expect(summary.expense).toBe(2000);
     expect(summary.lent).toBe(1000);

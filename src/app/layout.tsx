@@ -22,7 +22,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff', // matches light background
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Prevents zoom on input focus in mobile iOS
 };
 
 import { Toaster } from '@/components/ui/sonner';
@@ -32,6 +35,7 @@ import { getLocale } from '@/i18n/server';
 import { SplashScreen } from '@/components/ui/splash-screen';
 import { LiquidBackground } from '@/components/ui/liquid-background';
 import { DataProvider } from '@/components/providers/data-provider';
+import { ThemeColorUpdater } from '@/components/theme-color-updater';
 
 export default async function RootLayout({
   children,
@@ -67,6 +71,7 @@ export default async function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
+            <ThemeColorUpdater />
             <SplashScreen />
             
             {/* Global Background Gradients (Liquid Mesh) - Hidden entirely on Desktop for dashboard */}

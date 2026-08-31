@@ -11,6 +11,13 @@ import {
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 function Calendar({
   className,
@@ -82,6 +89,7 @@ function Calendar({
         ),
         caption_label: cn(
           "font-medium select-none",
+          captionLayout === "dropdown" ? "hidden" : "",
           captionLayout === "label"
             ? "text-sm"
             : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
@@ -159,6 +167,36 @@ function Calendar({
 
           return (
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
+          )
+        },
+        Dropdown: ({ value, onChange, options, ...props }) => {
+          const selected = options?.find((child) => child.value === value)
+          const handleChange = (value: string) => {
+            const changeEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLSelectElement>
+            onChange?.(changeEvent)
+          }
+          return (
+            <Select
+              value={value?.toString()}
+              onValueChange={(val) => {
+                if (val) handleChange(val)
+              }}
+            >
+              <SelectTrigger className="pr-1.5 focus:ring-0 focus:ring-offset-0 w-fit gap-2 border-none h-8 px-3 font-semibold bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-colors">
+                <SelectValue>{selected?.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[250px] glass-panel shadow-2xl rounded-xl z-[9999] border-primary/20">
+                <div className="overflow-y-auto max-h-[240px] px-1 py-1 custom-scrollbar">
+                  {options?.map((option, id: number) => (
+                    <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ""} className="rounded-lg cursor-pointer my-0.5 font-medium">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
           )
         },
         DayButton: ({ ...props }) => (

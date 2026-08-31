@@ -191,15 +191,19 @@ html.hide-splash .splash-screen {
   display: none !important;
 }
 
-/* Hide scrollbars completely on mobile devices but keep scroll functionality */
-@media (max-width: 767px) {
-  ::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
-  * {
-    -ms-overflow-style: none !important; /* IE and Edge */
-    scrollbar-width: none !important; /* Firefox */
-  }
+/* Hide scrollbars completely but keep scroll functionality */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+* {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+/* Hide mobile fab when 'More' menu is open */
+body.hide-mobile-fab .mobile-fab {
+  transform: translateY(150%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

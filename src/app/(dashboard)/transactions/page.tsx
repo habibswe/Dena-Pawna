@@ -48,7 +48,7 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
         <div className="flex items-start justify-between w-full xl:w-auto gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+            <h2 className="text-3xl font-bold tracking-tight">History</h2>
             <p className="text-muted-foreground">Your complete financial history.</p>
           </div>
           <div className="sm:hidden mt-1 shrink-0">

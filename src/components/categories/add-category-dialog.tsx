@@ -61,7 +61,7 @@ export function AddCategoryDialog() {
           <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
             <Select name="type" required defaultValue="EXPENSE">
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>

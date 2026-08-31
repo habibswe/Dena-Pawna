@@ -89,18 +89,28 @@ export function calculateAccountBalance(accountId: string, transactions: Transac
 /**
  * Calculates a summary of transactions for a specific month (YYYY-MM).
  */
-export function calculateMonthlySummary(transactions: Transaction[], month: string) {
-  const monthlyTxs = transactions.filter(tx => tx.transaction_date.startsWith(month));
+export function calculateTimeframeSummary(transactions: Transaction[], month?: string, from?: string, to?: string) {
+  let filteredTxs = transactions;
+  
+  if (month && month !== 'all') {
+    filteredTxs = transactions.filter(tx => tx.transaction_date.startsWith(month));
+  } else if (from || to) {
+    filteredTxs = transactions.filter(tx => {
+      if (from && tx.transaction_date < from) return false;
+      if (to && tx.transaction_date > to) return false;
+      return true;
+    });
+  }
   
   let income = 0;
   let expense = 0;
   let lent = 0;
   let borrowed = 0;
   let savings = 0;
-  let repaymentsReceived = 0; // RECEIVED
-  let repaymentsSent = 0; // RETURNED
+  let repaymentsReceived = 0;
+  let repaymentsSent = 0;
   
-  for (const tx of monthlyTxs) {
+  for (const tx of filteredTxs) {
     const amount = Number(tx.amount) || 0;
     switch (tx.type) {
       case 'INCOME': income += amount; break;

@@ -7,15 +7,38 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { 
+  Loader2, 
+  ArrowRight, 
+  Calendar as CalendarIcon, 
+  ArrowLeft, 
+  TrendingDown, 
+  TrendingUp, 
+  ArrowRightLeft, 
+  PiggyBank, 
+  Send, 
+  Handshake, 
+  Download, 
+  Upload 
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { addTransaction } from '@/app/(dashboard)/transactions/actions';
 import { AddPersonDialog } from '../people/add-person-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+
+const TRANSACTION_TYPES = [
+  { id: 'EXPENSE', label: 'Expense', icon: TrendingDown, color: 'text-red-500', bg: 'hover:bg-red-500/10 border-red-500/20' },
+  { id: 'INCOME', label: 'Income', icon: TrendingUp, color: 'text-green-500', bg: 'hover:bg-green-500/10 border-green-500/20' },
+  { id: 'TRANSFER', label: 'Transfer', icon: ArrowRightLeft, color: 'text-blue-500', bg: 'hover:bg-blue-500/10 border-blue-500/20' },
+  { id: 'SAVING', label: 'Saving', icon: PiggyBank, color: 'text-purple-500', bg: 'hover:bg-purple-500/10 border-purple-500/20' },
+  { id: 'GIVEN', label: 'Lent (Given)', icon: Send, color: 'text-orange-500', bg: 'hover:bg-orange-500/10 border-orange-500/20' },
+  { id: 'RECEIVED', label: 'Repay In', icon: Handshake, color: 'text-emerald-500', bg: 'hover:bg-emerald-500/10 border-emerald-500/20' },
+  { id: 'BORROWED', label: 'Borrowed', icon: Download, color: 'text-rose-500', bg: 'hover:bg-rose-500/10 border-rose-500/20' },
+  { id: 'RETURNED', label: 'Repay Out', icon: Upload, color: 'text-indigo-500', bg: 'hover:bg-indigo-500/10 border-indigo-500/20' },
+];
 
 export function AddTransactionForm({ 
   people, 
@@ -35,7 +58,9 @@ export function AddTransactionForm({
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [type, setType] = useState(defaultType || 'EXPENSE');
+  
+  const type = defaultType || '';
+  const showGrid = !type;
   
   const [personId, setPersonId] = useState(defaultPersonId || '');
   const [accountId, setAccountId] = useState('');
@@ -103,35 +128,35 @@ export function AddTransactionForm({
   const filteredCategories = categories.filter(c => c.type === type);
 
   return (
-    <Card className="glass-panel max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>Add Transaction</CardTitle>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4 pb-6">
-          
-          {/* TYPE SELECTOR */}
-          <div className="space-y-2">
-            <Label htmlFor="type">Transaction Type</Label>
-            <Select name="type" required value={type} onValueChange={(val) => {
-                setType(val || 'EXPENSE');
-                setCategoryId(''); // reset category on type change
-              }}>
-              <SelectTrigger className="w-full glass-panel border-primary/20">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent className="glass-panel border-primary/20 shadow-2xl">
-                <SelectItem value="EXPENSE">Expense</SelectItem>
-                <SelectItem value="INCOME">Income</SelectItem>
-                <SelectItem value="TRANSFER">Transfer</SelectItem>
-                <SelectItem value="SAVING">Saving</SelectItem>
-                <SelectItem value="GIVEN">I gave money (Lending)</SelectItem>
-                <SelectItem value="RECEIVED">I received money (Repayment in)</SelectItem>
-                <SelectItem value="BORROWED">I borrowed money (Borrowing)</SelectItem>
-                <SelectItem value="RETURNED">I returned money (Repayment out)</SelectItem>
-              </SelectContent>
-            </Select>
+    <Card className="glass-panel w-full">
+      {showGrid ? (
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {TRANSACTION_TYPES.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  setCategoryId('');
+                  router.push(`?type=${t.id}`);
+                }}
+                className={cn(
+                  "flex flex-col items-center justify-center p-5 sm:p-6 gap-3 sm:gap-4 rounded-xl border glass-panel transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  t.bg
+                )}
+              >
+                <div className={cn("p-3 rounded-full bg-background/50", t.color)}>
+                  <t.icon className="h-7 w-7 sm:h-8 sm:w-8" />
+                </div>
+                <span className="font-medium text-sm text-center leading-tight">{t.label}</span>
+              </button>
+            ))}
           </div>
+        </CardContent>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4 pb-6">
+            <input type="hidden" name="type" value={type} />
 
           {/* PERSON SELECTOR */}
           {isLending && (
@@ -340,6 +365,7 @@ export function AddTransactionForm({
           </div>
         </CardContent>
       </form>
+      )}
     </Card>
   );
 }

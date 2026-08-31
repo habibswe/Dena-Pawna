@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { calculateSummary, calculateMonthlySummary, calculateBalance, Transaction } from '@/lib/calculations';
+import { calculateBalance, calculateTimeframeSummary, calculateSummary, Transaction } from '@/lib/calculations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowDownLeft, ArrowUpRight, Wallet, ArrowRight, TrendingUp, TrendingDown, PiggyBank, Target, ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -14,14 +14,19 @@ import DashboardLoading from '@/components/ui/dashboard-loading';
 import { getDictionary } from '@/i18n/server';
 import { ExpandableFab } from '@/components/ui/expandable-fab';
 
-async function DashboardContent({ month }: { month?: string }) {
+async function DashboardContent({ month, from, to }: { month?: string; from?: string; to?: string }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return null;
 
   const t = await getDictionary();
-  const currentMonth = month || format(new Date(), 'yyyy-MM');
+  
+  const isAllTime = month === 'all';
+  const hasCustomRange = !!from || !!to;
+  
+  // If no params, default to current month
+  const currentMonth = (!month && !hasCustomRange) ? format(new Date(), 'yyyy-MM') : month;
 
   const [
     { data: people }, 
@@ -37,7 +42,7 @@ async function DashboardContent({ month }: { month?: string }) {
   const allPeople = (people || []);
   const allCategories = (categories || []);
 
-  const monthlySummary = calculateMonthlySummary(allTransactions, currentMonth);
+  const timeframeSummary = calculateTimeframeSummary(allTransactions, currentMonth, from, to);
 
   // Overall People Balances (not tied to month)
   const peopleBalances = allPeople.map(person => {
@@ -49,12 +54,22 @@ async function DashboardContent({ month }: { month?: string }) {
   });
   const { youAreOwed, youOwe, netBalance: totalNetBalance } = calculateSummary(peopleBalances.map(p => p.balance));
 
-  // Current month's transactions
-  const currentMonthTransactions = allTransactions.filter(tx => tx.transaction_date.startsWith(currentMonth));
-  const recentTransactions = allTransactions.slice(0, 5);
+  // Current timeframe's transactions for the list
+  let currentFilteredTransactions = allTransactions;
+  if (currentMonth && currentMonth !== 'all') {
+    currentFilteredTransactions = allTransactions.filter(tx => tx.transaction_date.startsWith(currentMonth));
+  } else if (from || to) {
+    currentFilteredTransactions = allTransactions.filter(tx => {
+      if (from && tx.transaction_date < from) return false;
+      if (to && tx.transaction_date > to) return false;
+      return true;
+    });
+  }
+  
+  const recentTransactions = currentFilteredTransactions.slice(0, 5);
 
-  const expenseRate = monthlySummary.income > 0 
-    ? ((monthlySummary.expense / monthlySummary.income) * 100).toFixed(0) 
+  const expenseRate = timeframeSummary.income > 0 
+    ? ((timeframeSummary.expense / timeframeSummary.income) * 100).toFixed(0) 
     : 0;
 
   return (
@@ -66,12 +81,12 @@ async function DashboardContent({ month }: { month?: string }) {
             <p className="text-muted-foreground">{t.dashboard.subtitle}</p>
           </div>
           <div className="sm:hidden mt-1 shrink-0">
-            <MonthSelector currentMonth={currentMonth} />
+            <MonthSelector currentMonth={currentMonth} from={from} to={to} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="hidden sm:block">
-            <MonthSelector currentMonth={currentMonth} />
+            <MonthSelector currentMonth={currentMonth} from={from} to={to} />
           </div>
           <Link href="/transactions/new" className={cn(buttonVariants(), 'hidden md:inline-flex')}>
             {t.dashboard.addTransaction}
@@ -89,8 +104,8 @@ async function DashboardContent({ month }: { month?: string }) {
             <Wallet className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${monthlySummary.remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
-              {monthlySummary.remaining >= 0 ? '' : '-'}৳{Math.abs(monthlySummary.remaining).toLocaleString()}
+            <div className={`text-2xl font-bold ${timeframeSummary.remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
+              {timeframeSummary.remaining >= 0 ? '' : '-'}৳{Math.abs(timeframeSummary.remaining).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Income - Exp - Saved</p>
           </CardContent>
@@ -102,7 +117,7 @@ async function DashboardContent({ month }: { month?: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-500">
-              ৳{monthlySummary.income.toLocaleString()}
+              ৳{timeframeSummary.income.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -113,7 +128,7 @@ async function DashboardContent({ month }: { month?: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-rose-500">
-              ৳{monthlySummary.expense.toLocaleString()}
+              ৳{timeframeSummary.expense.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">{expenseRate}% of income</p>
           </CardContent>
@@ -125,7 +140,7 @@ async function DashboardContent({ month }: { month?: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-500">
-              ৳{monthlySummary.savings.toLocaleString()}
+              ৳{timeframeSummary.savings.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -136,7 +151,7 @@ async function DashboardContent({ month }: { month?: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-500">
-              ৳{monthlySummary.lent.toLocaleString()}
+              ৳{timeframeSummary.lent.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -145,23 +160,23 @@ async function DashboardContent({ month }: { month?: string }) {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* EXPENSE BREAKDOWN */}
         <div className="lg:col-span-1">
-          <ExpenseBreakdown transactions={currentMonthTransactions} categories={allCategories} />
+          <ExpenseBreakdown transactions={currentFilteredTransactions} categories={allCategories} />
         </div>
 
         {/* MONEY FLOW */}
         <Card className="lg:col-span-2 glass-panel">
           <CardHeader>
-            <CardTitle>{t.dashboard.moneyFlow} ({format(new Date(currentMonth + '-01'), 'MMMM yyyy')})</CardTitle>
+            <CardTitle>{t.dashboard.moneyFlow} {currentMonth && currentMonth !== 'all' ? `(${format(new Date(currentMonth + '-01'), 'MMMM yyyy')})` : ''}</CardTitle>
             <CardDescription>Visual representation of your cash movement</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 ml-6">
                   <div className="flex items-center gap-3">
                     <TrendingUp className="h-5 w-5 text-emerald-500" />
-                    <span className="font-medium text-emerald-600 dark:text-emerald-400">{t.dashboard.totalIncome}</span>
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400">{t.dashboard.income}</span>
                   </div>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">+৳{monthlySummary.income.toLocaleString()}</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">+৳{timeframeSummary.income.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 ml-6">
@@ -169,7 +184,7 @@ async function DashboardContent({ month }: { month?: string }) {
                     <TrendingDown className="h-5 w-5 text-rose-500" />
                     <span className="font-medium text-rose-600 dark:text-rose-400">{t.dashboard.expenses}</span>
                   </div>
-                  <span className="font-bold text-rose-600 dark:text-rose-400">-৳{monthlySummary.expense.toLocaleString()}</span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400">-৳{timeframeSummary.expense.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 ml-6">
@@ -177,7 +192,7 @@ async function DashboardContent({ month }: { month?: string }) {
                     <PiggyBank className="h-5 w-5 text-amber-500" />
                     <span className="font-medium text-amber-600 dark:text-amber-400">{t.dashboard.saved}</span>
                   </div>
-                  <span className="font-bold text-amber-600 dark:text-amber-400">-৳{monthlySummary.savings.toLocaleString()}</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400">-৳{timeframeSummary.savings.toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 ml-6">
@@ -185,7 +200,7 @@ async function DashboardContent({ month }: { month?: string }) {
                     <ArrowUpRight className="h-5 w-5 text-blue-500" />
                     <span className="font-medium text-blue-600 dark:text-blue-400">{t.dashboard.lent} ({t.dashboard.given} Out)</span>
                   </div>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">-৳{monthlySummary.lent.toLocaleString()}</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">-৳{timeframeSummary.lent.toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 ml-6">
@@ -193,7 +208,7 @@ async function DashboardContent({ month }: { month?: string }) {
                     <ArrowDownLeft className="h-5 w-5 text-purple-500" />
                     <span className="font-medium text-purple-600 dark:text-purple-400">{t.dashboard.borrowed} (In)</span>
                   </div>
-                  <span className="font-bold text-purple-600 dark:text-purple-400">+৳{monthlySummary.borrowed.toLocaleString()}</span>
+                  <span className="font-bold text-purple-600 dark:text-purple-400">+৳{timeframeSummary.borrowed.toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-xl bg-primary/10 border border-primary/20 mt-2">
@@ -201,7 +216,7 @@ async function DashboardContent({ month }: { month?: string }) {
                     <Wallet className="h-6 w-6 text-primary" />
                     <span className="font-bold text-lg text-primary">{t.dashboard.monthlyRemaining}</span>
                   </div>
-                  <span className="font-bold text-xl text-primary">৳{monthlySummary.remaining.toLocaleString()}</span>
+                  <span className="font-bold text-xl text-primary">৳{timeframeSummary.remaining.toLocaleString()}</span>
                 </div>
              </div>
           </CardContent>
@@ -344,13 +359,13 @@ async function DashboardContent({ month }: { month?: string }) {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; from?: string; to?: string }>;
 }) {
-  const { month } = await searchParams;
+  const { month, from, to } = await searchParams;
   
   return (
-    <Suspense key={month || 'default'} fallback={<DashboardLoading />}>
-      <DashboardContent month={month} />
+    <Suspense key={`${month}-${from}-${to}`} fallback={<DashboardLoading />}>
+      <DashboardContent month={month} from={from} to={to} />
     </Suspense>
   );
 }

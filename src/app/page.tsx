@@ -13,12 +13,12 @@ export default async function LandingPage() {
       {/* Floating Glass Navbar */}
       <header className="w-full max-w-5xl mx-auto p-4 relative z-50 mt-4 md:mt-8">
         <div className="glass-panel rounded-full px-6 py-3 flex items-center justify-between border-primary/20 bg-background/40 backdrop-blur-3xl shadow-xl">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="bg-primary/20 p-2 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.3)]">
               <Activity className="w-6 h-6 text-primary" />
             </div>
             <span className="font-extrabold text-xl tracking-tight text-primary">{t.landing.title}</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2 md:gap-4">
             <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors hidden md:block">
               {t.landing.login}

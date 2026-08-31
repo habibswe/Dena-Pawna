@@ -121,7 +121,7 @@ export default function SettingsPage() {
       <div className={`md:hidden ${mobileView === 'menu' ? 'flex' : 'hidden'} flex-col gap-3 mt-4`}>
         <Button 
           variant="outline" 
-          className="h-16 justify-start text-lg px-4 glass-panel border-primary/20 shadow-sm"
+          className="h-14 justify-start text-sm px-4 glass-panel border-primary/20 shadow-sm"
           onClick={() => setMobileView('profile')}
         >
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
@@ -131,7 +131,7 @@ export default function SettingsPage() {
         </Button>
         <Button 
           variant="outline" 
-          className="h-16 justify-start text-lg px-4 glass-panel border-primary/20 shadow-sm"
+          className="h-14 justify-start text-sm px-4 glass-panel border-primary/20 shadow-sm"
           onClick={() => setMobileView('password')}
         >
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
@@ -141,7 +141,7 @@ export default function SettingsPage() {
         </Button>
         <Button 
           variant="outline" 
-          className="h-16 justify-start text-lg px-4 glass-panel border-primary/20 shadow-sm"
+          className="h-14 justify-start text-sm px-4 glass-panel border-primary/20 shadow-sm"
           onClick={() => setMobileView('preferences')}
         >
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
@@ -151,7 +151,7 @@ export default function SettingsPage() {
         </Button>
         <Button 
           variant="outline" 
-          className="h-16 justify-start text-lg px-4 glass-panel border-destructive/20 text-destructive shadow-sm"
+          className="h-14 justify-start text-sm px-4 glass-panel border-destructive/20 text-destructive shadow-sm"
           onClick={() => setIsLogoutOpen(true)}
         >
           <div className="bg-destructive/10 p-2 rounded-lg mr-4">
@@ -163,7 +163,7 @@ export default function SettingsPage() {
 
       {/* Profile Section */}
       <Card className={`glass-panel ${mobileView === 'profile' ? 'block' : 'hidden md:block'}`}>
-        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-6">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileView('menu')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
 
       {/* Password Section (Split from Profile on Mobile, combined on Desktop) */}
       <Card className={`glass-panel ${mobileView === 'password' ? 'block' : 'hidden md:block'}`}>
-        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-6">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileView('menu')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
 
       {/* Preferences Section */}
       <Card className={`glass-panel ${mobileView === 'preferences' ? 'block' : 'hidden md:block'}`}>
-        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-6">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileView('menu')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
@@ -302,7 +302,7 @@ export default function SettingsPage() {
 
       {/* Logout Section (Desktop Only) */}
       <Card className="glass-panel border-destructive/20 hidden md:block">
-        <CardHeader>
+        <CardHeader className="pb-6">
           <CardTitle className="text-destructive">Danger Zone</CardTitle>
           <CardDescription>Account security and management</CardDescription>
         </CardHeader>
