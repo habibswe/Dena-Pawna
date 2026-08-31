@@ -86,8 +86,8 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
     <div 
       ref={containerRef}
       className={cn(
-        "fixed right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none transition-transform duration-300 ease-in-out",
-        isScrollingDown ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100",
+        "fixed right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none transition-all duration-200 ease-in-out origin-center",
+        isScrollingDown ? "scale-75 opacity-0" : "scale-100 opacity-100",
         className
       )}
       style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}

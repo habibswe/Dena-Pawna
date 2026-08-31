@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#10b981', // matches emerald primary
+  themeColor: '#ffffff', // matches light background
 };
 
 import { Toaster } from '@/components/ui/sonner';
