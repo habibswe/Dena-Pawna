@@ -19,44 +19,33 @@ function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
 }
 
 function DropdownMenuContent({
+  align = "start",
+  alignOffset = 0,
+  side = "bottom",
+  sideOffset = 4,
   className,
-  side,
-  sideOffset,
-  align,
-  alignOffset,
   ...props
-}: MenuPrimitive.Popup.Props & {
-  side?: string;
-  sideOffset?: number;
-  align?: string;
-  alignOffset?: number;
-}) {
-  const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
-
+}: MenuPrimitive.Popup.Props &
+  Pick<
+    MenuPrimitive.Positioner.Props,
+    "align" | "alignOffset" | "side" | "sideOffset"
+  >) {
   return (
-    <>
-      <div ref={setContainer} className="w-full" />
-      {container && (
-        <MenuPrimitive.Portal container={container}>
-    <MenuPrimitive.Positioner
-      side={side as any || "bottom"}
-      sideOffset={sideOffset ?? 4}
-      align={align as any || "start"}
-      alignOffset={alignOffset ?? 0}
-      className="!relative !top-auto !left-auto !transform-none isolate w-full outline-none"
-    >
-      <MenuPrimitive.Popup
-        data-slot="dropdown-menu-content"
-        className={cn(
-          "relative mt-1.5 w-full min-w-32 overflow-x-hidden overflow-y-auto rounded-lg !bg-background/80 backdrop-blur-xl p-1 text-popover-foreground shadow-md ring-1 ring-border duration-200 outline-none data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-top-2 data-closed:animate-out data-closed:overflow-hidden data-closed:fade-out-0 data-closed:slide-out-to-top-2",
-          className
-        )}
-        {...props}
-      />
-    </MenuPrimitive.Positioner>
-        </MenuPrimitive.Portal>
-      )}
-    </>
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
+        className="isolate z-50 outline-none"
+        align={align}
+        alignOffset={alignOffset}
+        side={side}
+        sideOffset={sideOffset}
+      >
+        <MenuPrimitive.Popup
+          data-slot="dropdown-menu-content"
+          className={cn("z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg !bg-background p-1 text-popover-foreground shadow-md ring-1 ring-border duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:overflow-hidden data-closed:fade-out-0 data-closed:zoom-out-95", className )}
+          {...props}
+        />
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
   )
 }
 
@@ -136,13 +125,21 @@ function DropdownMenuSubTrigger({
 }
 
 function DropdownMenuSubContent({
+  align = "start",
+  alignOffset = -3,
+  side = "right",
+  sideOffset = 0,
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuContent>) {
   return (
     <DropdownMenuContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("mt-1 w-auto min-w-[96px] rounded-lg !bg-background/80 backdrop-blur-xl p-1 text-popover-foreground shadow-sm ring-1 ring-border duration-200 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-top-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-top-2", className )}
+      className={cn("w-auto min-w-[96px] rounded-lg !bg-background p-1 text-popover-foreground shadow-lg ring-1 ring-border duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95", className )}
+      align={align}
+      alignOffset={alignOffset}
+      side={side}
+      sideOffset={sideOffset}
       {...props}
     />
   )
