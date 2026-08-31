@@ -61,7 +61,7 @@ export function AddAccountDialog() {
           <div className="space-y-2">
             <Label htmlFor="type">Account Type</Label>
             <Select name="type" required defaultValue="BANK">
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
