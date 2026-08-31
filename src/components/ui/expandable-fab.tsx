@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface ExpandableFabProps {
   href?: string;
@@ -14,8 +14,11 @@ interface ExpandableFabProps {
 
 export function ExpandableFab({ href, onClick, label, className }: ExpandableFabProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Handle clicking outside to collapse
   useEffect(() => {
@@ -33,13 +36,40 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
     };
   }, []);
 
+  // Handle scroll to hide
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const currentScrollY = target.scrollTop;
+      
+      if (currentScrollY > lastScrollY.current + 10) {
+        setIsScrollingDown(true); // Scrolled down
+        setIsExpanded(false); // Also collapse if expanded
+        lastScrollY.current = currentScrollY;
+      } else if (currentScrollY < lastScrollY.current - 10) {
+        setIsScrollingDown(false); // Scrolled up
+        lastScrollY.current = currentScrollY;
+      }
+    };
 
+    const container = document.getElementById('main-scroll-container');
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [pathname]);
 
   return (
     <div 
       ref={containerRef}
       className={cn(
-        "fixed bottom-20 right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none",
+        "fixed bottom-20 right-4 z-[100] md:hidden flex items-center justify-end pointer-events-none transition-transform duration-300 ease-in-out",
+        isScrollingDown ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100",
         className
       )}
     >

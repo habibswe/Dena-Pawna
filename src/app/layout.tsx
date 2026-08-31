@@ -29,6 +29,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { LanguageProvider } from '@/i18n/client';
 import { getLocale } from '@/i18n/server';
 import { SplashScreen } from '@/components/ui/splash-screen';
+import { LiquidBackground } from '@/components/ui/liquid-background';
 
 export default async function RootLayout({
   children,
@@ -64,18 +65,10 @@ export default async function RootLayout({
           >
             <SplashScreen />
             
-            {/* Global Background Gradients (Liquid Mesh) - Hidden entirely on Desktop to ensure a completely clean, solid flat background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 md:hidden">
-              {/* Base gradient layer for depth */}
-              <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/10 dark:to-primary/5" />
-              
-              {/* Animated Mesh Orbs - Vibrant on mobile (opacity-25) */}
-              <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary rounded-full blur-[100px] opacity-25 dark:opacity-20 animate-pulse" style={{ animationDuration: '8s' }} />
-              <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-blue-500 rounded-full blur-[100px] opacity-20 dark:opacity-15 animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
-              <div className="absolute bottom-[-10%] left-[10%] w-[60vw] h-[60vw] bg-emerald-300 dark:bg-emerald-800 rounded-full blur-[120px] opacity-20 dark:opacity-20 animate-pulse" style={{ animationDuration: '10s', animationDelay: '4s' }} />
-            </div>
+            {/* Global Background Gradients (Liquid Mesh) - Hidden entirely on Desktop for dashboard */}
+            <LiquidBackground className="md:hidden" />
             
-            <div className="relative z-10 flex flex-col min-h-screen">
+            <div className="relative z-10 flex flex-col h-[100dvh] overflow-y-auto overflow-x-hidden">
               {children}
             </div>
             

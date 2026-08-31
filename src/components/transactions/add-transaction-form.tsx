@@ -44,6 +44,7 @@ export function AddTransactionForm({
   
   const [localPeople, setLocalPeople] = useState(people);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [transactionDate, setTransactionDate] = useState<Date>(new Date());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +62,8 @@ export function AddTransactionForm({
     if (dueDate && (type === 'GIVEN' || type === 'BORROWED')) {
       formData.set('due_date', format(dueDate, 'yyyy-MM-dd'));
     }
+    
+    formData.set('transaction_date', format(transactionDate, 'yyyy-MM-dd'));
     
     if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !personId) {
       toast.error('Please select a person');
@@ -295,16 +298,30 @@ export function AddTransactionForm({
             <Input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required className="glass-panel border-primary/20" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
             <Label htmlFor="transaction_date">Date</Label>
-            <Input 
-              id="transaction_date" 
-              name="transaction_date" 
-              type="date" 
-              required 
-              defaultValue={new Date().toISOString().split('T')[0]}
-              className="glass-panel border-primary/20" 
-            />
+            <Popover>
+              <PopoverTrigger render={
+                <Button
+                  variant={'outline'}
+                  className={cn(
+                    'w-full justify-start text-left font-normal glass-panel border-primary/20 bg-background/50',
+                    !transactionDate && 'text-muted-foreground'
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {transactionDate ? format(transactionDate, 'PPP') : <span>Pick a date</span>}
+                </Button>
+              } />
+              <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl" align="start">
+                <Calendar
+                  mode="single"
+                  selected={transactionDate}
+                  onSelect={(newDate) => newDate && setTransactionDate(newDate)}
+                  className="rounded-xl"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">

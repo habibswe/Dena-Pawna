@@ -6,11 +6,43 @@ import { Home, Users, ArrowRightLeft, PieChart, Settings, Activity, Target } fro
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { LanguageToggle } from '@/components/ui/language-toggle';
+import { NotificationBell } from '@/components/layout/notification-bell';
 import { useTranslation } from '@/i18n/client';
+import { useState, useEffect, useRef } from 'react';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t } = useTranslation();
+  
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const currentScrollY = target.scrollTop;
+      
+      // Add a small threshold (10px) to prevent jitter on tiny scrolls
+      if (currentScrollY > lastScrollY.current + 10) {
+        setIsScrollingDown(true); // Scrolled down
+        lastScrollY.current = currentScrollY;
+      } else if (currentScrollY < lastScrollY.current - 10) {
+        setIsScrollingDown(false); // Scrolled up
+        lastScrollY.current = currentScrollY;
+      }
+    };
+
+    const container = document.getElementById('main-scroll-container');
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [pathname]); // Re-run effect if pathname changes just in case container resets
 
   const navItems = [
     { label: t.nav.overview, href: '/dashboard', icon: Home },
@@ -59,8 +91,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile Top Header (flex item, doesn't overlap scroll) */}
-      <header className="md:hidden h-14 border-b flex items-center justify-between px-4 glass-panel shrink-0 z-20">
+      {/* Mobile Top Header (Fixed and hides on scroll) */}
+      <header className={cn(
+        "md:hidden fixed top-0 left-0 right-0 h-14 border-b flex items-center justify-between px-4 shrink-0 z-30 transition-transform duration-300 ease-in-out bg-background/95 backdrop-blur-md",
+        isScrollingDown ? "-translate-y-full" : "translate-y-0"
+      )}>
         <div className="flex items-center gap-2">
           <div className="bg-primary/10 p-2 rounded-xl glass-panel">
             <Activity className="w-5 h-5 text-primary" />
@@ -68,6 +103,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
         </div>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <Link href="/settings" className="bg-primary/10 p-2 rounded-full glass-panel hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
             <Settings className="w-5 h-5 text-primary" />
           </Link>
@@ -75,7 +111,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content Area (Scrollable flex area) */}
-      <main className="flex-1 min-w-0 overflow-y-auto relative z-10 p-4 md:p-8">
+      <main id="main-scroll-container" className="flex-1 min-w-0 overflow-y-auto relative z-10 p-4 md:p-8 pt-20 md:pt-8">
+        <div className="hidden md:flex justify-end mb-4">
+          <NotificationBell />
+        </div>
         <div className="max-w-4xl mx-auto pb-4">
           {children}
         </div>
