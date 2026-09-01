@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
+import { useTranslation } from '@/i18n/client';
+
 export function DeleteButton({ 
   onDelete, 
   itemType = 'Item'
@@ -14,6 +16,7 @@ export function DeleteButton({
   onDelete: () => Promise<{ error?: string, success?: boolean }>, 
   itemType?: string
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -40,15 +43,15 @@ export function DeleteButton({
     <>
       <Button variant="destructive" size="sm" onClick={() => setIsOpen(true)} disabled={isDeleting}>
         {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />} 
-        Delete
+        {t.common.delete}
       </Button>
 
       <ConfirmDialog
         isOpen={isOpen}
         onClose={() => !isDeleting && setIsOpen(false)}
         onConfirm={handleDelete}
-        title="Are you absolutely sure?"
-        description={`This action cannot be undone. This will permanently delete this ${itemType.toLowerCase()}.`}
+        title={t.common.confirmDelete}
+        description={t.common.confirmDeleteDesc}
         isDeleting={isDeleting}
       />
     </>

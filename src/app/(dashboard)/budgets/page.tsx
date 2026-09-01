@@ -2,15 +2,22 @@ import { createClient } from '@/lib/supabase/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MonthSelector } from '@/components/dashboard/month-selector';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { AddBudgetDialog } from '@/components/budgets/add-budget-dialog';
 import { BudgetListClient } from '@/components/budgets/budget-list-client';
 import { Suspense } from 'react';
 import DashboardLoading from '@/components/ui/dashboard-loading';
+import { getDictionary } from '@/i18n/server';
 
 async function BudgetsContent({ month }: { month?: string }) {
   const supabase = await createClient();
+  const t = await getDictionary();
   const currentMonth = month || format(new Date(), 'yyyy-MM');
+
+  const [yearStr, monthStr] = currentMonth.split('-');
+  const monthDate = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1);
+  const startDate = format(startOfMonth(monthDate), 'yyyy-MM-dd');
+  const endDate = format(endOfMonth(monthDate), 'yyyy-MM-dd');
 
   const [
     { data: categories },
@@ -22,8 +29,8 @@ async function BudgetsContent({ month }: { month?: string }) {
     supabase.from('transactions')
       .select('amount, category_id')
       .eq('type', 'EXPENSE')
-      .gte('transaction_date', `${currentMonth}-01`)
-      .lte('transaction_date', `${currentMonth}-31`) // naive end of month, sufficient for DB filtering since we just match prefix anyway if we used like
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate)
   ]);
 
   const allCategories = categories || [];
@@ -42,8 +49,8 @@ async function BudgetsContent({ month }: { month?: string }) {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-start justify-between w-full sm:w-auto gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Budgets</h2>
-            <p className="text-muted-foreground">Manage your spending limits.</p>
+            <h2 className="text-3xl font-bold tracking-tight">{t.budgets.title}</h2>
+            <p className="text-muted-foreground">{t.budgets.subtitle}</p>
           </div>
           <div className="sm:hidden mt-1 shrink-0">
             <MonthSelector currentMonth={currentMonth} />

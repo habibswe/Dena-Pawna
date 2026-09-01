@@ -15,7 +15,10 @@ import { useRouter } from 'next/navigation';
 import { EditPersonDialog } from './edit-person-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
+import { useTranslation } from '@/i18n/client';
+
 export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [editingPerson, setEditingPerson] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input 
-          placeholder="Search people..." 
+          placeholder={t.people.searchPlaceholder} 
           className="pl-9 glass-panel" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -56,8 +59,7 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
       {peopleBalances.length === 0 ? (
         <Card className="glass-panel border-dashed p-8 text-center">
           <div className="space-y-3">
-            <h3 className="text-lg font-medium">No people yet</h3>
-            <p className="text-muted-foreground">Add someone to start tracking your money.</p>
+            <h3 className="text-lg font-medium">{t.people.noPeople}</h3>
             <AddPersonDialog />
           </div>
         </Card>
@@ -71,7 +73,7 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
             const isSettled = person.balance === 0;
             const isPositive = person.balance > 0;
             const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-primary' : 'text-destructive';
-            const statusText = isSettled ? 'Settled ✓' : isPositive ? `Owes you ৳${Math.abs(person.balance).toLocaleString()}` : `You owe ৳${Math.abs(person.balance).toLocaleString()}`;
+            const statusText = isSettled ? `${t.people.netSettled} ✓` : isPositive ? `${t.dashboard.owesYou} ৳${Math.abs(person.balance).toLocaleString()}` : `${t.dashboard.youOwe} ৳${Math.abs(person.balance).toLocaleString()}`;
             
             return (
               <Link key={person.id} href={`/people/${person.id}`}>
@@ -96,11 +98,11 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditingPerson(person)}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            {t.common.edit}
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeletingId(person.id); }}>
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            {t.common.delete}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -130,8 +132,8 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
         isOpen={!!deletingId}
         onClose={() => !isDeleting && setDeletingId(null)}
         onConfirm={handleDelete}
-        title="Delete Person?"
-        description="Are you sure you want to delete this person? They will be removed from all associated transactions."
+        title={t.people.deleteTitle}
+        description={t.people.deleteDesc}
         isDeleting={isDeleting}
       />
     </>

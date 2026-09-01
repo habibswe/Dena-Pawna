@@ -19,7 +19,10 @@ interface Category {
   icon: string | null;
 }
 
+import { useTranslation } from '@/i18n/client';
+
 export function CategoryList({ categories: initialCategories }: { categories: Category[] }) {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState(initialCategories);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -58,7 +61,6 @@ export function CategoryList({ categories: initialCategories }: { categories: Ca
   }
 
   const renderIcon = (iconName: string | null) => {
-    // Dynamically render icon or fallback to Tag
     if (!iconName) return <Tag className="h-5 w-5" />;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,11 +85,11 @@ export function CategoryList({ categories: initialCategories }: { categories: Ca
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setEditingCategory(cat)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t.common.edit}
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(cat.id)}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t.common.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -111,8 +113,8 @@ export function CategoryList({ categories: initialCategories }: { categories: Ca
         isOpen={!!deletingId}
         onClose={() => !isDeleting && setDeletingId(null)}
         onConfirm={handleDelete}
-        title="Delete Category?"
-        description="Are you sure you want to delete this category? It will be removed from all linked transactions."
+        title={t.categories.deleteTitle}
+        description={t.categories.deleteDesc}
         isDeleting={isDeleting}
       />
     </div>

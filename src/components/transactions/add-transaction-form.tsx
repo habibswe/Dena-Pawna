@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,8 @@ const TRANSACTION_TYPES = [
   { id: 'RETURNED', label: 'Repay Out', icon: Upload, color: 'text-indigo-500', bg: 'hover:bg-indigo-500/10 border-indigo-500/20' },
 ];
 
+import { useTranslation } from '@/i18n/client';
+
 export function AddTransactionForm({ 
   people, 
   accounts,
@@ -57,7 +59,19 @@ export function AddTransactionForm({
   defaultType?: string
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+
+  const TRANSACTION_TYPES = [
+    { id: 'EXPENSE', label: t.addTransactionForm.addExpense, icon: TrendingDown, color: 'text-red-500', bg: 'hover:bg-red-500/10 border-red-500/20' },
+    { id: 'INCOME', label: t.addTransactionForm.addIncome, icon: TrendingUp, color: 'text-green-500', bg: 'hover:bg-green-500/10 border-green-500/20' },
+    { id: 'TRANSFER', label: t.addTransactionForm.transferMoney, icon: ArrowRightLeft, color: 'text-blue-500', bg: 'hover:bg-blue-500/10 border-blue-500/20' },
+    { id: 'SAVING', label: t.addTransactionForm.addSaving, icon: PiggyBank, color: 'text-purple-500', bg: 'hover:bg-purple-500/10 border-purple-500/20' },
+    { id: 'GIVEN', label: t.addTransactionForm.lendMoney, icon: Send, color: 'text-orange-500', bg: 'hover:bg-orange-500/10 border-orange-500/20' },
+    { id: 'RECEIVED', label: t.addTransactionForm.repaymentReceived, icon: Handshake, color: 'text-emerald-500', bg: 'hover:bg-emerald-500/10 border-emerald-500/20' },
+    { id: 'BORROWED', label: t.addTransactionForm.borrowMoney, icon: Download, color: 'text-rose-500', bg: 'hover:bg-rose-500/10 border-rose-500/20' },
+    { id: 'RETURNED', label: t.addTransactionForm.repayMoney, icon: Upload, color: 'text-indigo-500', bg: 'hover:bg-indigo-500/10 border-indigo-500/20' },
+  ];
   
   const type = defaultType || '';
   const showGrid = !type;
@@ -76,8 +90,6 @@ export function AddTransactionForm({
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     
-    // Append the controlled states since Select components might not natively submit well if not using hidden inputs, 
-    // or we just inject them here to be safe.
     formData.set('type', type);
     if (personId) formData.set('person_id', personId);
     if (accountId) formData.set('account_id', accountId);
@@ -91,7 +103,7 @@ export function AddTransactionForm({
     formData.set('transaction_date', format(transactionDate, 'yyyy-MM-dd'));
     
     if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !personId) {
-      toast.error('Please select a person');
+      toast.error(t.addTransactionForm.selectPerson);
       setIsLoading(false);
       return;
     }
@@ -120,6 +132,17 @@ export function AddTransactionForm({
     }
   };
 
+  const [isPending, startTransition] = useTransition();
+  const [selectingType, setSelectingType] = useState<string | null>(null);
+
+  const handleSelectType = (typeId: string) => {
+    setSelectingType(typeId);
+    setCategoryId('');
+    startTransition(() => {
+      router.push(`?type=${typeId}`);
+    });
+  };
+
   const isLending = ['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type);
   const requiresCategory = ['INCOME', 'EXPENSE'].includes(type);
   const requiresSingleAccount = ['INCOME', 'EXPENSE', 'GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'SAVING'].includes(type);
@@ -129,28 +152,56 @@ export function AddTransactionForm({
 
   return (
     <Card className="glass-panel w-full">
-      {showGrid ? (
+      {selectingType ? (
+        <CardContent className="p-6 space-y-6 animate-pulse">
+          <div className="flex items-center gap-3 pb-2 border-b border-border/40">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-sm font-medium text-muted-foreground">{t.common.loading}</span>
+          </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="h-4 w-28 bg-primary/10 rounded-md" />
+              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 w-24 bg-primary/10 rounded-md" />
+              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-primary/10 rounded-md" />
+              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
+            </div>
+            <div className="h-12 w-full bg-primary/20 rounded-xl mt-6" />
+          </div>
+        </CardContent>
+      ) : showGrid ? (
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {TRANSACTION_TYPES.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => {
-                  setCategoryId('');
-                  router.push(`?type=${t.id}`);
-                }}
-                className={cn(
-                  "flex flex-col items-center justify-center p-5 sm:p-6 gap-3 sm:gap-4 rounded-xl border glass-panel transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  t.bg
-                )}
-              >
-                <div className={cn("p-3 rounded-full bg-background/50", t.color)}>
-                  <t.icon className="h-7 w-7 sm:h-8 sm:w-8" />
-                </div>
-                <span className="font-medium text-sm text-center leading-tight">{t.label}</span>
-              </button>
-            ))}
+            {TRANSACTION_TYPES.map(tItem => {
+              const isCardSelected = selectingType === tItem.id;
+              return (
+                <button
+                  key={tItem.id}
+                  type="button"
+                  disabled={!!selectingType}
+                  onClick={() => handleSelectType(tItem.id)}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-5 sm:p-6 gap-3 sm:gap-4 rounded-xl border glass-panel transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary relative overflow-hidden",
+                    tItem.bg,
+                    isCardSelected && "ring-2 ring-primary bg-primary/10 scale-95"
+                  )}
+                >
+                  <div className={cn("p-3 rounded-full bg-background/50", tItem.color)}>
+                    {isCardSelected ? (
+                      <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-primary" />
+                    ) : (
+                      <tItem.icon className="h-7 w-7 sm:h-8 sm:w-8" />
+                    )}
+                  </div>
+                  <span className="font-medium text-sm text-center leading-tight">{tItem.label}</span>
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       ) : (
@@ -161,7 +212,7 @@ export function AddTransactionForm({
           {/* PERSON SELECTOR */}
           {isLending && (
             <div className="space-y-2">
-              <Label>Person</Label>
+              <Label>{t.common.person}</Label>
               <div className="flex gap-2">
                 <div className="flex-1">
                   <Select value={personId} onValueChange={(val) => setPersonId(val || '')} required>
@@ -172,7 +223,7 @@ export function AddTransactionForm({
                         </span>
                       ) : (
                         <span className="flex flex-1 text-left text-muted-foreground truncate">
-                          Select a person
+                          {t.addTransactionForm.selectPerson}
                         </span>
                       )}
                     </SelectTrigger>
@@ -196,11 +247,11 @@ export function AddTransactionForm({
           {/* ACCOUNTS SELECTOR */}
           {requiresSingleAccount && (
             <div className="space-y-2">
-              <Label>{['INCOME', 'BORROWED', 'RECEIVED'].includes(type) ? 'To Account' : 'From Account'} (Optional)</Label>
+              <Label>{['INCOME', 'BORROWED', 'RECEIVED'].includes(type) ? t.addTransactionForm.toAccount : t.addTransactionForm.fromAccount}</Label>
               <Select value={accountId} onValueChange={(val) => setAccountId(val || '')}>
                 <SelectTrigger className="w-full glass-panel border-primary/20">
-                  <SelectValue placeholder="Select Account">
-                    {accountId ? accounts.find(a => a.id === accountId)?.name : 'Select Account'}
+                  <SelectValue placeholder={t.addTransactionForm.selectAccount}>
+                    {accountId ? accounts.find(a => a.id === accountId)?.name : t.addTransactionForm.selectAccount}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="glass-panel border-primary/20 shadow-2xl">
@@ -215,11 +266,11 @@ export function AddTransactionForm({
           {requiresTwoAccounts && (
             <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-end">
               <div className="space-y-2">
-                <Label>From</Label>
+                <Label>{t.addTransactionForm.source}</Label>
                 <Select value={accountId} onValueChange={(val) => setAccountId(val || '')} required>
                   <SelectTrigger className="glass-panel border-primary/20">
-                    <SelectValue placeholder="Source">
-                      {accountId ? accounts.find(a => a.id === accountId)?.name : 'Source'}
+                    <SelectValue placeholder={t.addTransactionForm.source}>
+                      {accountId ? accounts.find(a => a.id === accountId)?.name : t.addTransactionForm.source}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -233,11 +284,11 @@ export function AddTransactionForm({
                 <ArrowRight className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <Label>To</Label>
+                <Label>{t.addTransactionForm.destination}</Label>
                 <Select value={toAccountId} onValueChange={(val) => setToAccountId(val || '')} required>
                   <SelectTrigger className="glass-panel border-primary/20">
-                    <SelectValue placeholder="Destination">
-                      {toAccountId ? accounts.find(a => a.id === toAccountId)?.name : 'Destination'}
+                    <SelectValue placeholder={t.addTransactionForm.destination}>
+                      {toAccountId ? accounts.find(a => a.id === toAccountId)?.name : t.addTransactionForm.destination}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -253,11 +304,11 @@ export function AddTransactionForm({
           {/* CATEGORY SELECTOR */}
           {requiresCategory && (
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>{t.addTransactionForm.category}</Label>
               <Select value={categoryId} onValueChange={(val) => setCategoryId(val || '')}>
                 <SelectTrigger className="w-full glass-panel border-primary/20">
-                  <SelectValue placeholder="Select category (Optional)">
-                    {categoryId ? filteredCategories.find(c => c.id === categoryId)?.name : 'Select category (Optional)'}
+                  <SelectValue placeholder={t.addTransactionForm.selectCategory}>
+                    {categoryId ? filteredCategories.find(c => c.id === categoryId)?.name : t.addTransactionForm.selectCategory}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="glass-panel border-primary/20 shadow-2xl">
@@ -274,7 +325,7 @@ export function AddTransactionForm({
           {/* DUE DATE */}
           {(type === 'GIVEN' || type === 'BORROWED') && (
             <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
-              <Label htmlFor="due_date">Expected Return Date (Optional)</Label>
+              <Label htmlFor="due_date">{t.addTransactionForm.expectedReturnDate}</Label>
               <Popover>
                 <PopoverTrigger render={
                   <Button
@@ -285,7 +336,7 @@ export function AddTransactionForm({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                    {dueDate ? format(dueDate, 'PPP') : <span>Pick a due date</span>}
+                    {dueDate ? format(dueDate, 'PPP') : <span>{t.addTransactionForm.pickDueDate}</span>}
                   </Button>
                 } />
                 <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl" align="start">
@@ -303,28 +354,28 @@ export function AddTransactionForm({
           {/* RECURRING OPTIONS */}
           {['INCOME', 'EXPENSE'].includes(type) && (
             <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
-              <Label>Recurring Transaction (Optional)</Label>
+              <Label>{t.addTransactionForm.recurring}</Label>
               <Select name="recurrence" defaultValue="">
                 <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
-                  <SelectValue placeholder="One-time (Not recurring)" />
+                  <SelectValue placeholder={t.addTransactionForm.oneTime} />
                 </SelectTrigger>
                 <SelectContent className="glass-panel border-primary/20 shadow-2xl">
-                  <SelectItem value="">One-time (Not recurring)</SelectItem>
-                  <SelectItem value="MONTHLY">Monthly</SelectItem>
-                  <SelectItem value="YEARLY">Yearly</SelectItem>
-                  <SelectItem value="WEEKLY">Weekly</SelectItem>
+                  <SelectItem value="">{t.addTransactionForm.oneTime}</SelectItem>
+                  <SelectItem value="MONTHLY">{t.addTransactionForm.monthly}</SelectItem>
+                  <SelectItem value="YEARLY">{t.addTransactionForm.yearly}</SelectItem>
+                  <SelectItem value="WEEKLY">{t.addTransactionForm.weekly}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount (৳)</Label>
+            <Label htmlFor="amount">{t.common.amount} (৳)</Label>
             <Input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required className="glass-panel border-primary/20" />
           </div>
 
           <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
-            <Label htmlFor="transaction_date">Date</Label>
+            <Label htmlFor="transaction_date">{t.common.date}</Label>
             <Popover>
               <PopoverTrigger render={
                 <Button
@@ -335,7 +386,7 @@ export function AddTransactionForm({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {transactionDate ? format(transactionDate, 'PPP') : <span>Pick a date</span>}
+                  {transactionDate ? format(transactionDate, 'PPP') : <span>{t.addTransactionForm.pickDate}</span>}
                 </Button>
               } />
               <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl" align="start">
@@ -350,17 +401,17 @@ export function AddTransactionForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="note">Note (Optional)</Label>
-            <Input id="note" name="note" placeholder="Add a short note" className="glass-panel border-primary/20" />
+            <Label htmlFor="note">{t.common.note}</Label>
+            <Input id="note" name="note" placeholder={t.addTransactionForm.addNotePlaceholder} className="glass-panel border-primary/20" />
           </div>
 
           <div className="pt-4 flex gap-3">
             <Button variant="outline" type="button" onClick={() => router.back()} className="flex-1 glass-panel">
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" disabled={isLoading} className="flex-1 shadow-lg hover:shadow-xl transition-all">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Transaction
+              {t.addTransactionForm.saveTransaction}
             </Button>
           </div>
         </CardContent>

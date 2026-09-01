@@ -2,9 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { calculateAccountBalance, Transaction } from '@/lib/calculations';
 import { AddAccountDialog } from '@/components/accounts/add-account-dialog';
 import { AccountList } from '@/components/accounts/account-list';
+import { getDictionary } from '@/i18n/server';
 
 export default async function AccountsPage() {
   const supabase = await createClient();
+  const t = await getDictionary();
 
   const [{ data: accounts }, { data: transactions }] = await Promise.all([
     supabase.from('accounts').select('*').order('name'),
@@ -25,8 +27,8 @@ export default async function AccountsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Accounts</h2>
-          <p className="text-muted-foreground">Manage your wallets and bank accounts.</p>
+          <h2 className="text-3xl font-bold tracking-tight">{t.accounts.title}</h2>
+          <p className="text-muted-foreground">{t.accounts.subtitle}</p>
         </div>
         <AddAccountDialog />
       </div>

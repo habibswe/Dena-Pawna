@@ -7,10 +7,12 @@ import Link from 'next/link';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { EditPersonButton } from '@/components/people/edit-person-button';
+import { getDictionary } from '@/i18n/server';
 
 export default async function PersonDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const t = await getDictionary();
 
   const [{ data: person }, { data: transactions }] = await Promise.all([
     supabase.from('people').select('*').eq('id', id).single(),
@@ -25,7 +27,7 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
   const isSettled = balance === 0;
   const isPositive = balance > 0;
   const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-primary' : 'text-destructive';
-  const statusText = isSettled ? 'Settled ✓' : isPositive ? `${person.name} owes you` : `You owe ${person.name}`;
+  const statusText = isSettled ? `${t.people.netSettled} ✓` : isPositive ? `${person.name} ${t.dashboard.owesYou}` : `${t.dashboard.youOwe} ${person.name}`;
 
   return (
     <div className="space-y-6">
@@ -52,9 +54,9 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
       </Card>
 
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Transaction History</h3>
+        <h3 className="text-xl font-semibold">{t.transactions.title}</h3>
         <Link href={`/transactions/new?person=${person.id}`} className={buttonVariants({ size: "sm" })}>
-          <Plus className="mr-2 h-4 w-4" /> Add Transaction
+          <Plus className="mr-2 h-4 w-4" /> {t.dashboard.addTransaction}
         </Link>
       </div>
 

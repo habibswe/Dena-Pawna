@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient();
@@ -58,7 +59,7 @@ export async function addTransaction(formData: FormData) {
   revalidatePath('/');
   revalidatePath('/people');
   if (person_id) revalidatePath(`/people/${person_id}`);
-  revalidatePath('/transactions');
+  revalidatePath('/transactions', 'page');
   revalidatePath('/accounts');
   
   return { success: true, data };
@@ -70,32 +71,55 @@ export async function getPaginatedTransactions(page: number, filter?: string, mo
   const offset = (page - 1) * PAGE_SIZE;
 
   let query = supabase.from('transactions')
-    .select('*, people(name), categories(name), accounts(name)', { count: 'exact' })
-    .order('transaction_date', { ascending: false });
+    .select('*', { count: 'exact' })
+    .order('transaction_date', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (filter && filter !== 'ALL') {
     query = query.eq('type', filter);
   }
 
   if (search) {
-    // Since people(name) is a left join, searching inside related tables in PostgREST is tricky.
-    // We can search the note and type fields easily. 
-    // To search people.name, we'd ideally need a view or just search the main table for now.
     query = query.or(`note.ilike.%${search}%,type.ilike.%${search}%`);
   }
 
-  if (month) {
-    query = query.gte('transaction_date', `${month}-01`).lte('transaction_date', `${month}-31`);
+  if (month && month !== 'all') {
+    const [yearStr, monthStr] = month.split('-');
+    const monthDate = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1);
+    const startDate = format(startOfMonth(monthDate), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(monthDate), 'yyyy-MM-dd') + 'T23:59:59.999Z';
+    query = query.gte('transaction_date', startDate).lte('transaction_date', endDate);
   }
 
   query = query.range(offset, offset + PAGE_SIZE - 1);
 
-  const { data, count, error } = await query;
-  
-  if (error) {
-    console.error("Error fetching paginated transactions:", error);
+  const [
+    { data: transactionsData, count, error: txError },
+    { data: peopleData },
+    { data: categoriesData },
+    { data: accountsData }
+  ] = await Promise.all([
+    query,
+    supabase.from('people').select('id, name'),
+    supabase.from('categories').select('id, name'),
+    supabase.from('accounts').select('id, name')
+  ]);
+
+  if (txError) {
+    console.error("Error fetching paginated transactions:", txError);
     return { data: [], count: 0 };
   }
+
+  const peopleMap = new Map((peopleData || []).map(p => [p.id, p]));
+  const categoriesMap = new Map((categoriesData || []).map(c => [c.id, c]));
+  const accountsMap = new Map((accountsData || []).map(a => [a.id, a]));
+
+  const data = (transactionsData || []).map(tx => ({
+    ...tx,
+    people: tx.person_id ? peopleMap.get(tx.person_id) : null,
+    categories: tx.category_id ? categoriesMap.get(tx.category_id) : null,
+    accounts: tx.account_id ? accountsMap.get(tx.account_id) : null,
+  }));
 
   return { data: data || [], count: count || 0 };
 }
@@ -156,7 +180,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   revalidatePath('/');
   revalidatePath('/people');
   if (person_id) revalidatePath(`/people/${person_id}`);
-  revalidatePath('/transactions');
+  revalidatePath('/transactions', 'page');
   revalidatePath('/accounts');
   
   return { success: true, data };
@@ -191,7 +215,7 @@ export async function deleteTransaction(id: string) {
   revalidatePath('/');
   revalidatePath('/people');
   if (existingTx?.person_id) revalidatePath(`/people/${existingTx.person_id}`);
-  revalidatePath('/transactions');
+  revalidatePath('/transactions', 'page');
   revalidatePath('/accounts');
 
   return { success: true };

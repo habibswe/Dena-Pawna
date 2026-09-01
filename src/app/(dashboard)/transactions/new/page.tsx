@@ -4,6 +4,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getDictionary } from '@/i18n/server';
 
 export default async function NewTransactionPage({
   searchParams,
@@ -11,6 +12,7 @@ export default async function NewTransactionPage({
   searchParams: Promise<{ person?: string, type?: string }>;
 }) {
   const supabase = await createClient();
+  const t = await getDictionary();
   const { person, type } = await searchParams;
 
   const [
@@ -24,18 +26,18 @@ export default async function NewTransactionPage({
   ]);
 
   const TYPE_DETAILS: Record<string, { title: string; desc: string }> = {
-    EXPENSE: { title: 'Add Expense', desc: 'Record money spent.' },
-    INCOME: { title: 'Add Income', desc: 'Record money received.' },
-    TRANSFER: { title: 'Transfer Money', desc: 'Move funds between your accounts.' },
-    SAVING: { title: 'Add Saving', desc: 'Record money set aside for savings.' },
-    GIVEN: { title: 'Lend Money', desc: 'Record money you gave or lent to someone.' },
-    RECEIVED: { title: 'Repayment Received', desc: 'Record money returned to you.' },
-    BORROWED: { title: 'Borrow Money', desc: 'Record money you borrowed from someone.' },
-    RETURNED: { title: 'Repay Money', desc: 'Record money you returned to someone.' },
+    EXPENSE: { title: t.addTransactionForm.addExpense, desc: t.addTransactionForm.addExpenseDesc },
+    INCOME: { title: t.addTransactionForm.addIncome, desc: t.addTransactionForm.addIncomeDesc },
+    TRANSFER: { title: t.addTransactionForm.transferMoney, desc: t.addTransactionForm.transferMoneyDesc },
+    SAVING: { title: t.addTransactionForm.addSaving, desc: t.addTransactionForm.addSavingDesc },
+    GIVEN: { title: t.addTransactionForm.lendMoney, desc: t.addTransactionForm.lendMoneyDesc },
+    RECEIVED: { title: t.addTransactionForm.repaymentReceived, desc: t.addTransactionForm.repaymentReceivedDesc },
+    BORROWED: { title: t.addTransactionForm.borrowMoney, desc: t.addTransactionForm.borrowMoneyDesc },
+    RETURNED: { title: t.addTransactionForm.repayMoney, desc: t.addTransactionForm.repayMoneyDesc },
   };
 
-  const pageTitle = type ? (TYPE_DETAILS[type]?.title || 'New Transaction') : 'Select Transaction Type';
-  const pageDesc = type ? (TYPE_DETAILS[type]?.desc || 'Record a new financial activity.') : 'Choose the type of activity you want to record.';
+  const pageTitle = type ? (TYPE_DETAILS[type]?.title || t.transactions.addNew) : t.addTransactionForm.title;
+  const pageDesc = type ? (TYPE_DETAILS[type]?.desc || t.addTransactionForm.subtitle) : t.addTransactionForm.subtitle;
   const backLink = person ? `/people/${person}` : (type ? '/transactions/new' : '/transactions');
 
   return (

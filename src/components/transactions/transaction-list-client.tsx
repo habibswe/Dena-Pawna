@@ -12,6 +12,8 @@ import { deleteTransaction } from '@/app/(dashboard)/transactions/actions';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
+import { useTranslation } from '@/i18n/client';
+
 export function TransactionListClient({ 
   initialTransactions, 
   totalCount,
@@ -25,6 +27,7 @@ export function TransactionListClient({
   month?: string;
   search?: string;
 }) {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState(initialTransactions);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -119,7 +122,7 @@ export function TransactionListClient({
   if (!transactions || transactions.length === 0) {
     return (
       <div className="p-12 text-center text-muted-foreground">
-        No transactions found. Start tracking your money today.
+        {t.transactions.noTransactions}
       </div>
     );
   }
@@ -127,15 +130,22 @@ export function TransactionListClient({
   return (
     <div className="divide-y">
       {optimisticTransactions.map(tx => {
-        const isTxPositive = tx.type === 'GIVEN' || tx.type === 'RETURNED';
+        const isTxPositive = ['GIVEN', 'RETURNED', 'INCOME', 'RECEIVED'].includes(tx.type);
         const txColor = isTxPositive ? 'text-primary' : 'text-destructive';
         const sign = isTxPositive ? '+' : '-';
         
+        const displayName = tx.people?.name || tx.categories?.name || tx.accounts?.name || (tx.type ? tx.type.charAt(0) + tx.type.slice(1).toLowerCase() : 'Transaction');
+        
         let actionText = '';
-        if (tx.type === 'GIVEN') actionText = 'You gave';
-        if (tx.type === 'RECEIVED') actionText = `${tx.people?.name || 'Someone'} paid`;
-        if (tx.type === 'BORROWED') actionText = 'You borrowed';
-        if (tx.type === 'RETURNED') actionText = 'You returned';
+        if (tx.type === 'GIVEN') actionText = t.dashboard.given;
+        else if (tx.type === 'RECEIVED') actionText = t.dashboard.received;
+        else if (tx.type === 'BORROWED') actionText = t.dashboard.borrowed;
+        else if (tx.type === 'RETURNED') actionText = t.dashboard.returned;
+        else if (tx.type === 'INCOME') actionText = tx.categories?.name ? `${t.dashboard.income} (${tx.categories.name})` : t.dashboard.income;
+        else if (tx.type === 'EXPENSE') actionText = tx.categories?.name ? `${t.dashboard.expenses} (${tx.categories.name})` : t.dashboard.expenses;
+        else if (tx.type === 'TRANSFER') actionText = 'Transfer';
+        else if (tx.type === 'SAVING') actionText = t.dashboard.saved;
+        else actionText = tx.type;
 
         const isOverdue = tx.due_date ? new Date(tx.due_date) < new Date(new Date().setHours(0, 0, 0, 0)) : false;
 
@@ -144,11 +154,11 @@ export function TransactionListClient({
             <div className="flex items-center gap-4 sm:w-[40%]">
               <Avatar className="h-10 w-10 border border-primary/20 shrink-0">
                 <AvatarFallback className="bg-primary/5 text-primary text-sm font-semibold">
-                  {(tx.people?.name || '??').substring(0, 2).toUpperCase()}
+                  {(displayName || '??').substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-1 min-w-0 pr-4">
-                <p className="font-semibold leading-none truncate">{tx.people?.name || 'Unknown'}</p>
+                <p className="font-semibold leading-none truncate">{displayName}</p>
                 <p className="text-sm text-muted-foreground truncate">
                   {actionText} • {format(new Date(tx.transaction_date), 'dd MMM yyyy')}
                 </p>
@@ -188,11 +198,11 @@ export function TransactionListClient({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => router.push(`/transactions/${tx.id}/edit`)}>
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      {t.common.edit}
                     </DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(tx.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      {t.common.delete}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -212,8 +222,8 @@ export function TransactionListClient({
         isOpen={!!deletingId}
         onClose={() => !isDeleting && setDeletingId(null)}
         onConfirm={handleDelete}
-        title="Delete Transaction?"
-        description="Are you sure you want to delete this transaction? This action cannot be undone."
+        title={t.transactions.deleteTitle}
+        description={t.transactions.deleteDesc}
         isDeleting={isDeleting}
       />
     </div>

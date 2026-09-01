@@ -18,7 +18,10 @@ import { toast } from 'sonner';
 import { addPerson } from '@/app/(dashboard)/people/actions';
 import { ExpandableFab } from '@/components/ui/expandable-fab';
 
+import { useTranslation } from '@/i18n/client';
+
 export function AddPersonDialog({ children, onSuccess }: { children?: React.ReactElement, onSuccess?: (person: any) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,41 +45,41 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
 
   return (
     <>
-      {!children && <ExpandableFab onClick={() => setOpen(true)} label="Add Person" />}
+      {!children && <ExpandableFab onClick={() => setOpen(true)} label={t.people.addPerson} />}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={
           children || (
             <Button className="hidden md:flex gap-2">
-              <Plus className="h-4 w-4" /> Add Person
+              <Plus className="h-4 w-4" /> {t.people.addPerson}
             </Button>
           )
         } />
       <DialogContent className="sm:max-w-[425px] glass-panel border-primary/20">
         <DialogHeader>
-          <DialogTitle>Add Person</DialogTitle>
+          <DialogTitle>{t.people.addPerson}</DialogTitle>
           <DialogDescription>
-            Add someone to start tracking money with them.
+            {t.people.addPersonDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" name="name" placeholder="e.g. Rahim" required />
+              <Label htmlFor="name">{t.people.fullName}</Label>
+              <Input id="name" name="name" placeholder={t.people.fullNamePlaceholder} required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone (Optional)</Label>
+              <Label htmlFor="phone">{t.people.phoneOptional}</Label>
               <Input id="phone" name="phone" placeholder="+880..." />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email (Optional)</Label>
+              <Label htmlFor="email">{t.people.emailOptional}</Label>
               <Input id="email" name="email" type="email" placeholder="rahim@example.com" />
             </div>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Person
+              {t.people.savePerson}
             </Button>
           </DialogFooter>
         </form>

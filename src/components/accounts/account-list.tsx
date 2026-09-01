@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { EditAccountDialog } from './edit-account-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useTranslation } from '@/i18n/client';
 
 interface Account {
   id: string;
@@ -19,6 +20,7 @@ interface Account {
 }
 
 export function AccountList({ accounts: initialAccounts }: { accounts: Account[] }) {
+  const { t } = useTranslation();
   const [accounts, setAccounts] = useState(initialAccounts);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -90,11 +92,11 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setEditingAccount(acc)}>
                   <Edit className="mr-2 h-4 w-4" />
-                  Edit
+                  {t.common.edit}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(acc.id)}>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t.common.delete}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -117,7 +119,7 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
           onOpenChange={(open) => {
             if (!open) {
               setEditingAccount(null);
-              router.refresh(); // Refresh to get updated accounts from server
+              router.refresh();
             }
           }} 
         />
@@ -127,8 +129,8 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
         isOpen={!!deletingId}
         onClose={() => !isDeleting && setDeletingId(null)}
         onConfirm={handleDelete}
-        title="Delete Account?"
-        description="Are you sure you want to delete this account? It will be removed from all linked transactions."
+        title={t.accounts.deleteTitle}
+        description={t.accounts.deleteDesc}
         isDeleting={isDeleting}
       />
     </div>

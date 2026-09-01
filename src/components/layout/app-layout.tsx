@@ -86,7 +86,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { label: t.nav.categories, href: '/categories', icon: PieChart },
     { label: t.nav.budgets, href: '/budgets', icon: Target },
     { label: t.nav.people, href: '/people', icon: Users },
-    { label: 'Add Transaction', mobileLabel: 'New', href: '/transactions/new', icon: Plus },
+    { label: t.dashboard.addTransaction, mobileLabel: locale === 'bn' ? 'নতুন' : 'New', href: '/transactions/new', icon: Plus },
     { label: t.nav.transactions, href: '/transactions', icon: ArrowRightLeft },
     { label: t.nav.settings, href: '/settings', icon: Settings },
   ];

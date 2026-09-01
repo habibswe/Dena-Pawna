@@ -24,10 +24,10 @@ export default async function AdminTransactionsPage({
   const PAGE_SIZE = 20;
   const offset = (page - 1) * PAGE_SIZE;
 
-  let query = supabase.from('transactions').select('*, people!inner(name)', { count: 'exact' }).order('transaction_date', { ascending: false });
+  let query = supabase.from('transactions').select('*, people(name), categories(name), accounts(name)', { count: 'exact' }).order('transaction_date', { ascending: false });
 
   if (search) {
-    query = query.or(`people.name.ilike.%${search}%,type.ilike.%${search}%,note.ilike.%${search}%`);
+    query = query.or(`type.ilike.%${search}%,note.ilike.%${search}%`);
   }
 
   if (from && to) {
@@ -83,7 +83,7 @@ export default async function AdminTransactionsPage({
                       <td className="px-6 py-4">
                         {tx.transaction_date ? format(new Date(tx.transaction_date), 'dd MMM yyyy') : 'Unknown'}
                       </td>
-                      <td className="px-6 py-4 font-medium">{tx.people?.name || 'Unknown'}</td>
+                      <td className="px-6 py-4 font-medium">{tx.people?.name || tx.categories?.name || tx.accounts?.name || 'General'}</td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold">
                           {tx.type}

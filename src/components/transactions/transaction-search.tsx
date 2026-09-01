@@ -4,11 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useState, useEffect } from 'react';
+import { useTranslation } from '@/i18n/client';
 
-export function TransactionSearch({ placeholder = 'Search transactions...' }: { placeholder?: string }) {
+export function TransactionSearch({ placeholder }: { placeholder?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const currentSearch = searchParams.get('search') || '';
   
   const [value, setValue] = useState(currentSearch);
@@ -44,7 +46,7 @@ export function TransactionSearch({ placeholder = 'Search transactions...' }: { 
       </div>
       <Input
         type="search"
-        placeholder={placeholder}
+        placeholder={placeholder || t.transactions.searchPlaceholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className="pl-9 glass-panel w-full"

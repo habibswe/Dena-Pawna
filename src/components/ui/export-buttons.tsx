@@ -40,7 +40,7 @@ export function ExportButtons({ transactions, people }: { transactions: any[], p
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm", className: "glass-panel text-xs" })} disabled={isExporting}>
+      <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "default", className: "glass-panel h-10 text-sm font-medium border-primary/20" })} disabled={isExporting}>
         {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
         Export <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
       </DropdownMenuTrigger>

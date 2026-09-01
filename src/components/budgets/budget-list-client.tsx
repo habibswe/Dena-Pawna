@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 import { EditBudgetDialog } from './edit-budget-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
+import { useTranslation } from '@/i18n/client';
+
 export function BudgetListClient({ 
   initialBudgets, 
   categories, 
@@ -22,6 +24,7 @@ export function BudgetListClient({
   categories: any[],
   categorySpent: Record<string, number>
 }) {
+  const { t } = useTranslation();
   const [budgets, setBudgets] = useState(initialBudgets);
   const [editingBudget, setEditingBudget] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -91,11 +94,11 @@ export function BudgetListClient({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setEditingBudget(budgetWithCategory)}>
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      {t.common.edit}
                     </DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeletingId(budget.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      {t.common.delete}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -104,11 +107,11 @@ export function BudgetListClient({
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
                 <div className="space-y-1">
-                  <p className="text-muted-foreground">Budget</p>
+                  <p className="text-muted-foreground">{t.budgets.title}</p>
                   <p className="font-medium">৳{limit.toLocaleString()}</p>
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="text-muted-foreground">Spent</p>
+                  <p className="text-muted-foreground">{t.budgets.spent}</p>
                   <p className={`font-bold ${isExceeded ? 'text-destructive' : 'text-primary'}`}>৳{spent.toLocaleString()}</p>
                 </div>
               </div>
@@ -124,8 +127,8 @@ export function BudgetListClient({
                   <span>{percentage}% used</span>
                   <span>
                     {isExceeded 
-                      ? `Exceeded by ৳${Math.abs(remaining).toLocaleString()}` 
-                      : `৳${remaining.toLocaleString()} left`
+                      ? `${t.budgets.overBudget}: ৳${Math.abs(remaining).toLocaleString()}` 
+                      : `৳${remaining.toLocaleString()} ${t.budgets.remaining}`
                     }
                   </span>
                 </div>
@@ -152,8 +155,8 @@ export function BudgetListClient({
         isOpen={!!deletingId}
         onClose={() => !isDeleting && setDeletingId(null)}
         onConfirm={handleDelete}
-        title="Delete Budget?"
-        description="Are you sure you want to delete this budget limit?"
+        title={t.budgets.deleteTitle}
+        description={t.budgets.deleteDesc}
         isDeleting={isDeleting}
       />
     </>

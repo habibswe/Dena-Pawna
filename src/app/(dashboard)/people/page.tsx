@@ -2,9 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { calculateBalance, Transaction } from '@/lib/calculations';
 import { AddPersonDialog } from '@/components/people/add-person-dialog';
 import { PeopleListClient } from '@/components/people/people-list-client';
+import { getDictionary } from '@/i18n/server';
 
 export default async function PeoplePage() {
   const supabase = await createClient();
+  const t = await getDictionary();
 
   const [{ data: people }, { data: transactions }] = await Promise.all([
     supabase.from('people').select('*').order('name'),
@@ -26,8 +28,8 @@ export default async function PeoplePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">People</h2>
-          <p className="text-muted-foreground">Manage your contacts and their balances.</p>
+          <h2 className="text-3xl font-bold tracking-tight">{t.people.title}</h2>
+          <p className="text-muted-foreground">{t.people.subtitle}</p>
         </div>
         <AddPersonDialog />
       </div>

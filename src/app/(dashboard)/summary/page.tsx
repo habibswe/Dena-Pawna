@@ -4,12 +4,14 @@ import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, CreditCard } from 'lucide-react';
 import { DateFilter } from '@/components/ui/date-filter';
 import { ExportButtons } from '@/components/ui/export-buttons';
+import { getDictionary } from '@/i18n/server';
 
 export default async function SummaryPage(props: { searchParams: Promise<{ filter?: string, from?: string, to?: string }> }) {
   const searchParams = await props.searchParams;
   const fromDate = searchParams.from;
   const toDate = searchParams.to;
   const supabase = await createClient();
+  const t = await getDictionary();
 
   let query = supabase.from('transactions').select('*');
   let titleText = '';
@@ -29,7 +31,7 @@ export default async function SummaryPage(props: { searchParams: Promise<{ filte
     subtitleText = 'Total transaction volume up to selected date';
   } else {
     // Default to lifetime if nothing is set
-    titleText = 'Lifetime financial summary';
+    titleText = t.dashboard.debtSubtitle;
     subtitleText = 'Total transaction volume across all time';
   }
 
@@ -57,7 +59,7 @@ export default async function SummaryPage(props: { searchParams: Promise<{ filte
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Summary</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t.summary.title}</h2>
           <p className="text-muted-foreground">{titleText}</p>
         </div>
         <div className="flex flex-col sm:flex-row items-end gap-4">
@@ -71,52 +73,48 @@ export default async function SummaryPage(props: { searchParams: Promise<{ filte
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="glass-panel border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Money Given (Lent)</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.summary.moneyGiven}</CardTitle>
             <ArrowUpRight className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary">৳{given.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total money you lent this month</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Money Received (Repayments)</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.summary.moneyReceived}</CardTitle>
             <ArrowDownLeft className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary">৳{received.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total money paid back to you</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel border-destructive/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Money Borrowed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.summary.moneyBorrowed}</CardTitle>
             <ArrowDownLeft className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-destructive">৳{borrowed.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total money you borrowed this month</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel border-destructive/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Money Returned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.summary.moneyReturned}</CardTitle>
             <ArrowUpRight className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-destructive">৳{returned.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total debt you paid off this month</p>
           </CardContent>
         </Card>
       </div>
       
       <Card className="glass-panel">
         <CardHeader>
-          <CardTitle>Total Volume</CardTitle>
+          <CardTitle>{t.summary.totalVolume}</CardTitle>
         </CardHeader>
         <CardContent>
            <div className="text-4xl font-bold text-foreground">

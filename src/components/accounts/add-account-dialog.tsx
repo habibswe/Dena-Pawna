@@ -11,7 +11,10 @@ import { addAccount } from '@/app/(dashboard)/accounts/actions';
 import { Loader2, Plus } from 'lucide-react';
 import { ExpandableFab } from '@/components/ui/expandable-fab';
 
+import { useTranslation } from '@/i18n/client';
+
 export function AddAccountDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,35 +41,35 @@ export function AddAccountDialog() {
 
   return (
     <>
-      <ExpandableFab onClick={() => setOpen(true)} label="Add Account" />
+      <ExpandableFab onClick={() => setOpen(true)} label={t.accounts.addAccount} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={
           <Button className="hidden md:flex gap-2">
             <Plus className="h-4 w-4" />
-            Add Account
+            {t.accounts.addAccount}
           </Button>
         } />
         <DialogContent className="sm:max-w-[425px] glass-panel">
         <DialogHeader>
-          <DialogTitle>Add Account</DialogTitle>
+          <DialogTitle>{t.accounts.addAccount}</DialogTitle>
           <DialogDescription>
-            Create a new account or wallet to track your balances.
+            {t.accounts.addAccountDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Account Name</Label>
-            <Input id="name" name="name" placeholder="e.g., BRAC Bank, Personal bKash" required />
+            <Label htmlFor="name">{t.accounts.accountName}</Label>
+            <Input id="name" name="name" placeholder={t.accounts.accountNamePlaceholder} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type">Account Type</Label>
+            <Label htmlFor="type">{t.accounts.accountType}</Label>
             <Select name="type" required defaultValue="BANK">
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CASH">Cash</SelectItem>
-                <SelectItem value="BANK">Bank</SelectItem>
+                <SelectItem value="CASH">{t.accounts.cash}</SelectItem>
+                <SelectItem value="BANK">{t.accounts.bank}</SelectItem>
                 <SelectItem value="BKASH">bKash</SelectItem>
                 <SelectItem value="NAGAD">Nagad</SelectItem>
                 <SelectItem value="CARD">Credit/Debit Card</SelectItem>
@@ -76,11 +79,11 @@ export function AddAccountDialog() {
           </div>
           <div className="pt-4 flex justify-end space-x-2">
             <Button variant="outline" type="button" onClick={() => setOpen(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Account
+              {t.accounts.saveAccount}
             </Button>
           </div>
         </form>

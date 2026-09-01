@@ -11,6 +11,8 @@ import { updateCategory } from '@/app/(dashboard)/categories/actions';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
 
+import { useTranslation } from '@/i18n/client';
+
 export function EditCategoryDialog({ 
   category, 
   open, 
@@ -21,6 +23,7 @@ export function EditCategoryDialog({
   open: boolean; 
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,40 +51,35 @@ export function EditCategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] glass-panel">
         <DialogHeader>
-          <DialogTitle>Edit Category</DialogTitle>
+          <DialogTitle>{t.common.edit} {t.categories.title}</DialogTitle>
           <DialogDescription>
-            Update the details of this category.
+            {t.categories.addCategoryDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Category Name</Label>
-            <Input id="name" name="name" defaultValue={category.name} placeholder="e.g., Food, Salary, Rent" required />
+            <Label htmlFor="name">{t.categories.categoryName}</Label>
+            <Input id="name" name="name" defaultValue={category.name} placeholder={t.categories.categoryNamePlaceholder} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type">{t.categories.categoryType}</Label>
             <Select name="type" required defaultValue={category.type}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="EXPENSE">Expense</SelectItem>
-                <SelectItem value="INCOME">Income</SelectItem>
+                <SelectItem value="EXPENSE">{t.dashboard.expenses}</SelectItem>
+                <SelectItem value="INCOME">{t.dashboard.income}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="icon">Icon Name (Optional)</Label>
-            <Input id="icon" name="icon" defaultValue={category.icon || ''} placeholder="e.g., Coffee, ShoppingCart" />
-            <p className="text-xs text-muted-foreground">Uses Lucide-react icon names.</p>
-          </div>
           <div className="pt-4 flex justify-end space-x-2">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update Category
+              {t.common.save}
             </Button>
           </div>
         </form>

@@ -113,8 +113,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className={`${mobileView !== 'menu' ? 'hidden md:block' : 'block'}`}>
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground mt-1">Manage your account settings and preferences.</p>
+        <h2 className="text-3xl font-bold tracking-tight">{t.settings.title}</h2>
+        <p className="text-muted-foreground mt-1">{t.settings.subtitle}</p>
       </div>
 
       {/* Mobile Menu (Hidden on Desktop, Hidden if viewing a specific section on mobile) */}
@@ -127,7 +127,7 @@ export default function SettingsPage() {
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
             <User className="h-5 w-5 text-primary" />
           </div>
-          Profile details
+          {t.settings.profile}
         </Button>
         <Button 
           variant="outline" 
@@ -137,7 +137,7 @@ export default function SettingsPage() {
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
             <Settings2 className="h-5 w-5 text-primary" />
           </div>
-          Change Password
+          {t.settings.password}
         </Button>
         <Button 
           variant="outline" 
@@ -147,7 +147,7 @@ export default function SettingsPage() {
           <div className="bg-primary/10 p-2 rounded-lg mr-4">
             <Settings2 className="h-5 w-5 text-primary" />
           </div>
-          Preferences
+          {t.settings.preferences}
         </Button>
         <Button 
           variant="outline" 
@@ -157,7 +157,7 @@ export default function SettingsPage() {
           <div className="bg-destructive/10 p-2 rounded-lg mr-4">
             <LogOut className="h-5 w-5 text-destructive" />
           </div>
-          Sign Out
+          {t.settings.logout}
         </Button>
       </div>
 
@@ -168,64 +168,64 @@ export default function SettingsPage() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
           <div>
-            <CardTitle className="flex items-center gap-2"><User className="h-5 w-5 text-primary" /> Profile</CardTitle>
-            <CardDescription>Your personal information</CardDescription>
+            <CardTitle className="flex items-center gap-2"><User className="h-5 w-5 text-primary" /> {t.settings.profile}</CardTitle>
+            <CardDescription>{t.settings.profileDesc}</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>{t.settings.email}</Label>
             <Input disabled value={email} />
-            <p className="text-xs text-muted-foreground">Your email is used for login and cannot be changed.</p>
+            <p className="text-xs text-muted-foreground">{t.settings.emailDesc}</p>
           </div>
           <div className="space-y-2">
-            <Label>Full Name</Label>
+            <Label>{t.settings.fullName}</Label>
             <Input 
-              placeholder="Enter your full name" 
+              placeholder={t.settings.fullNamePlaceholder} 
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
           </div>
           <Button onClick={handleSaveProfile} disabled={isSaving}>
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Save Changes
+            {t.settings.saveChanges}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Password Section (Split from Profile on Mobile, combined on Desktop) */}
+      {/* Password Section */}
       <Card className={`glass-panel ${mobileView === 'password' ? 'block' : 'hidden md:block'}`}>
         <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-6">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileView('menu')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
           <div>
-            <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" /> Change Password</CardTitle>
-            <CardDescription>Update your security credentials</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" /> {t.settings.password}</CardTitle>
+            <CardDescription>{t.settings.passwordDesc}</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>New Password</Label>
+            <Label>{t.settings.newPassword}</Label>
             <Input 
               type="password" 
-              placeholder="New password (min 6 chars)" 
+              placeholder={t.settings.newPasswordPlaceholder} 
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label>Confirm Password</Label>
+            <Label>{t.settings.confirmPassword}</Label>
             <Input 
               type="password" 
-              placeholder="Confirm new password" 
+              placeholder={t.settings.confirmPasswordPlaceholder} 
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
           <Button variant="outline" onClick={handleChangePassword} disabled={isChangingPassword || !newPassword}>
             {isChangingPassword ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Update Password
+            {t.settings.updatePassword}
           </Button>
         </CardContent>
       </Card>
@@ -237,19 +237,18 @@ export default function SettingsPage() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
           <div>
-            <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" /> Preferences</CardTitle>
-            <CardDescription>Customize your experience</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" /> {t.settings.preferences}</CardTitle>
+            <CardDescription>{t.settings.preferencesDesc}</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-3">
-            <Label>Appearance</Label>
+            <Label>{t.settings.appearance}</Label>
             
             <div 
               className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full max-w-xs cursor-pointer border border-border"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
-              {/* Sliding Pill Background */}
               <div 
                 className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
                   theme === 'dark' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
@@ -257,24 +256,23 @@ export default function SettingsPage() {
               />
               
               <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme !== 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                <Sun className="h-4 w-4 mr-2" /> Light
+                <Sun className="h-4 w-4 mr-2" /> {t.settings.light}
               </div>
               <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme === 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                <Moon className="h-4 w-4 mr-2" /> Dark
+                <Moon className="h-4 w-4 mr-2" /> {t.settings.dark}
               </div>
             </div>
             
-            <p className="text-xs text-muted-foreground">Tap or swipe to switch between light and dark mode.</p>
+            <p className="text-xs text-muted-foreground">{t.settings.appearanceDesc}</p>
           </div>
 
           <div className="space-y-3 pt-4 border-t border-border">
-            <Label>Language / ভাষা</Label>
+            <Label>{t.settings.language}</Label>
             
             <div 
               className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full max-w-xs cursor-pointer border border-border"
               onClick={() => setLocale(locale === 'en' ? 'bn' : 'en')}
             >
-              {/* Sliding Pill Background */}
               <div 
                 className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
                   locale === 'bn' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
@@ -289,26 +287,26 @@ export default function SettingsPage() {
               </div>
             </div>
             
-            <p className="text-xs text-muted-foreground">Select your preferred language.</p>
+            <p className="text-xs text-muted-foreground">{t.settings.languageDesc}</p>
           </div>
 
           <div className="space-y-2 pt-4 border-t border-border">
-            <Label>Currency</Label>
+            <Label>{t.settings.currency}</Label>
             <Input disabled value="Bangladeshi Taka (BDT / ৳)" />
-            <p className="text-xs text-muted-foreground">Multi-currency support coming soon.</p>
+            <p className="text-xs text-muted-foreground">{t.settings.currencyDesc}</p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Logout Section (Desktop Only) */}
+      {/* Logout Section */}
       <Card className="glass-panel border-destructive/20 hidden md:block">
         <CardHeader className="pb-6">
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>Account security and management</CardDescription>
+          <CardTitle className="text-destructive">{t.settings.dangerZone}</CardTitle>
+          <CardDescription>{t.settings.dangerZoneDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="destructive" onClick={() => setIsLogoutOpen(true)}>
-            <LogOut className="mr-2 h-4 w-4" /> Sign Out
+            <LogOut className="mr-2 h-4 w-4" /> {t.settings.logout}
           </Button>
         </CardContent>
       </Card>
@@ -317,10 +315,10 @@ export default function SettingsPage() {
         isOpen={isLogoutOpen}
         onClose={() => !isLoggingOut && setIsLogoutOpen(false)}
         onConfirm={handleLogout}
-        title="Sign Out?"
-        description="Are you sure you want to sign out of your account?"
+        title={t.settings.logoutConfirmTitle}
+        description={t.settings.logoutConfirmDesc}
         isDeleting={isLoggingOut}
-        confirmText="Sign Out"
+        confirmText={t.settings.logout}
       />
     </div>
   );

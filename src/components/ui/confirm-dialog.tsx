@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { useTranslation } from '@/i18n/client';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -13,9 +14,12 @@ interface ConfirmDialogProps {
   description: string;
   isDeleting?: boolean;
   confirmText?: string;
+  cancelText?: string;
 }
 
-export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, isDeleting = false, confirmText = "Delete" }: ConfirmDialogProps) {
+export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, isDeleting = false, confirmText, cancelText }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent showCloseButton={false} className="glass-panel border-destructive/20 sm:max-w-[400px]">
@@ -32,11 +36,11 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, 
         </DialogHeader>
         <div className="mt-6 flex justify-end gap-3 w-full">
           <Button variant="outline" onClick={onClose} disabled={isDeleting} className="w-auto">
-            Cancel
+            {cancelText || t.common.cancel}
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isDeleting} className="w-auto">
             {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {confirmText}
+            {confirmText || t.common.delete}
           </Button>
         </div>
       </DialogContent>
