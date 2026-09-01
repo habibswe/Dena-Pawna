@@ -16,7 +16,7 @@ import { Languages } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [email, setEmail] = useState('');
@@ -284,18 +284,18 @@ export default function SettingsPage() {
             
             <div 
               className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full max-w-xs cursor-pointer border border-border"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             >
               <div 
                 className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                  theme === 'dark' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                  resolvedTheme === 'dark' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
                 }`} 
               />
               
-              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme !== 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${resolvedTheme !== 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <Sun className="h-4 w-4 mr-2" /> {t.settings.light}
               </div>
-              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${theme === 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${resolvedTheme === 'dark' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <Moon className="h-4 w-4 mr-2" /> {t.settings.dark}
               </div>
             </div>

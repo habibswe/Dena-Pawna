@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import en from './dictionaries/en.json';
 import bn from './dictionaries/bn.json';
 
@@ -26,11 +27,13 @@ export function LanguageProvider({
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
+  const router = useRouter();
+
   const setLocale = (newLocale: Locale) => {
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
     setLocaleState(newLocale);
-    // Reload to ensure all Server Components re-read the cookie and update
-    window.location.reload(); 
+    // Refresh to ensure all Server Components re-read the cookie and update without a full reload
+    router.refresh(); 
   };
 
   const t = dictionaries[locale] || en;

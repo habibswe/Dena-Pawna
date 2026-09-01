@@ -99,7 +99,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="bg-primary/10 p-2 rounded-xl glass-panel">
             <Activity className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-primary">Dena Pawna</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-primary">{t.common.appTitle}</h1>
         </Link>
         <nav className="flex-1 space-y-2 p-4">
           {navItems.map((item) => {
@@ -143,7 +143,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="bg-primary/10 p-2 rounded-xl glass-panel">
             <Activity className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
+          <h1 className="text-xl font-bold tracking-tight text-primary">{t.common.appTitle}</h1>
         </Link>
         <div className="flex items-center gap-2">
           <NotificationBell />

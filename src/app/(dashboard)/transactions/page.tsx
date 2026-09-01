@@ -11,7 +11,7 @@ import { TransactionListClient } from '@/components/transactions/transaction-lis
 import { TransactionFilterDropdown } from '@/components/transactions/transaction-filter-dropdown';
 import { TransactionSearch } from '@/components/transactions/transaction-search';
 import { Suspense } from 'react';
-import DashboardLoading from '@/components/ui/dashboard-loading';
+import { SkeletonHeader, SkeletonTransactions } from '@/components/ui/skeletons';
 import { ExpandableFab } from '@/components/ui/expandable-fab';
 import { getDictionary } from '@/i18n/server';
 
@@ -141,7 +141,16 @@ export default async function TransactionsPage({
   const suspenseKey = JSON.stringify(searchParamsResolved);
   
   return (
-    <Suspense key={suspenseKey} fallback={<DashboardLoading />}>
+    <Suspense key={suspenseKey} fallback={
+      <div className="space-y-6 w-full">
+        <SkeletonHeader title subtitle button />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="h-10 flex-1 bg-muted/50 rounded-md animate-pulse" />
+          <div className="hidden md:block h-10 w-28 bg-muted/50 rounded-md animate-pulse" />
+        </div>
+        <SkeletonTransactions />
+      </div>
+    }>
       <TransactionsContent searchParamsResolved={searchParamsResolved} />
     </Suspense>
   );

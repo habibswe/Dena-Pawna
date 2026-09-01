@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/client';
 
 export function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
   const [isFading, setIsFading] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if running as a PWA (standalone mode)
@@ -20,21 +22,16 @@ export function SplashScreen() {
       return;
     }
 
-    // Start fade out after 1.5s
-    const fadeTimer = setTimeout(() => {
+    // Hide splash screen after minimum display time
+    const timer = setTimeout(() => {
       setIsFading(true);
-    }, 1500);
+      setTimeout(() => {
+        setIsVisible(false);
+        sessionStorage.setItem('hasSeenSplash', 'true');
+      }, 500); // Wait for fade out animation
+    }, 2000); // Show for 2 seconds
 
-    // Completely remove after 2.2s
-    const removeTimer = setTimeout(() => {
-      setIsVisible(false);
-      sessionStorage.setItem('hasSeenSplash', 'true');
-    }, 2200);
-
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(removeTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   if (!isVisible) return null;
@@ -42,8 +39,8 @@ export function SplashScreen() {
   return (
     <div 
       className={cn(
-        "splash-screen fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-opacity duration-700 ease-in-out",
-        isFading ? "opacity-0 pointer-events-none" : "opacity-100"
+        "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background transition-opacity duration-500",
+        isFading ? "opacity-0" : "opacity-100"
       )}
     >
       <style dangerouslySetInnerHTML={{__html: `
@@ -64,7 +61,7 @@ export function SplashScreen() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary drop-shadow-md">
-            Dena Pawna
+            {t.common.appTitle}
           </h1>
           <p className="text-muted-foreground font-medium animate-pulse tracking-wide">
             Your Premium Ledger

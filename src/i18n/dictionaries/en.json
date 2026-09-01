@@ -34,7 +34,15 @@
     "signInBtn": "Sign In",
     "signUpBtn": "Sign Up",
     "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
+    "hasAccount": "Already have an account?",
+    "forgotPasswordTitle": "Forgot Password?",
+    "forgotPasswordSubtitle": "Enter your email to receive a password reset link",
+    "forgotPasswordLink": "Forgot password?",
+    "sendResetLinkBtn": "Send Reset Link",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordSubtitle": "Enter your new password below",
+    "updatePasswordBtn": "Update Password",
+    "backToLoginBtn": "Back to login"
   },
   "dashboard": {
     "title": "Overview",
@@ -233,6 +241,7 @@
     "addNotePlaceholder": "Add a short note"
   },
   "common": {
+    "appTitle": "Dena Pawna",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -249,5 +258,18 @@
     "addNew": "+ Add New",
     "confirmDelete": "Are you sure?",
     "confirmDeleteDesc": "This action cannot be undone."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "clearAll": "Clear All",
+    "allCaughtUp": "You're all caught up!",
+    "paymentExpected": "Payment Expected",
+    "paymentDue": "Payment Due",
+    "receiveMessage": "You are expected to receive ৳{amount} from {name}.",
+    "returnMessage": "You are expected to return ৳{amount} to {name}.",
+    "notificationCleared": "Notification cleared!",
+    "allCleared": "All notifications cleared!",
+    "pendingReminders": "You have {count} pending reminder(s)!",
+    "checkBell": "Check the bell icon for details."
   }
 }

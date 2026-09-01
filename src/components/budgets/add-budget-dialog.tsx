@@ -78,7 +78,9 @@ export function AddBudgetDialog({
             <Label>{t.categories.title}</Label>
             <Select value={categoryId} onValueChange={(val) => setCategoryId(val || '')} required>
               <SelectTrigger>
-                <SelectValue placeholder={t.budgets.selectCategory} />
+                <SelectValue placeholder={t.budgets.selectCategory}>
+                  {categoryId ? categories.find(c => c.id === categoryId)?.name : t.budgets.selectCategory}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {categories.map(cat => (

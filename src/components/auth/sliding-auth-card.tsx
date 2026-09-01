@@ -92,15 +92,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-[100dvh] bg-transparent relative z-10 items-center justify-center p-4 overflow-hidden">
       
-      {/* Mobile Top Header */}
-      <header className="md:hidden absolute top-0 left-0 right-0 h-14 border-b flex items-center justify-between px-4 glass-panel z-20 bg-card">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 p-1.5 rounded-xl glass-panel">
-            <Activity className="w-5 h-5 text-primary" />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-primary">Dena Pawna</h1>
-        </div>
-      </header>
+      {/* Mobile Top Header Removed - Using AuthLayout instead */}
 
       {/* Main Container - The Glass Card */}
       <div className="relative w-full max-w-4xl h-[600px] glass-panel border-primary/20 bg-background/60 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.1)] rounded-[2rem] overflow-hidden hidden md:block">
@@ -122,7 +114,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
               <Input id="login-password" name="password" type="password" required className="bg-background/50 border-primary/10" />
               <div className="flex justify-end pt-1">
                 <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
-                  Forgot password?
+                  {t.auth.forgotPasswordLink}
                 </Link>
               </div>
             </div>
@@ -257,7 +249,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
                 <Input id="mobile-login-password" name="password" type="password" required className="bg-background/50 border-primary/10" />
                 <div className="flex justify-end pt-1">
                   <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
-                    Forgot password?
+                    {t.auth.forgotPasswordLink}
                   </Link>
                 </div>
               </div>

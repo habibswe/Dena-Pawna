@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowRight, Wallet, Users, ShieldCheck, Activity } from 'lucide-react';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { LanguageToggle } from '@/components/ui/language-toggle';
 import { getDictionary } from '@/i18n/server';
 
 export default async function LandingPage() {
@@ -20,6 +21,10 @@ export default async function LandingPage() {
             <span className="font-extrabold text-xl tracking-tight text-primary">{t.landing.title}</span>
           </Link>
           <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-2 mr-1 md:mr-2">
+              <LanguageToggle />
+              <ModeToggle />
+            </div>
             <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors hidden md:block">
               {t.landing.login}
             </Link>

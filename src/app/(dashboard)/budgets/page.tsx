@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { AddBudgetDialog } from '@/components/budgets/add-budget-dialog';
 import { BudgetListClient } from '@/components/budgets/budget-list-client';
 import { Suspense } from 'react';
-import DashboardLoading from '@/components/ui/dashboard-loading';
+import { SkeletonHeader, SkeletonCards } from '@/components/ui/skeletons';
 import { getDictionary } from '@/i18n/server';
 
 async function BudgetsContent({ month }: { month?: string }) {
@@ -75,6 +75,7 @@ async function BudgetsContent({ month }: { month?: string }) {
   );
 }
 
+
 export default async function BudgetsPage({
   searchParams,
 }: {
@@ -83,7 +84,15 @@ export default async function BudgetsPage({
   const { month } = await searchParams;
   
   return (
-    <Suspense key={month || 'default'} fallback={<DashboardLoading />}>
+    <Suspense 
+      key={month || 'default'} 
+      fallback={
+        <div className="space-y-6 w-full">
+          <SkeletonHeader title subtitle button={true} />
+          <SkeletonCards count={6} />
+        </div>
+      }
+    >
       <BudgetsContent month={month} />
     </Suspense>
   );

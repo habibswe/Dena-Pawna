@@ -73,7 +73,7 @@ export function NotificationBell({ className }: { className?: string }) {
     localStorage.setItem('dismissed_notifications', JSON.stringify(newDismissed));
     
     setNotifications(prev => prev.filter(n => n.id !== id));
-    toast.success("Notification cleared!");
+    toast.success(t.notifications.notificationCleared);
   };
 
   const handleClearAll = (e: React.MouseEvent) => {
@@ -85,7 +85,7 @@ export function NotificationBell({ className }: { className?: string }) {
     localStorage.setItem('dismissed_notifications', JSON.stringify(allIds));
     
     setNotifications([]);
-    toast.success("All notifications cleared!");
+    toast.success(t.notifications.allCleared);
   };
 
   // Show toast on initial load if there are notifications
@@ -101,9 +101,9 @@ export function NotificationBell({ className }: { className?: string }) {
         // Small delay so it doesn't pop up instantly before UI settles
         const timer = setTimeout(() => {
           toast.info(
-            `You have ${notifications.length} pending reminder${notifications.length > 1 ? 's' : ''}!`, 
+            t.notifications.pendingReminders.replace('{count}', notifications.length.toString()), 
             {
-              description: "Check the bell icon for details.",
+              description: t.notifications.checkBell,
               duration: 6000,
             }
           );
@@ -111,7 +111,7 @@ export function NotificationBell({ className }: { className?: string }) {
         return () => clearTimeout(timer);
       }
     }
-  }, [notifications]);
+  }, [notifications, t.notifications]);
 
   return (
     <DropdownMenu>
@@ -133,13 +133,13 @@ export function NotificationBell({ className }: { className?: string }) {
       
       <DropdownMenuContent align="end" className="w-80 glass-panel border-primary/20 !bg-background/95 backdrop-blur-2xl shadow-2xl z-50">
         <div className="px-3 py-2 flex items-center justify-between">
-          <div className="font-bold text-lg text-foreground">Notifications</div>
+          <div className="font-bold text-lg text-foreground">{t.notifications.title}</div>
           {notifications.length > 0 && (
             <button 
               onClick={handleClearAll}
               className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors bg-background/50 px-2 py-1 rounded-md"
             >
-              <Trash2 className="w-3 h-3" /> Clear All
+              <Trash2 className="w-3 h-3" /> {t.notifications.clearAll}
             </button>
           )}
         </div>
@@ -152,7 +152,7 @@ export function NotificationBell({ className }: { className?: string }) {
                 <CheckCircle2 className="w-6 h-6 text-primary" />
               </div>
               <p className="text-sm font-medium text-muted-foreground">
-                You're all caught up!
+                {t.notifications.allCaughtUp}
               </p>
             </div>
           ) : (
@@ -165,6 +165,11 @@ export function NotificationBell({ className }: { className?: string }) {
                 dateStr = item.due_date || '';
               }
 
+              const personName = item.people?.name || 'someone';
+              const message = item.type === 'GIVEN'
+                ? t.notifications.receiveMessage.replace('{amount}', item.amount.toString()).replace('{name}', personName)
+                : t.notifications.returnMessage.replace('{amount}', item.amount.toString()).replace('{name}', personName);
+
               return (
                 <div key={item.id} className="relative group p-1">
                   <DropdownMenuItem 
@@ -173,7 +178,7 @@ export function NotificationBell({ className }: { className?: string }) {
                     <div className="flex justify-between w-full items-center">
                       <span className="font-semibold text-primary flex items-center gap-1.5">
                         <div className={cn("w-2 h-2 rounded-full", item.type === 'GIVEN' ? "bg-emerald-500" : "bg-blue-500")} />
-                        {item.type === 'GIVEN' ? 'Payment Expected' : 'Payment Due'}
+                        {item.type === 'GIVEN' ? t.notifications.paymentExpected : t.notifications.paymentDue}
                         {item.isTest && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded ml-1">TEST</span>}
                       </span>
                       <span className="text-xs text-muted-foreground font-medium bg-background/50 px-1.5 py-0.5 rounded">
@@ -181,9 +186,7 @@ export function NotificationBell({ className }: { className?: string }) {
                       </span>
                     </div>
                     <p className="text-sm text-foreground/80 leading-snug">
-                      {item.type === 'GIVEN' 
-                        ? `You are expected to receive ৳${item.amount} from ${item.people?.name || 'someone'}.`
-                        : `You are expected to return ৳${item.amount} to ${item.people?.name || 'someone'}.`}
+                      {message}
                     </p>
                   </DropdownMenuItem>
                   
