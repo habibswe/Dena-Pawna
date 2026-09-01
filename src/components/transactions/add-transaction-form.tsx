@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +41,7 @@ const TRANSACTION_TYPES = [
 ];
 
 import { useTranslation } from '@/i18n/client';
+import DashboardLoading from '@/components/ui/dashboard-loading';
 
 export function AddTransactionForm({ 
   people, 
@@ -135,6 +136,10 @@ export function AddTransactionForm({
   const [isPending, startTransition] = useTransition();
   const [selectingType, setSelectingType] = useState<string | null>(null);
 
+  useEffect(() => {
+    setSelectingType(null);
+  }, [defaultType]);
+
   const handleSelectType = (typeId: string) => {
     setSelectingType(typeId);
     setCategoryId('');
@@ -150,31 +155,15 @@ export function AddTransactionForm({
 
   const filteredCategories = categories.filter(c => c.type === type);
 
+  const isSelecting = (selectingType !== null && defaultType !== selectingType) || isPending;
+
+  if (isSelecting) {
+    return <DashboardLoading />;
+  }
+
   return (
     <Card className="glass-panel w-full">
-      {selectingType ? (
-        <CardContent className="p-6 space-y-6 animate-pulse">
-          <div className="flex items-center gap-3 pb-2 border-b border-border/40">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">{t.common.loading}</span>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="h-4 w-28 bg-primary/10 rounded-md" />
-              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 w-24 bg-primary/10 rounded-md" />
-              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 w-32 bg-primary/10 rounded-md" />
-              <div className="h-11 w-full bg-secondary/40 rounded-xl border border-primary/10" />
-            </div>
-            <div className="h-12 w-full bg-primary/20 rounded-xl mt-6" />
-          </div>
-        </CardContent>
-      ) : showGrid ? (
+      {showGrid ? (
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {TRANSACTION_TYPES.map(tItem => {
@@ -192,11 +181,7 @@ export function AddTransactionForm({
                   )}
                 >
                   <div className={cn("p-3 rounded-full bg-background/50", tItem.color)}>
-                    {isCardSelected ? (
-                      <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-primary" />
-                    ) : (
-                      <tItem.icon className="h-7 w-7 sm:h-8 sm:w-8" />
-                    )}
+                    <tItem.icon className="h-7 w-7 sm:h-8 sm:w-8" />
                   </div>
                   <span className="font-medium text-sm text-center leading-tight">{tItem.label}</span>
                 </button>

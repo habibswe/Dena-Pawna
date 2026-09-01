@@ -111,7 +111,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6">
       <div className={`${mobileView !== 'menu' ? 'hidden md:block' : 'block'}`}>
         <h2 className="text-3xl font-bold tracking-tight">{t.settings.title}</h2>
         <p className="text-muted-foreground mt-1">{t.settings.subtitle}</p>

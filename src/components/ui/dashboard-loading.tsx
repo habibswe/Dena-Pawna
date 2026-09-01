@@ -5,18 +5,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 
 export default function DashboardLoading() {
-  // Prevent flashing on fast navigations by delaying the skeleton slightly
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShow(true), 250);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!show) return <div className="min-h-[100dvh]" />;
-
   return (
-    <div className="space-y-6 max-w-4xl animate-in fade-in duration-500 w-full">
+    <div className="space-y-6 max-w-4xl animate-in fade-in duration-300 w-full">
       {/* Skeleton Header */}
       <div className="space-y-2">
         <div className="h-10 w-48 bg-primary/10 rounded-lg animate-pulse glass-panel" />
