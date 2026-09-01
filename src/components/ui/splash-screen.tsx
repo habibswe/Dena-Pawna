@@ -46,6 +46,11 @@ export function SplashScreen() {
         isFading ? "opacity-0 pointer-events-none" : "opacity-100"
       )}
     >
+      <style dangerouslySetInnerHTML={{__html: `
+        @media all and (not (display-mode: standalone)) {
+          .splash-screen { display: none !important; }
+        }
+      `}} />
       {/* Background gradients matching the theme */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/20 dark:to-primary/10" />

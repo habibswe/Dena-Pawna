@@ -57,7 +57,7 @@ export default async function EditTransactionPage({
   const backLink = showGrid ? `/transactions/${id}/edit` : '/transactions';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-4">
         <Link href={backLink} className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-10 w-10 sm:h-12 sm:w-12 shrink-0")}>
           <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />

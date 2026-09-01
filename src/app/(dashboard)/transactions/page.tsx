@@ -75,7 +75,7 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
   const people = peopleData || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
         <div className="flex items-start justify-between w-full xl:w-auto gap-4">
           <div>

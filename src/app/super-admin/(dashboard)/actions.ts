@@ -144,3 +144,74 @@ export async function deleteSystemUser(userId: string) {
   revalidatePath('/super-admin/users');
   return { success: true };
 }
+
+export async function deleteAccount(accountId: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('accounts').delete().eq('id', accountId);
+  if (error) return { error: error.message };
+  revalidatePath('/super-admin/accounts');
+  revalidatePath('/', 'layout');
+  return { success: true };
+}
+
+export async function updateAccount(accountId: string, formData: FormData) {
+  const supabase = createAdminClient();
+  const name = formData.get('name') as string;
+  const type = formData.get('type') as string;
+
+  if (!name || !type) throw new Error('Name and type are required');
+
+  const { error } = await supabase.from('accounts').update({ name, type }).eq('id', accountId);
+  if (error) throw new Error(error.message);
+  revalidatePath('/super-admin/accounts');
+  revalidatePath('/', 'layout');
+}
+
+export async function deleteCategory(categoryId: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('categories').delete().eq('id', categoryId);
+  if (error) return { error: error.message };
+  revalidatePath('/super-admin/categories');
+  revalidatePath('/', 'layout');
+  return { success: true };
+}
+
+export async function updateCategory(categoryId: string, formData: FormData) {
+  const supabase = createAdminClient();
+  const name = formData.get('name') as string;
+  const type = formData.get('type') as string;
+  const icon = formData.get('icon') as string;
+  const budget_limit = formData.get('budget_limit');
+
+  if (!name || !type || !icon) throw new Error('Name, type, and icon are required');
+
+  const { error } = await supabase.from('categories').update({
+    name, type, icon, budget_limit: budget_limit ? parseFloat(budget_limit as string) : null
+  }).eq('id', categoryId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/super-admin/categories');
+  revalidatePath('/', 'layout');
+}
+
+export async function deleteBudget(budgetId: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('budgets').delete().eq('id', budgetId);
+  if (error) return { error: error.message };
+  revalidatePath('/super-admin/budgets');
+  revalidatePath('/', 'layout');
+  return { success: true };
+}
+
+export async function updateBudget(budgetId: string, formData: FormData) {
+  const supabase = createAdminClient();
+  const amount = parseFloat(formData.get('amount') as string);
+  const month = formData.get('month') as string;
+
+  if (isNaN(amount) || amount <= 0) throw new Error('Valid amount is required');
+
+  const { error } = await supabase.from('budgets').update({ amount, month }).eq('id', budgetId);
+  if (error) throw new Error(error.message);
+  revalidatePath('/super-admin/budgets');
+  revalidatePath('/', 'layout');
+}

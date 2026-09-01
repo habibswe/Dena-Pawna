@@ -1,20 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { AddTransactionForm } from '@/components/transactions/add-transaction-form';
-import { Button, buttonVariants } from '@/components/ui/button';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { getDictionary } from '@/i18n/server';
+import { Suspense } from 'react';
+import { SkeletonForm, SkeletonHeader, SkeletonTransactionGrid } from '@/components/ui/skeletons';
 
-export default async function NewTransactionPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ person?: string, type?: string }>;
-}) {
+async function DataLoader({ person, type, pageTitle, pageDesc, backLink }: { person?: string, type?: string, pageTitle: string, pageDesc: string, backLink: string }) {
   const supabase = await createClient();
-  const t = await getDictionary();
-  const { person, type } = await searchParams;
-
   const [
     { data: people },
     { data: accounts },
@@ -24,6 +15,28 @@ export default async function NewTransactionPage({
     supabase.from('accounts').select('*').order('name'),
     supabase.from('categories').select('*').order('name'),
   ]);
+
+  return (
+    <AddTransactionForm 
+      people={people || []} 
+      accounts={accounts || []}
+      categories={categories || []}
+      defaultPersonId={person} 
+      defaultType={type}
+      pageTitle={pageTitle}
+      pageDesc={pageDesc}
+      backLink={backLink}
+    />
+  );
+}
+
+export default async function NewTransactionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ person?: string, type?: string }>;
+}) {
+  const t = await getDictionary();
+  const { person, type } = await searchParams;
 
   const TYPE_DETAILS: Record<string, { title: string; desc: string }> = {
     EXPENSE: { title: t.addTransactionForm.addExpense, desc: t.addTransactionForm.addExpenseDesc },
@@ -41,28 +54,15 @@ export default async function NewTransactionPage({
   const backLink = person ? `/people/${person}` : (type ? '/transactions/new' : '/transactions');
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        {type && (
-          <Link href={backLink} className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-10 w-10 sm:h-12 sm:w-12 shrink-0")}>
-            <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-          </Link>
-        )}
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{pageTitle}</h2>
-          <p className="text-muted-foreground">{pageDesc}</p>
+    <div className="pb-10 animate-in fade-in duration-500">
+      <Suspense fallback={
+        <div className="space-y-6 w-full">
+          <SkeletonHeader title subtitle button={false} />
+          {type ? <SkeletonForm /> : <SkeletonTransactionGrid />}
         </div>
-      </div>
-
-      <div className="pt-8 pb-10">
-        <AddTransactionForm 
-          people={people || []} 
-          accounts={accounts || []}
-          categories={categories || []}
-          defaultPersonId={person} 
-          defaultType={type}
-        />
-      </div>
+      }>
+        <DataLoader person={person} type={type} pageTitle={pageTitle} pageDesc={pageDesc} backLink={backLink} />
+      </Suspense>
     </div>
   );
 }

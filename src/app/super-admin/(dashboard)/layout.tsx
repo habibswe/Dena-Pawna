@@ -8,7 +8,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-background">
       {/* Admin Sidebar */}
-      <aside className="w-full md:w-64 border-r bg-card px-4 py-6 flex flex-col justify-between">
+      <aside className="w-full md:w-64 border-r bg-card px-4 py-6 flex flex-col justify-between md:sticky md:top-0 md:h-screen md:overflow-y-auto">
         <div className="space-y-6">
           <div className="flex items-center gap-2 px-2 text-destructive">
             <ShieldAlert className="h-6 w-6" />

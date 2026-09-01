@@ -45,7 +45,7 @@ async function BudgetsContent({ month }: { month?: string }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-start justify-between w-full sm:w-auto gap-4">
           <div>

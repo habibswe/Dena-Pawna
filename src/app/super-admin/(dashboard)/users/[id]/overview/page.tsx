@@ -1,10 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateBalance, calculateTimeframeSummary, calculateSummary, Transaction } from '@/lib/calculations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowDownLeft, ArrowUpRight, Wallet, ArrowRight, TrendingUp, TrendingDown, PiggyBank, Target, ArrowRightLeft } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Wallet, ArrowRight, TrendingUp, TrendingDown, PiggyBank, ArrowRightLeft, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { MonthSelector } from '@/components/dashboard/month-selector';
@@ -12,17 +11,15 @@ import { ExpenseBreakdown } from '@/components/dashboard/expense-breakdown';
 import { Suspense } from 'react';
 import DashboardLoading from '@/components/ui/dashboard-loading';
 import { getDictionary } from '@/i18n/server';
-import { ExpandableFab } from '@/components/ui/expandable-fab';
 
-async function DashboardContent({ month, from, to }: { month?: string; from?: string; to?: string }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+async function AdminUserOverviewContent({ userId, month, from, to }: { userId: string; month?: string; from?: string; to?: string }) {
+  const supabase = createAdminClient();
 
-  if (!user) return null;
+  const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', userId).single();
+  if (!profile) return null;
 
   const t = await getDictionary();
   
-  const isAllTime = month === 'all';
   const hasCustomRange = !!from || !!to;
   
   // If no params, default to current month
@@ -33,9 +30,9 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
     { data: transactions },
     { data: categories }
   ] = await Promise.all([
-    supabase.from('people').select('id, name'),
-    supabase.from('transactions').select('id, person_id, category_id, type, amount, transaction_date, note, due_date').order('transaction_date', { ascending: false }),
-    supabase.from('categories').select('id, name')
+    supabase.from('people').select('id, name').eq('user_id', userId),
+    supabase.from('transactions').select('id, person_id, category_id, type, amount, transaction_date, note, due_date').eq('user_id', userId).order('transaction_date', { ascending: false }),
+    supabase.from('categories').select('id, name').eq('user_id', userId)
   ]);
 
   const allTransactions = (transactions || []) as Transaction[];
@@ -52,7 +49,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
       balance: calculateBalance(personTxs)
     };
   });
-  const { youAreOwed, youOwe, netBalance: totalNetBalance } = calculateSummary(peopleBalances.map(p => p.balance));
+  const { youAreOwed, youOwe } = calculateSummary(peopleBalances.map(p => p.balance));
 
   // Current timeframe's transactions for the list
   let currentFilteredTransactions = allTransactions;
@@ -74,11 +71,16 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <Link href="/super-admin/users" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Users
+      </Link>
+      
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4">
         <div className="flex items-start justify-between w-full sm:w-auto gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.title}</h2>
-            <p className="text-muted-foreground">{t.dashboard.subtitle}</p>
+            <h2 className="text-3xl font-bold tracking-tight">Overview: {profile.full_name}</h2>
+            <p className="text-muted-foreground">Viewing dashboard data for this specific user.</p>
           </div>
           <div className="sm:hidden mt-1 shrink-0">
             <MonthSelector currentMonth={currentMonth} from={from} to={to} />
@@ -88,13 +90,8 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
           <div className="hidden sm:block">
             <MonthSelector currentMonth={currentMonth} from={from} to={to} />
           </div>
-          <Link href="/transactions/new" className={cn(buttonVariants(), 'hidden md:inline-flex')}>
-            {t.dashboard.addTransaction}
-          </Link>
         </div>
       </div>
-
-      <ExpandableFab href="/transactions/new" label={t.dashboard.addTransaction} />
 
       {/* MONTHLY FINANCIAL SUMMARY */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
@@ -167,7 +164,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
         <Card className="lg:col-span-2 glass-panel">
           <CardHeader>
             <CardTitle>{t.dashboard.moneyFlow} {currentMonth && currentMonth !== 'all' ? `(${format(new Date(currentMonth + '-01'), 'MMMM yyyy')})` : ''}</CardTitle>
-            <CardDescription>Visual representation of your cash movement</CardDescription>
+            <CardDescription>Visual representation of cash movement for this user</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 animate-in fade-in duration-500">
              <div className="flex flex-col gap-3">
@@ -231,7 +228,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
               <CardTitle>{t.dashboard.overallDebt}</CardTitle>
               <CardDescription>{t.dashboard.debtSubtitle}</CardDescription>
             </div>
-            <Link href="/people" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Link href={`/super-admin/people?search=${encodeURIComponent(profile.full_name)}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
               {t.dashboard.viewAll} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </CardHeader>
@@ -282,7 +279,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
               <CardTitle>{t.dashboard.recentTransactions}</CardTitle>
               <CardDescription>{t.dashboard.latestActivities}</CardDescription>
             </div>
-            <Link href="/transactions" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Link href={`/super-admin/transactions?search=${encodeURIComponent(profile.full_name)}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
               {t.dashboard.viewAll} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </CardHeader>
@@ -318,12 +315,12 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
                     sign = '-';
                   } else if (['GIVEN', 'RETURNED'].includes(tx.type)) {
                     title = person?.name || 'Lending';
-                    subtitle = tx.type === 'GIVEN' ? 'You gave' : 'You returned';
+                    subtitle = tx.type === 'GIVEN' ? 'User gave' : 'User returned';
                     amountColor = 'text-blue-500';
                     sign = '-';
                   } else if (['RECEIVED', 'BORROWED'].includes(tx.type)) {
                     title = person?.name || 'Borrowing';
-                    subtitle = tx.type === 'RECEIVED' ? 'You received' : 'You borrowed';
+                    subtitle = tx.type === 'RECEIVED' ? 'User received' : 'User borrowed';
                     amountColor = 'text-purple-500';
                     sign = '+';
                   }
@@ -356,16 +353,19 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
   );
 }
 
-export default async function DashboardPage({
+export default async function AdminUserOverviewPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ month?: string; from?: string; to?: string }>;
 }) {
+  const { id } = await params;
   const { month, from, to } = await searchParams;
   
   return (
-    <Suspense key={`${month}-${from}-${to}`} fallback={<DashboardLoading />}>
-      <DashboardContent month={month} from={from} to={to} />
+    <Suspense key={`${id}-${month}-${from}-${to}`} fallback={<DashboardLoading />}>
+      <AdminUserOverviewContent userId={id} month={month} from={from} to={to} />
     </Suspense>
   );
 }

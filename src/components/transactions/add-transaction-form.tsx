@@ -41,14 +41,19 @@ const TRANSACTION_TYPES = [
 ];
 
 import { useTranslation } from '@/i18n/client';
-import DashboardLoading from '@/components/ui/dashboard-loading';
+import { SkeletonForm, SkeletonHeader } from '@/components/ui/skeletons';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 
 export function AddTransactionForm({ 
   people, 
   accounts,
   categories,
   defaultPersonId,
-  defaultType 
+  defaultType,
+  pageTitle,
+  pageDesc,
+  backLink
 }: { 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   people: any[], 
@@ -57,7 +62,10 @@ export function AddTransactionForm({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   categories: any[],
   defaultPersonId?: string,
-  defaultType?: string
+  defaultType?: string,
+  pageTitle: string,
+  pageDesc: string,
+  backLink: string
 }) {
   const router = useRouter();
   const { t } = useTranslation();
@@ -158,11 +166,29 @@ export function AddTransactionForm({
   const isSelecting = (selectingType !== null && defaultType !== selectingType) || isPending;
 
   if (isSelecting) {
-    return <DashboardLoading />;
+    return (
+      <div className="space-y-6">
+        <SkeletonHeader title subtitle button={false} />
+        <SkeletonForm />
+      </div>
+    );
   }
 
   return (
-    <Card className="glass-panel w-full">
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        {type && (
+          <Link href={backLink} className={cn(buttonVariants({ variant: "default", size: "icon" }), "h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl")}>
+            <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+          </Link>
+        )}
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">{pageTitle}</h2>
+          <p className="text-muted-foreground">{pageDesc}</p>
+        </div>
+      </div>
+      
+      <Card className="glass-panel w-full">
       {showGrid ? (
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -403,5 +429,6 @@ export function AddTransactionForm({
       </form>
       )}
     </Card>
+    </div>
   );
 }

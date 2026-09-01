@@ -1,5 +1,10 @@
-import DashboardLoading from '@/components/ui/dashboard-loading';
+import { SkeletonHeader, SkeletonCards } from '@/components/ui/skeletons';
 
 export default function Loading() {
-  return <DashboardLoading />;
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300 w-full">
+      <SkeletonHeader title subtitle button />
+      <SkeletonCards count={6} />
+    </div>
+  );
 }

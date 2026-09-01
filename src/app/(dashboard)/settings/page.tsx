@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
-import DashboardLoading from '@/components/ui/dashboard-loading';
+
 import { useTranslation } from '@/i18n/client';
 import { Languages } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -107,11 +107,48 @@ export default function SettingsPage() {
   };
 
   if (isLoadingPage) {
-    return <DashboardLoading />;
+    return (
+      <div className="space-y-6 animate-in fade-in duration-300 w-full">
+        <div className="space-y-2 mb-6">
+          <div className="h-8 w-48 bg-primary/10 rounded-lg animate-pulse glass-panel" />
+          <div className="h-4 w-64 md:w-96 bg-muted/50 rounded-md animate-pulse" />
+        </div>
+        
+        <div className="md:hidden flex flex-col gap-3 mt-4">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="h-14 w-full bg-muted/30 rounded-md animate-pulse" />
+          ))}
+        </div>
+        
+        <div className="hidden md:block space-y-6">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="glass-panel p-6 space-y-6 rounded-xl border border-border shadow-sm">
+              <div className="space-y-2">
+                <div className="h-6 w-32 bg-muted rounded animate-pulse" />
+                <div className="h-4 w-64 bg-muted/50 rounded animate-pulse" />
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                  <div className="h-10 w-full bg-muted/30 rounded-md animate-pulse" />
+                </div>
+                {i < 2 && (
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                    <div className="h-10 w-full bg-muted/30 rounded-md animate-pulse" />
+                  </div>
+                )}
+                <div className="h-10 w-32 bg-primary/30 rounded-md animate-pulse mt-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className={`${mobileView !== 'menu' ? 'hidden md:block' : 'block'}`}>
         <h2 className="text-3xl font-bold tracking-tight">{t.settings.title}</h2>
         <p className="text-muted-foreground mt-1">{t.settings.subtitle}</p>

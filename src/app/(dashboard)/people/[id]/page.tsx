@@ -30,7 +30,7 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
   const statusText = isSettled ? `${t.people.netSettled} ✓` : isPositive ? `${person.name} ${t.dashboard.owesYou}` : `${t.dashboard.youOwe} ${person.name}`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-4">
         <Link href="/people" className={buttonVariants({ variant: "ghost", size: "icon" })}>
           <ArrowLeft className="h-4 w-4" />
