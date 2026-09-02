@@ -373,7 +373,7 @@ export function EditTransactionForm({
             <Button variant="outline" type="button" onClick={() => router.back()} className="flex-1 glass-panel">
               {t.common.cancel}
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 shadow-lg hover:shadow-xl transition-all">
+            <Button type="submit" disabled={isLoading} className="flex-1">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t.addTransactionForm.saveTransaction}
             </Button>

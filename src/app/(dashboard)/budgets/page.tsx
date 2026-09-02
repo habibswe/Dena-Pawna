@@ -22,10 +22,12 @@ async function BudgetsContent({ month }: { month?: string }) {
   const [
     { data: categories },
     { data: budgets },
+    { data: defaultBudgets },
     { data: transactions }
   ] = await Promise.all([
     supabase.from('categories').select('*').eq('type', 'EXPENSE'),
     supabase.from('budgets').select('*').eq('month', currentMonth),
+    supabase.from('budgets').select('*').eq('is_default', true),
     supabase.from('transactions')
       .select('amount, category_id')
       .eq('type', 'EXPENSE')
@@ -33,8 +35,40 @@ async function BudgetsContent({ month }: { month?: string }) {
       .lte('transaction_date', endDate)
   ]);
 
+  let allBudgets = budgets || [];
+  const existingCategoryIds = new Set(allBudgets.map(b => b.category_id));
+
+  // Find unique default budgets for categories not yet in this month
+  const uniqueDefaults = new Map<string, any>();
+  (defaultBudgets || []).forEach(b => {
+    if (!existingCategoryIds.has(b.category_id) && !uniqueDefaults.has(b.category_id)) {
+      uniqueDefaults.set(b.category_id, b);
+    }
+  });
+
+  if (uniqueDefaults.size > 0) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const toInsert = Array.from(uniqueDefaults.values()).map(b => ({
+        user_id: user.id,
+        category_id: b.category_id,
+        amount: b.amount,
+        month: currentMonth,
+        is_default: true
+      }));
+
+      const { data: inserted } = await supabase
+        .from('budgets')
+        .insert(toInsert)
+        .select();
+
+      if (inserted && inserted.length > 0) {
+        allBudgets = [...allBudgets, ...inserted];
+      }
+    }
+  }
+
   const allCategories = categories || [];
-  const allBudgets = budgets || [];
   const allTransactions = transactions || [];
 
   const categorySpent: Record<string, number> = {};

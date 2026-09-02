@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, AlertCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Target, AlertCircle, MoreVertical, Edit, Trash2, Repeat } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
@@ -83,8 +83,14 @@ export function BudgetListClient({
           <Card key={budget.id} className={`glass-panel ${isExceeded ? 'border-destructive/50 bg-destructive/5' : ''}`}>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex justify-between items-center">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span>{category.name}</span>
+                  {budget.is_default && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      <Repeat className="h-3 w-3" />
+                      {t.budgets.defaultBadge}
+                    </span>
+                  )}
                   {isExceeded && <AlertCircle className="h-4 w-4 text-destructive" />}
                 </div>
                 <DropdownMenu>

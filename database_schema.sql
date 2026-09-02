@@ -88,6 +88,7 @@ create table if not exists public.budgets (
     category_id uuid references public.categories on delete cascade not null,
     amount numeric(12, 2) not null check (amount > 0),
     month text not null, -- Format: YYYY-MM
+    is_default boolean default false, -- If true, auto-applies to every month
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
     unique(user_id, category_id, month)
@@ -267,3 +268,13 @@ values
   ('DPS (Monthly Deposit)', 'DPS', 'Vault', true),
   ('FDR (Fixed Deposit)', 'FDR', 'Landmark', true)
 on conflict (code) do nothing;
+
+-- =========================================================
+-- MIGRATION PATCHES (For Existing Databases)
+-- =========================================================
+
+alter table if exists public.budgets add column if not exists is_default boolean default false;
+alter table if exists public.accounts alter column type type text using type::text;
+
+-- Refresh PostgREST schema cache
+notify pgrst, 'reload schema';

@@ -3,10 +3,17 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Upload, History, Database, Loader2, CheckCircle2, AlertTriangle, FileJson } from 'lucide-react';
+import { Download, Upload, History, Loader2, CheckCircle2, FileJson, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { exportSystemBackup, restoreSystemBackup } from '@/app/super-admin/(dashboard)/backups/actions';
+import { 
+  exportSystemBackup, 
+  restoreSystemBackup, 
+  getBackupLogs, 
+  deleteBackupLog, 
+  clearAllBackupLogs 
+} from '@/app/super-admin/(dashboard)/backups/actions';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface BackupLog {
@@ -23,6 +30,10 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
   const [parsedBackup, setParsedBackup] = useState<any | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [logs, setLogs] = useState<BackupLog[]>(initialLogs);
+  const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
+  const [isClearAllOpen, setIsClearAllOpen] = useState(false);
+  const [isDeletingAction, setIsDeletingAction] = useState(false);
+  const router = useRouter();
 
   const handleExport = async () => {
     try {
@@ -46,6 +57,10 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
         document.body.removeChild(link);
 
         toast.success('System backup downloaded successfully!');
+        
+        // Immediate log update without page refresh
+        const freshLogs = await getBackupLogs();
+        setLogs(freshLogs);
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to export backup');
@@ -67,16 +82,40 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
-        const json = JSON.parse(evt.target?.result as string);
-        if (!json.data) {
-          toast.error('Invalid backup format: missing data payload');
+        const text = evt.target?.result as string;
+        if (!text || text.trim() === '') {
+          toast.error('The selected file is empty.');
           setSelectedFile(null);
           setParsedBackup(null);
           return;
         }
-        setParsedBackup(json);
-      } catch {
-        toast.error('Failed to parse backup JSON file');
+
+        const json = JSON.parse(text);
+        
+        // Extract data payload regardless of wrapping structure
+        let extractedData: any = null;
+        if (json.data && typeof json.data === 'object') {
+          extractedData = json.data;
+        } else if (json.backup?.data && typeof json.backup.data === 'object') {
+          extractedData = json.backup.data;
+        } else if (json.backup && typeof json.backup === 'object') {
+          extractedData = json.backup;
+        } else if (Array.isArray(json)) {
+          extractedData = { transactions: json };
+        } else if (typeof json === 'object' && json !== null) {
+          extractedData = json;
+        }
+
+        if (!extractedData) {
+          toast.error('Invalid backup format: unable to extract data payload.');
+          setSelectedFile(null);
+          setParsedBackup(null);
+          return;
+        }
+
+        setParsedBackup({ data: extractedData });
+      } catch (e: any) {
+        toast.error('Failed to parse backup JSON file: ' + (e.message || 'Invalid JSON'));
         setSelectedFile(null);
         setParsedBackup(null);
       }
@@ -92,15 +131,58 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
       if (res.error) {
         toast.error(res.error);
       } else if (res.success) {
-        toast.success('System data restored successfully!');
+        const c = res.counts || {};
+        toast.success(`Restored: ${c.accounts || 0} accounts, ${c.transactions || 0} transactions, ${c.people || 0} people, ${c.categories || 0} categories, ${c.budgets || 0} budgets.`);
         setSelectedFile(null);
         setParsedBackup(null);
         setIsConfirmOpen(false);
+        
+        // Immediate log update without page refresh
+        const freshLogs = await getBackupLogs();
+        setLogs(freshLogs);
+        router.refresh();
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to restore backup');
     } finally {
       setIsRestoring(false);
+    }
+  };
+
+  const handleDeleteSingleLog = async () => {
+    if (!deletingLogId) return;
+    try {
+      setIsDeletingAction(true);
+      const res = await deleteBackupLog(deletingLogId);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success('Log entry deleted.');
+        setLogs(prev => prev.filter(l => l.id !== deletingLogId));
+        setDeletingLogId(null);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete log');
+    } finally {
+      setIsDeletingAction(false);
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      setIsDeletingAction(true);
+      const res = await clearAllBackupLogs();
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success('All backup & restore logs cleared.');
+        setLogs([]);
+        setIsClearAllOpen(false);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to clear logs');
+    } finally {
+      setIsDeletingAction(false);
     }
   };
 
@@ -162,7 +244,7 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
                     <FileJson className="h-4 w-4" /> Ready to Restore: {selectedFile.name}
                   </p>
                   <p className="text-muted-foreground">
-                    Contains {parsedBackup.data?.transactions?.length || 0} transactions, {parsedBackup.data?.people?.length || 0} people, {parsedBackup.data?.profiles?.length || 0} profiles.
+                    Contains {parsedBackup.data?.accounts?.length || 0} accounts, {parsedBackup.data?.transactions?.length || 0} transactions, {parsedBackup.data?.people?.length || 0} people, {parsedBackup.data?.categories?.length || 0} categories.
                   </p>
                 </div>
               )}
@@ -189,6 +271,17 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
             </CardTitle>
             <CardDescription>System log of all previous backup exports and restore operations</CardDescription>
           </div>
+          {logs.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearAllOpen(true)}
+              className="text-destructive hover:bg-destructive/10 border-destructive/20 gap-1 text-xs"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Clear History
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           <div className="relative overflow-x-auto border-y">
@@ -198,7 +291,8 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
                   <th className="px-6 py-4">Action</th>
                   <th className="px-6 py-4">Date & Time</th>
                   <th className="px-6 py-4">Summary Details</th>
-                  <th className="px-6 py-4 text-right">Status</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -206,7 +300,7 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
                   const isExport = log.action === 'BACKUP_EXPORT';
                   const summary = log.details?.summary || {};
                   return (
-                    <tr key={log.id} className="border-b border-border/50 last:border-0 hover:bg-secondary/20">
+                    <tr key={log.id} className="border-b border-border/50 last:border-0 hover:bg-secondary/20 transition-colors">
                       <td className="px-6 py-4 font-semibold">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
                           isExport 
@@ -223,10 +317,20 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
                       <td className="px-6 py-4 text-xs font-mono">
                         Profiles: {summary.profiles || 0} | People: {summary.people || 0} | Categories: {summary.categories || 0} | Accounts: {summary.accounts || 0} | Txs: {summary.transactions || 0}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4">
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Success
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeletingLogId(log.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -234,7 +338,7 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
 
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                       No backup or restore activity logs recorded yet.
                     </td>
                   </tr>
@@ -253,6 +357,26 @@ export function BackupRestoreClient({ initialLogs }: { initialLogs: BackupLog[] 
         title="Confirm System Data Restore?"
         description="This operation will restore all profiles, people, accounts, categories, budgets, and transactions from the selected backup file. Are you sure you want to proceed?"
         isDeleting={isRestoring}
+      />
+
+      {/* Confirm Delete Single Log */}
+      <ConfirmDialog
+        isOpen={!!deletingLogId}
+        onClose={() => !isDeletingAction && setDeletingLogId(null)}
+        onConfirm={handleDeleteSingleLog}
+        title="Delete Log Entry?"
+        description="Are you sure you want to delete this backup activity log? This cannot be undone."
+        isDeleting={isDeletingAction}
+      />
+
+      {/* Confirm Clear All Logs */}
+      <ConfirmDialog
+        isOpen={isClearAllOpen}
+        onClose={() => !isDeletingAction && setIsClearAllOpen(false)}
+        onConfirm={handleClearAll}
+        title="Clear All Backup Logs?"
+        description="Are you sure you want to delete all backup and restore activity history logs?"
+        isDeleting={isDeletingAction}
       />
     </div>
   );

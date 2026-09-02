@@ -164,6 +164,9 @@
     "selectCategory": "Select Category",
     "monthlyLimit": "Monthly Limit (৳)",
     "saveBudget": "Save Budget",
+    "setAsDefault": "Set as recurring monthly budget",
+    "setAsDefaultDesc": "Auto-apply this budget to every upcoming month.",
+    "defaultBadge": "Recurring",
     "deleteTitle": "Delete Budget?",
     "deleteDesc": "Are you sure you want to delete this budget?"
   },

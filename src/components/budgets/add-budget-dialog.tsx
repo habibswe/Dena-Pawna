@@ -25,6 +25,7 @@ export function AddBudgetDialog({
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryId, setCategoryId] = useState('');
+  const [isDefault, setIsDefault] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,6 +35,7 @@ export function AddBudgetDialog({
       const formData = new FormData(e.currentTarget);
       formData.set('category_id', categoryId);
       formData.set('month', defaultMonth);
+      formData.set('is_default', isDefault ? 'true' : 'false');
       
       if (!categoryId) {
         toast.error(t.budgets.selectCategory);
@@ -66,7 +68,7 @@ export function AddBudgetDialog({
             {t.budgets.addBudget}
           </Button>
         } />
-        <DialogContent className="sm:max-w-[425px] glass-panel">
+        <DialogContent className="sm:max-w-[425px] glass-panel !bg-background shadow-2xl">
         <DialogHeader>
           <DialogTitle>{t.budgets.addBudget}</DialogTitle>
           <DialogDescription>
@@ -77,12 +79,12 @@ export function AddBudgetDialog({
           <div className="space-y-2">
             <Label>{t.categories.title}</Label>
             <Select value={categoryId} onValueChange={(val) => setCategoryId(val || '')} required>
-              <SelectTrigger>
+              <SelectTrigger className="glass-panel border-primary/20">
                 <SelectValue placeholder={t.budgets.selectCategory}>
                   {categoryId ? categories.find(c => c.id === categoryId)?.name : t.budgets.selectCategory}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-panel border-primary/20 shadow-2xl">
                 {categories.map(cat => (
                   <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                 ))}
@@ -92,8 +94,29 @@ export function AddBudgetDialog({
           
           <div className="space-y-2">
             <Label htmlFor="amount">{t.budgets.monthlyLimit}</Label>
-            <Input id="amount" name="amount" type="number" step="0.01" min="1" placeholder="e.g. 5000" required />
+            <Input id="amount" name="amount" type="number" step="0.01" min="1" placeholder="e.g. 5000" required className="glass-panel border-primary/20" />
           </div>
+
+          <label 
+            htmlFor="is_default"
+            className="flex items-start space-x-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors select-none"
+          >
+            <input 
+              type="checkbox" 
+              id="is_default" 
+              checked={isDefault} 
+              onChange={(e) => setIsDefault(e.target.checked)}
+              className="h-4 w-4 mt-0.5 rounded border-primary/20 text-primary accent-primary cursor-pointer" 
+            />
+            <div className="space-y-0.5">
+              <span className="text-sm font-medium block text-foreground">
+                {t.budgets.setAsDefault}
+              </span>
+              <p className="text-xs text-muted-foreground">
+                {t.budgets.setAsDefaultDesc}
+              </p>
+            </div>
+          </label>
 
           <div className="pt-4 flex justify-end space-x-2">
             <Button variant="outline" type="button" onClick={() => setOpen(false)}>
