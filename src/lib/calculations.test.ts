@@ -117,4 +117,35 @@ describe('Credit/Debt & Double-Entry Calculation Rules', () => {
     // Must be 0 (Settled), NOT +5500
     expect(calculateBalance(orphanRepayment)).toBe(0);
   });
+
+  it('8. Partial Loan Repayment Received with Opening Receivable: Wallet increases, Debt decreases, Net Worth stable', () => {
+    const contactA = { id: 'contact_a', name: 'A', opening_balance: 1000, opening_balance_type: 'RECEIVABLE' };
+    const walletCash = 'wallet_cash';
+
+    // Initial state before repayment
+    const initialTxs: Transaction[] = [
+      { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-09-01', account_id: walletCash }
+    ];
+    const initialWallet = calculateAccountBalance(walletCash, initialTxs); // 5,000
+    const initialDebt = calculateBalance(initialTxs, contactA); // 1,000
+    const initialNetWorth = initialWallet + initialDebt; // 5,000 + 1,000 = 6,000
+
+    expect(initialWallet).toBe(5000);
+    expect(initialDebt).toBe(1000);
+    expect(initialNetWorth).toBe(6000);
+
+    // Contact A pays back 500 BDT into walletCash
+    const afterRepaymentTxs: Transaction[] = [
+      ...initialTxs,
+      { id: '2', type: 'RECEIVED', amount: 500, transaction_date: '2026-09-02', account_id: walletCash, person_id: 'contact_a' }
+    ];
+
+    const updatedWallet = calculateAccountBalance(walletCash, afterRepaymentTxs); // 5,500 (+500)
+    const updatedDebt = calculateBalance(afterRepaymentTxs, contactA); // 500 (-500)
+    const updatedNetWorth = updatedWallet + updatedDebt; // 5,500 + 500 = 6,000 (stable!)
+
+    expect(updatedWallet).toBe(5500);
+    expect(updatedDebt).toBe(500);
+    expect(updatedNetWorth).toBe(6000);
+  });
 });

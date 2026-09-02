@@ -95,6 +95,8 @@
     "filterExpense": "Expense",
     "filterBorrowed": "Borrowed",
     "filterReturned": "Returned",
+    "filterTransfer": "Transfer",
+    "filterSaving": "Saving",
     "filterPlaceholder": "Filter by type",
     "searchPlaceholder": "Search name, note...",
     "exportBtn": "Export",

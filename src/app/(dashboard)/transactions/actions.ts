@@ -30,14 +30,14 @@ export async function addTransaction(formData: FormData) {
   if (!type) return { error: 'Transaction type is required' };
   if (isNaN(amount) || amount <= 0) return { error: 'Amount must be a positive number' };
 
-  if (type === 'TRANSFER') {
+  if (['TRANSFER', 'SAVING'].includes(type)) {
     if (!account_id || !to_account_id) {
-      return { error: 'Transfer requires both source and destination accounts' };
+      return { error: type === 'SAVING' ? 'Saving requires both source and savings destination accounts' : 'Transfer requires both source and destination accounts' };
     }
     if (account_id === to_account_id) {
       return { error: 'Source and destination accounts must be different' };
     }
-  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME', 'SAVING'].includes(type) && !account_id) {
+  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME'].includes(type) && !account_id) {
     return { error: 'Please select an account/wallet for this transaction' };
   }
 
@@ -152,14 +152,14 @@ export async function updateTransaction(id: string, formData: FormData) {
   if (!type) return { error: 'Transaction type is required' };
   if (isNaN(amount) || amount <= 0) return { error: 'Amount must be a positive number' };
 
-  if (type === 'TRANSFER') {
+  if (['TRANSFER', 'SAVING'].includes(type)) {
     if (!account_id || !to_account_id) {
-      return { error: 'Transfer requires both source and destination accounts' };
+      return { error: type === 'SAVING' ? 'Saving requires both source and savings destination accounts' : 'Transfer requires both source and destination accounts' };
     }
     if (account_id === to_account_id) {
       return { error: 'Source and destination accounts must be different' };
     }
-  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME', 'SAVING'].includes(type) && !account_id) {
+  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME'].includes(type) && !account_id) {
     return { error: 'Please select an account/wallet for this transaction' };
   }
 

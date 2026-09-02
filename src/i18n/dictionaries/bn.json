@@ -95,6 +95,8 @@
     "filterExpense": "ব্যয়",
     "filterBorrowed": "ধার নিয়েছি",
     "filterReturned": "ফেরত দিয়েছি",
+    "filterTransfer": "টাকা ট্রান্সফার",
+    "filterSaving": "সঞ্চয়",
     "filterPlaceholder": "ধরণ অনুযায়ী ফিল্টার",
     "searchPlaceholder": "নাম বা নোট দিয়ে খুঁজুন...",
     "exportBtn": "ডাউনলোড (Export)",

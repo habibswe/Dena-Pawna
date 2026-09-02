@@ -19,6 +19,8 @@ export function TransactionFilterDropdown({ currentFilter }: { currentFilter?: s
     { value: 'EXPENSE', label: t.transactions.filterExpense },
     { value: 'BORROWED', label: t.transactions.filterBorrowed },
     { value: 'RETURNED', label: t.transactions.filterReturned },
+    { value: 'TRANSFER', label: t.transactions.filterTransfer },
+    { value: 'SAVING', label: t.transactions.filterSaving },
   ];
 
   const selectedValue = currentFilter && FILTER_OPTIONS.some(o => o.value === currentFilter) ? currentFilter : 'ALL';

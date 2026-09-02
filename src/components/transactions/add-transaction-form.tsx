@@ -94,6 +94,7 @@ export function AddTransactionForm({
   const [localPeople, setLocalPeople] = useState(people);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [transactionDate, setTransactionDate] = useState<Date>(new Date());
+  const [recurrence, setRecurrence] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,6 +106,7 @@ export function AddTransactionForm({
     if (accountId) formData.set('account_id', accountId);
     if (toAccountId) formData.set('to_account_id', toAccountId);
     if (categoryId) formData.set('category_id', categoryId);
+    if (recurrence) formData.set('recurrence', recurrence);
     
     if (dueDate && (type === 'GIVEN' || type === 'BORROWED')) {
       formData.set('due_date', format(dueDate, 'yyyy-MM-dd'));
@@ -124,13 +126,13 @@ export function AddTransactionForm({
       return;
     }
     
-    if (type === 'TRANSFER' && (!accountId || !toAccountId)) {
-      toast.error('Please select both source and destination accounts');
+    if (['TRANSFER', 'SAVING'].includes(type) && (!accountId || !toAccountId)) {
+      toast.error(type === 'SAVING' ? 'উৎস ও সঞ্চয় অ্যাকাউন্ট উভয়ই নির্বাচন করুন' : 'Please select both source and destination accounts');
       setIsLoading(false);
       return;
     }
     
-    if (type === 'TRANSFER' && accountId === toAccountId) {
+    if (['TRANSFER', 'SAVING'].includes(type) && accountId === toAccountId) {
       toast.error('Source and destination accounts must be different');
       setIsLoading(false);
       return;
@@ -165,8 +167,8 @@ export function AddTransactionForm({
 
   const isLending = ['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type);
   const requiresCategory = ['INCOME', 'EXPENSE'].includes(type);
-  const requiresSingleAccount = ['INCOME', 'EXPENSE', 'GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'SAVING'].includes(type);
-  const requiresTwoAccounts = type === 'TRANSFER';
+  const requiresSingleAccount = ['INCOME', 'EXPENSE', 'GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type);
+  const requiresTwoAccounts = ['TRANSFER', 'SAVING'].includes(type);
 
   const filteredCategories = categories.filter(c => c.type === type);
 
@@ -284,11 +286,11 @@ export function AddTransactionForm({
           {requiresTwoAccounts && (
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
               <div className="space-y-2">
-                <Label>{t.addTransactionForm.source}</Label>
+                <Label>{type === 'SAVING' ? (t.addTransactionForm.fromAccount || 'কোন অ্যাকাউন্ট থেকে (From)') : t.addTransactionForm.source}</Label>
                 <Select value={accountId} onValueChange={(val) => setAccountId(val || '')} required>
                   <SelectTrigger className="w-full glass-panel border-primary/20">
-                    <SelectValue placeholder={t.addTransactionForm.source}>
-                      {accountId ? accounts.find(a => a.id === accountId)?.name : t.addTransactionForm.source}
+                    <SelectValue placeholder={type === 'SAVING' ? (t.addTransactionForm.fromAccount || 'উৎস অ্যাকাউন্ট') : t.addTransactionForm.source}>
+                      {accountId ? accounts.find(a => a.id === accountId)?.name : (type === 'SAVING' ? (t.addTransactionForm.fromAccount || 'উৎস অ্যাকাউন্ট') : t.addTransactionForm.source)}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="glass-panel border-primary/20 shadow-2xl">
@@ -305,11 +307,11 @@ export function AddTransactionForm({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>{t.addTransactionForm.destination}</Label>
+                <Label>{type === 'SAVING' ? (t.addTransactionForm.toAccount || 'সঞ্চয় অ্যাকাউন্ট (To)') : t.addTransactionForm.destination}</Label>
                 <Select value={toAccountId} onValueChange={(val) => setToAccountId(val || '')} required>
                   <SelectTrigger className="w-full glass-panel border-primary/20">
-                    <SelectValue placeholder={t.addTransactionForm.destination}>
-                      {toAccountId ? accounts.find(a => a.id === toAccountId)?.name : t.addTransactionForm.destination}
+                    <SelectValue placeholder={type === 'SAVING' ? (t.addTransactionForm.toAccount || 'সঞ্চয় অ্যাকাউন্ট') : t.addTransactionForm.destination}>
+                      {toAccountId ? accounts.find(a => a.id === toAccountId)?.name : (type === 'SAVING' ? (t.addTransactionForm.toAccount || 'সঞ্চয় অ্যাকাউন্ট') : t.addTransactionForm.destination)}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="glass-panel border-primary/20 shadow-2xl">
@@ -376,15 +378,20 @@ export function AddTransactionForm({
           {['INCOME', 'EXPENSE'].includes(type) && (
             <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
               <Label>{t.addTransactionForm.recurring}</Label>
-              <Select name="recurrence" defaultValue="">
+              <Select value={recurrence} onValueChange={(val) => val !== null && setRecurrence(val)}>
                 <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
-                  <SelectValue placeholder={t.addTransactionForm.oneTime} />
+                  <SelectValue placeholder={t.addTransactionForm.oneTime}>
+                    {recurrence === 'MONTHLY' ? t.addTransactionForm.monthly :
+                     recurrence === 'YEARLY' ? t.addTransactionForm.yearly :
+                     recurrence === 'WEEKLY' ? t.addTransactionForm.weekly :
+                     t.addTransactionForm.oneTime}
+                  </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="glass-panel border-primary/20 shadow-2xl">
+                <SelectContent className="glass-panel border-primary/20 shadow-2xl !bg-background">
                   <SelectItem value="">{t.addTransactionForm.oneTime}</SelectItem>
+                  <SelectItem value="WEEKLY">{t.addTransactionForm.weekly}</SelectItem>
                   <SelectItem value="MONTHLY">{t.addTransactionForm.monthly}</SelectItem>
                   <SelectItem value="YEARLY">{t.addTransactionForm.yearly}</SelectItem>
-                  <SelectItem value="WEEKLY">{t.addTransactionForm.weekly}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
