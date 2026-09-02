@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { calculateBalance, calculateTimeframeSummary, calculateSummary, Transaction } from '@/lib/calculations';
+import { calculateBalance, calculateTimeframeSummary, calculateSummary, calculateTotalWalletBalance, Transaction } from '@/lib/calculations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowDownLeft, ArrowUpRight, Wallet, ArrowRight, TrendingUp, TrendingDown, PiggyBank, ArrowRightLeft, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -30,7 +30,7 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
     { data: categories }
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
-    supabase.from('people').select('id, name').eq('user_id', userId),
+    supabase.from('people').select('id, name'),
     supabase.from('transactions').select('id, person_id, category_id, account_id, to_account_id, type, amount, transaction_date, note, due_date').eq('user_id', userId).order('transaction_date', { ascending: false }),
     supabase.from('categories').select('id, name').eq('user_id', userId)
   ]);
@@ -43,6 +43,7 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
   const allPeople = (people || []);
   const allCategories = (categories || []);
 
+  const totalWalletBalance = calculateTotalWalletBalance(allTransactions);
   const timeframeSummary = calculateTimeframeSummary(allTransactions, currentMonth, from, to);
 
   // Overall People Balances (not tied to month)
@@ -54,6 +55,7 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
     };
   });
   const { youAreOwed, youOwe, netBalance: totalNetBalance } = calculateSummary(peopleBalances.map(p => p.balance));
+  const netWorth = totalWalletBalance + youAreOwed - youOwe;
 
   // Current timeframe's transactions for the list
   let currentFilteredTransactions = allTransactions;
@@ -94,19 +96,56 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
       </div>
 
       {/* MONTHLY FINANCIAL SUMMARY */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-        <Card className="glass-panel border-primary/20 col-span-2 md:col-span-2 lg:col-span-1">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        {/* NET WORTH */}
+        <Card className="glass-panel border-primary/20 col-span-2 md:col-span-1 lg:col-span-1 bg-gradient-to-br from-primary/10 via-background/40 to-transparent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.dashboard.available}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.dashboard.netWorth}</CardTitle>
             <Wallet className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${timeframeSummary.remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
-              {timeframeSummary.remaining >= 0 ? '' : '-'}৳{Math.abs(timeframeSummary.remaining).toLocaleString()}
+            <div className={`text-2xl font-bold ${netWorth >= 0 ? 'text-primary' : 'text-destructive'}`}>
+              ৳{netWorth.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Net Cash Flow (In - Out)</p>
+            <p className="text-[11px] text-muted-foreground mt-1 truncate">
+              {t.dashboard.netWorthDesc}
+            </p>
           </CardContent>
         </Card>
+
+        {/* LIQUID CASH */}
+        <Card className="glass-panel border-emerald-500/20 col-span-2 md:col-span-1 lg:col-span-1 bg-gradient-to-br from-emerald-500/5 via-background/40 to-transparent">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.dashboard.liquidCash}</CardTitle>
+            <PiggyBank className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              ৳{totalWalletBalance.toLocaleString()}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1 truncate">
+              {t.dashboard.liquidCashDesc}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* MONTHLY CASH FLOW */}
+        <Card className="glass-panel">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.dashboard.monthlyCashFlow}</CardTitle>
+            <ArrowRightLeft className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${timeframeSummary.remaining >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-destructive'}`}>
+              {timeframeSummary.remaining >= 0 ? '+' : '-'}৳{Math.abs(timeframeSummary.remaining).toLocaleString()}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1 truncate">
+              {t.dashboard.monthlyCashFlowDesc}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* MONTHLY INCOME */}
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.dashboard.income}</CardTitle>
@@ -116,8 +155,13 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
             <div className="text-2xl font-bold text-emerald-500">
               ৳{timeframeSummary.income.toLocaleString()}
             </div>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {recentTransactions.filter(t => t.type === 'INCOME').length} entries
+            </p>
           </CardContent>
         </Card>
+
+        {/* MONTHLY EXPENSES */}
         <Card className="glass-panel">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.dashboard.expenses}</CardTitle>
@@ -127,29 +171,7 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
             <div className="text-2xl font-bold text-rose-500">
               ৳{timeframeSummary.expense.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{expenseRate}% of income</p>
-          </CardContent>
-        </Card>
-        <Card className="glass-panel">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.dashboard.saved}</CardTitle>
-            <PiggyBank className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-500">
-              ৳{timeframeSummary.savings.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="glass-panel">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.dashboard.lent}</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-500">
-              ৳{timeframeSummary.lent.toLocaleString()}
-            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">{expenseRate}% of income</p>
           </CardContent>
         </Card>
       </div>
