@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Loader2, 
   ArrowRight, 
+  ArrowDown,
   Calendar as CalendarIcon, 
   ArrowLeft, 
   TrendingDown, 
@@ -275,34 +276,37 @@ export function AddTransactionForm({
           )}
 
           {requiresTwoAccounts && (
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
               <div className="space-y-2">
                 <Label>{t.addTransactionForm.source}</Label>
                 <Select value={accountId} onValueChange={(val) => setAccountId(val || '')} required>
-                  <SelectTrigger className="glass-panel border-primary/20">
+                  <SelectTrigger className="w-full glass-panel border-primary/20">
                     <SelectValue placeholder={t.addTransactionForm.source}>
                       {accountId ? accounts.find(a => a.id === accountId)?.name : t.addTransactionForm.source}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass-panel border-primary/20 shadow-2xl">
                     {accounts.map(acc => (
                       <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="pb-2">
-                <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center justify-center sm:pt-6 sm:h-[66px]">
+                <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
+                  <ArrowRight className="hidden sm:block h-4 w-4" />
+                  <ArrowDown className="sm:hidden h-4 w-4" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>{t.addTransactionForm.destination}</Label>
                 <Select value={toAccountId} onValueChange={(val) => setToAccountId(val || '')} required>
-                  <SelectTrigger className="glass-panel border-primary/20">
+                  <SelectTrigger className="w-full glass-panel border-primary/20">
                     <SelectValue placeholder={t.addTransactionForm.destination}>
                       {toAccountId ? accounts.find(a => a.id === toAccountId)?.name : t.addTransactionForm.destination}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass-panel border-primary/20 shadow-2xl">
                     {accounts.map(acc => (
                       <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
                     ))}
