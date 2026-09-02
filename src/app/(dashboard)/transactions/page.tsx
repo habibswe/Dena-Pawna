@@ -27,7 +27,10 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
   const currentMonth = month || format(new Date(), 'yyyy-MM');
   const search = searchParamsResolved.search;
 
-  let query = supabase.from('transactions').select('*', { count: 'exact' }).order('transaction_date', { ascending: false }).order('created_at', { ascending: false });
+  let query = supabase.from('transactions')
+    .select('*, people(id, name), categories(id, name), accounts!transactions_account_id_fkey(id, name)', { count: 'exact' })
+    .order('transaction_date', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (filter && filter !== 'ALL') {
     query = query.eq('type', filter);
@@ -48,30 +51,17 @@ async function TransactionsContent({ searchParamsResolved }: { searchParamsResol
 
   const [
     { data: transactionsData, count, error: txError },
-    { data: peopleData },
-    { data: categoriesData },
-    { data: accountsData }
+    { data: peopleData }
   ] = await Promise.all([
     query,
-    supabase.from('people').select('*'),
-    supabase.from('categories').select('*'),
-    supabase.from('accounts').select('*')
+    supabase.from('people').select('id, name')
   ]);
 
   if (txError) {
     console.error("Error fetching transactions:", txError);
   }
 
-  const peopleMap = new Map((peopleData || []).map(p => [p.id, p]));
-  const categoriesMap = new Map((categoriesData || []).map(c => [c.id, c]));
-  const accountsMap = new Map((accountsData || []).map(a => [a.id, a]));
-
-  const transactions = (transactionsData || []).map(tx => ({
-    ...tx,
-    people: tx.person_id ? peopleMap.get(tx.person_id) : null,
-    categories: tx.category_id ? categoriesMap.get(tx.category_id) : null,
-    accounts: tx.account_id ? accountsMap.get(tx.account_id) : null,
-  }));
+  const transactions = transactionsData || [];
   const people = peopleData || [];
 
   return (

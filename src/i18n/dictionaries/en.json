@@ -8,7 +8,9 @@
     "transactions": "History",
     "summary": "Summary",
     "settings": "Settings",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "more": "More",
+    "menuSubtitle": "Access all features and settings"
   },
   "landing": {
     "title": "Dena Pawna",
@@ -42,7 +44,12 @@
     "resetPasswordTitle": "Reset Password",
     "resetPasswordSubtitle": "Enter your new password below",
     "updatePasswordBtn": "Update Password",
-    "backToLoginBtn": "Back to login"
+    "backToLoginBtn": "Back to login",
+    "overlayHello": "Hello, Friend!",
+    "overlaySignupSub": "Enter your personal details and start your journey with us.",
+    "overlayWelcome": "Welcome Back!",
+    "overlayLoginSub": "To keep connected with us please login with your personal info.",
+    "orContinueWith": "Or continue with"
   },
   "dashboard": {
     "title": "Overview",

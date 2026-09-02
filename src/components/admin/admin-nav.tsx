@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ArrowLeftRight, UserCog, Tags, Wallet, PieChart } from 'lucide-react';
+import { LayoutDashboard, Users, ArrowLeftRight, UserCog, Tags, Wallet, PieChart, CreditCard, HardDrive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -14,9 +14,11 @@ export function AdminNav() {
     { href: '/super-admin/people', label: 'People', icon: Users },
     { href: '/super-admin/transactions', label: 'Transactions', icon: ArrowLeftRight },
     { href: '/super-admin/accounts', label: 'Accounts', icon: Wallet },
+    { href: '/super-admin/account-types', label: 'Account Types', icon: CreditCard },
     { href: '/super-admin/categories', label: 'Categories', icon: Tags },
     { href: '/super-admin/budgets', label: 'Budgets', icon: PieChart },
     { href: '/super-admin/users', label: 'System Users', icon: UserCog },
+    { href: '/super-admin/backups', label: 'Backup & Restore', icon: HardDrive },
   ];
 
   return (

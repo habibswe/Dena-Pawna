@@ -10,7 +10,7 @@ export default async function PeoplePage() {
 
   const [{ data: people }, { data: transactions }] = await Promise.all([
     supabase.from('people').select('*').order('name'),
-    supabase.from('transactions').select('*')
+    supabase.from('transactions').select('id, person_id, type, amount')
   ]);
 
   const allTransactions = (transactions || []) as Transaction[];

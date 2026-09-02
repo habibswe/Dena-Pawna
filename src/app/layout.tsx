@@ -32,10 +32,9 @@ import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { LanguageProvider } from '@/i18n/client';
 import { getLocale } from '@/i18n/server';
-import { SplashScreen } from '@/components/ui/splash-screen';
 import { LiquidBackground } from '@/components/ui/liquid-background';
-import { DataProvider } from '@/components/providers/data-provider';
 import { ThemeColorUpdater } from '@/components/theme-color-updater';
+import { ScrollToTop } from '@/components/layout/scroll-to-top';
 
 export default async function RootLayout({
   children,
@@ -46,42 +45,22 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <Script
-          id="splash-script"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-                var hasSeen = sessionStorage.getItem('hasSeenSplash');
-                if (!isPWA || hasSeen) {
-                  document.documentElement.classList.add('hide-splash');
-                }
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
       <body className={`antialiased font-sans ${outfit.variable}`} suppressHydrationWarning>
         <LanguageProvider initialLocale={locale}>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
             enableSystem={false}
-            disableTransitionOnChange
           >
+            <ScrollToTop />
             <ThemeColorUpdater />
-            <SplashScreen />
             
-            {/* Global Background Gradients (Liquid Mesh) - Hidden entirely on Desktop for dashboard */}
-            <LiquidBackground className="md:hidden" />
+            {/* Global Background Gradients (Liquid Mesh) */}
+            <LiquidBackground />
             
-            <DataProvider>
-              <div className="relative z-10 flex flex-col h-[100dvh] overflow-y-auto overflow-x-hidden">
-                {children}
-              </div>
-            </DataProvider>
+            <div className="relative z-10 flex flex-col h-[100dvh] overflow-y-auto overflow-x-hidden">
+              {children}
+            </div>
             
             <Toaster richColors />
           </ThemeProvider>

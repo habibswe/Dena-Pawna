@@ -3,30 +3,45 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Transaction } from './calculations';
 
-export function formatTransactions(transactions: Transaction[], people: any[]) {
+export interface Person {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+export interface FormattedTransaction {
+  Date: string;
+  Person: string;
+  Type: string;
+  Amount: number;
+  Note: string;
+  [key: string]: string | number;
+}
+
+export function formatTransactions(transactions: Transaction[], people: Person[]): FormattedTransaction[] {
   return transactions.map(tx => {
     const person = people.find(p => p.id === tx.person_id);
     return {
       'Date': new Date(tx.transaction_date).toLocaleDateString(),
       'Person': person ? person.name : 'Unknown',
       'Type': tx.type,
-      'Amount': tx.amount,
+      'Amount': Number(tx.amount),
       'Note': tx.note || ''
     };
   });
 }
 
-export function exportToCSV(transactions: Transaction[], people: any[]) {
+export function exportToCSV(transactions: Transaction[], people: Person[]) {
   const data = formatTransactions(transactions, people);
   if (data.length === 0) return;
   
-  const headers = Object.keys(data[0]);
-  const csvRows = [];
+  const headers = Object.keys(data[0]) as (keyof FormattedTransaction)[];
+  const csvRows: string[] = [];
   csvRows.push(headers.join(','));
   
   for (const row of data) {
     const values = headers.map(header => {
-      const escaped = ('' + (row as any)[header]).replace(/"/g, '\\"');
+      const escaped = ('' + row[header]).replace(/"/g, '\\"');
       return `"${escaped}"`;
     });
     csvRows.push(values.join(','));
@@ -43,7 +58,7 @@ export function exportToCSV(transactions: Transaction[], people: any[]) {
   document.body.removeChild(link);
 }
 
-export function exportToExcel(transactions: Transaction[], people: any[]) {
+export function exportToExcel(transactions: Transaction[], people: Person[]) {
   const data = formatTransactions(transactions, people);
   const worksheet = xlsx.utils.json_to_sheet(data);
   const workbook = xlsx.utils.book_new();
@@ -51,15 +66,15 @@ export function exportToExcel(transactions: Transaction[], people: any[]) {
   xlsx.writeFile(workbook, 'transactions.xlsx');
 }
 
-export function exportToPDF(transactions: Transaction[], people: any[]) {
+export function exportToPDF(transactions: Transaction[], people: Person[]) {
   const data = formatTransactions(transactions, people);
   if (data.length === 0) return;
   
   const doc = new jsPDF();
   doc.text('Transaction History', 14, 15);
   
-  const headers = Object.keys(data[0]);
-  const rows = data.map(row => headers.map(h => (row as any)[h]));
+  const headers = Object.keys(data[0]) as (keyof FormattedTransaction)[];
+  const rows = data.map(row => headers.map(h => String(row[h])));
   
   autoTable(doc, {
     head: [headers],

@@ -8,7 +8,9 @@
     "transactions": "হিস্ট্রি",
     "summary": "সারাংশ",
     "settings": "সেটিংস",
-    "logout": "লগ আউট"
+    "logout": "লগ আউট",
+    "more": "আরও",
+    "menuSubtitle": "সকল ফিচার এবং সেটিংস দেখুন"
   },
   "landing": {
     "title": "দেনা পাওনা",
@@ -42,7 +44,12 @@
     "resetPasswordTitle": "নতুন পাসওয়ার্ড",
     "resetPasswordSubtitle": "নিচে আপনার নতুন পাসওয়ার্ড দিন",
     "updatePasswordBtn": "পাসওয়ার্ড পরিবর্তন করুন",
-    "backToLoginBtn": "লগইন পেজে ফিরে যান"
+    "backToLoginBtn": "লগইন পেজে ফিরে যান",
+    "overlayHello": "হ্যালো, সুপ্রিয়!",
+    "overlaySignupSub": "আপনার তথ্য দিয়ে আমাদের সাথে যাত্রা শুরু করুন।",
+    "overlayWelcome": "স্বাগতম!",
+    "overlayLoginSub": "আমাদের সাথে যুক্ত থাকতে আপনার তথ্য দিয়ে লগইন করুন।",
+    "orContinueWith": "অথবা কন্টিনিউ করুন"
   },
   "dashboard": {
     "title": "ওভারভিউ",

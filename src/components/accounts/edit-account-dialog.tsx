@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +10,8 @@ import { toast } from 'sonner';
 import { updateAccount } from '@/app/(dashboard)/accounts/actions';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
-
 import { useTranslation } from '@/i18n/client';
+import { fetchActiveAccountTypes, AccountTypeItem, DEFAULT_ACCOUNT_TYPES } from '@/lib/account-types';
 
 export function EditAccountDialog({ 
   account, 
@@ -25,6 +25,13 @@ export function EditAccountDialog({
 }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const [accountTypes, setAccountTypes] = useState<AccountTypeItem[]>(DEFAULT_ACCOUNT_TYPES);
+
+  useEffect(() => {
+    if (open) {
+      fetchActiveAccountTypes().then(setAccountTypes);
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,7 +56,7 @@ export function EditAccountDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] glass-panel">
+      <DialogContent className="sm:max-w-[425px] glass-panel !bg-background shadow-2xl">
         <DialogHeader>
           <DialogTitle>{t.common.edit} {t.accounts.title}</DialogTitle>
           <DialogDescription>
@@ -67,13 +74,12 @@ export function EditAccountDialog({
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CASH">{t.accounts.cash}</SelectItem>
-                <SelectItem value="BANK">{t.accounts.bank}</SelectItem>
-                <SelectItem value="BKASH">bKash</SelectItem>
-                <SelectItem value="NAGAD">Nagad</SelectItem>
-                <SelectItem value="CARD">Credit/Debit Card</SelectItem>
-                <SelectItem value="SAVINGS">Savings</SelectItem>
+              <SelectContent className="glass-panel !bg-background">
+                {accountTypes.map((at) => (
+                  <SelectItem key={at.code} value={at.code}>
+                    {at.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

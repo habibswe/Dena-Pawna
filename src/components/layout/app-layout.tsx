@@ -16,20 +16,28 @@ import { useTheme } from 'next-themes';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t, locale, setLocale } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const lastScrollY = useRef(0);
 
+  const isDark = mounted && (resolvedTheme || theme) === 'dark';
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Close the more menu whenever the user navigates
+  // Reset scroll position and close the more menu whenever the user navigates
   useEffect(() => {
     setIsMoreMenuOpen(false);
+    setIsScrollingDown(false);
+    
+    const container = document.getElementById('main-scroll-container');
+    if (container) {
+      container.scrollTop = 0;
+    }
   }, [pathname]);
 
   // Hide the mobile FAB when the "More" menu is open
@@ -220,7 +228,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
             <span className={cn("text-[9px] sm:text-[10px]", isMoreMenuOpen ? "font-bold" : "font-medium")}>
-              More
+              {t.nav.more}
             </span>
           </button>
         </nav>
@@ -236,8 +244,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="flex-1 overflow-y-auto px-6 py-12 pt-20">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold tracking-tight">Menu</h2>
-            <p className="text-muted-foreground mt-1">Access all features and settings</p>
+            <h2 className="text-3xl font-bold tracking-tight">{locale === 'bn' ? 'মেনু' : 'Menu'}</h2>
+            <p className="text-muted-foreground mt-1">{t.nav.menuSubtitle}</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {navItems.filter(item => !['/dashboard', '/accounts', '/transactions/new', '/transactions'].includes(item.href)).map((item) => {
@@ -263,19 +271,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <span className="font-medium text-sm block">Dark Mode</span>
                   <div 
                     className="relative flex items-center bg-secondary/50 rounded-full p-1 w-full cursor-pointer border border-border"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onClick={() => setTheme(isDark ? 'light' : 'dark')}
                   >
                     {/* Sliding Pill Background */}
                     <div 
                       className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                        (mounted && theme === 'dark') ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                        isDark ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
                       }`} 
                     />
                     
-                    <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${!(mounted && theme === 'dark') ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                    <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors duration-300 ${!isDark ? 'text-primary-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}>
                       <Sun className="h-4 w-4 mr-2" /> Light
                     </div>
-                    <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors ${(mounted && theme === 'dark') ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                    <div className={`flex-1 text-center z-10 flex items-center justify-center py-2.5 text-sm font-medium transition-colors duration-300 ${isDark ? 'text-primary-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}>
                       <Moon className="h-4 w-4 mr-2" /> Dark
                     </div>
                   </div>

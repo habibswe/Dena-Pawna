@@ -90,7 +90,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
   );
 
   return (
-    <div className="flex flex-col md:flex-row w-full min-h-[100dvh] bg-transparent relative z-10 items-center justify-center p-4 overflow-hidden">
+    <div className="flex flex-col items-center justify-center w-full bg-transparent relative z-10">
       
       {/* Mobile Top Header Removed - Using AuthLayout instead */}
 
@@ -129,7 +129,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
                 <span className="w-full border-t border-border/50" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground rounded-full">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground rounded-full">{t.auth.orContinueWith}</span>
               </div>
             </div>
 
@@ -148,7 +148,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
           
           <form onSubmit={handleSignupSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="signup-name">Full Name</Label>
+              <Label htmlFor="signup-name">{t.settings.fullName}</Label>
               <Input id="signup-name" name="name" type="text" placeholder="e.g. John Doe" required className="bg-background/50 border-primary/10" />
             </div>
             <div className="space-y-2">
@@ -170,7 +170,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
                 <span className="w-full border-t border-border/50" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground rounded-full">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground rounded-full">{t.auth.orContinueWith}</span>
               </div>
             </div>
 
@@ -202,27 +202,27 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
             <div className="relative h-[150px] w-full flex flex-col items-center justify-center">
               {/* Login mode text (shown when overlay is on right) */}
               <div className={`absolute transition-all duration-700 transform flex flex-col items-center w-full ${isLogin ? 'opacity-100 translate-x-0 delay-100' : 'opacity-0 -translate-x-20 pointer-events-none'}`}>
-                <h2 className="text-3xl font-extrabold mb-4 text-white">Hello, Friend!</h2>
-                <p className="text-white/80 mb-8 max-w-[80%] leading-relaxed">Enter your personal details and start your journey with us.</p>
+                <h2 className="text-3xl font-extrabold mb-4 text-white">{t.auth.overlayHello}</h2>
+                <p className="text-white/80 mb-8 max-w-[80%] leading-relaxed">{t.auth.overlaySignupSub}</p>
                 <Button 
                   variant="outline" 
-                  className="rounded-full px-12 bg-transparent text-white border-white/40 hover:bg-white hover:text-primary transition-all duration-300 h-12 text-md tracking-wider font-semibold"
+                  className="rounded-full px-12 bg-transparent text-white border-white/40 hover:bg-white hover:text-primary transition-all duration-300 h-12 text-md tracking-wider font-semibold uppercase"
                   onClick={toggleMode}
                 >
-                  SIGN UP
+                  {t.auth.signUpBtn}
                 </Button>
               </div>
 
               {/* Signup mode text (shown when overlay is on left) */}
               <div className={`absolute transition-all duration-700 transform flex flex-col items-center w-full ${!isLogin ? 'opacity-100 translate-x-0 delay-100' : 'opacity-0 translate-x-20 pointer-events-none'}`}>
-                <h2 className="text-3xl font-extrabold mb-4 text-white">Welcome Back!</h2>
-                <p className="text-white/80 mb-8 max-w-[80%] leading-relaxed">To keep connected with us please login with your personal info.</p>
+                <h2 className="text-3xl font-extrabold mb-4 text-white">{t.auth.overlayWelcome}</h2>
+                <p className="text-white/80 mb-8 max-w-[80%] leading-relaxed">{t.auth.overlayLoginSub}</p>
                 <Button 
                   variant="outline" 
-                  className="rounded-full px-12 bg-transparent text-white border-white/40 hover:bg-white hover:text-primary transition-all duration-300 h-12 text-md tracking-wider font-semibold"
+                  className="rounded-full px-12 bg-transparent text-white border-white/40 hover:bg-white hover:text-primary transition-all duration-300 h-12 text-md tracking-wider font-semibold uppercase"
                   onClick={toggleMode}
                 >
-                  SIGN IN
+                  {t.auth.signInBtn}
                 </Button>
               </div>
             </div>
@@ -231,7 +231,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
       </div>
 
       {/* --- MOBILE FALLBACK (Vertical Forms) --- */}
-      <div className="md:hidden w-full max-w-md mt-16 pb-8 px-4">
+      <div className="md:hidden w-full max-w-md pb-4 px-2">
         <div className="glass-panel p-6 sm:p-8 rounded-3xl border-primary/20 bg-background/60 backdrop-blur-xl shadow-xl relative z-10 w-full">
           <div className="text-center mb-6">
             <CardTitle className="text-2xl font-bold">{isLogin ? t.auth.loginTitle : t.auth.signupTitle}</CardTitle>
@@ -261,7 +261,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
           ) : (
             <form onSubmit={handleSignupSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="mobile-signup-name">Full Name</Label>
+                <Label htmlFor="mobile-signup-name">{t.settings.fullName}</Label>
                 <Input id="mobile-signup-name" name="name" type="text" placeholder="e.g. John Doe" required className="bg-background/50 border-primary/10" />
               </div>
               <div className="space-y-2">
@@ -284,7 +284,7 @@ export function SlidingAuthCard({ defaultMode }: SlidingAuthCardProps) {
               <span className="w-full border-t border-border/50" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground rounded-full">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground rounded-full">{t.auth.orContinueWith}</span>
             </div>
           </div>
 

@@ -57,11 +57,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[100dvh] bg-transparent relative z-10 items-center justify-center p-4">
+    <div className="flex flex-col items-center justify-center w-full bg-transparent relative z-10">
       {/* Mobile Top Header Removed - Using AuthLayout instead */}
 
       {/* Main Container - The Glass Card */}
-      <div className="relative w-full max-w-md mt-12 md:mt-0 glass-panel border-primary/20 bg-background/60 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.1)] rounded-[2rem] p-8 md:p-12 z-10 animate-fade-in-up">
+      <div className="relative w-full max-w-md glass-panel border-primary/20 bg-background/60 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.1)] rounded-[2rem] p-8 md:p-12 z-10 animate-fade-in-up">
         <div className="text-center mb-6">
           <div className="bg-primary/10 p-3 rounded-2xl inline-block mb-4 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
             <Activity className="w-8 h-8 text-primary" />

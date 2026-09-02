@@ -2,8 +2,18 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+
+async function verifyAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_token')?.value;
+  if (token !== 'true') {
+    throw new Error('Unauthorized: Admin access required');
+  }
+}
 
 export async function deletePerson(personId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('people').delete().eq('id', personId);
   if (error) {
@@ -15,6 +25,7 @@ export async function deletePerson(personId: string) {
 }
 
 export async function deleteTransaction(transactionId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('transactions').delete().eq('id', transactionId);
   if (error) {
@@ -26,6 +37,7 @@ export async function deleteTransaction(transactionId: string) {
 }
 
 export async function updatePerson(personId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const name = formData.get('name') as string;
   const phone = formData.get('phone') as string;
@@ -46,6 +58,7 @@ export async function updatePerson(personId: string, formData: FormData) {
 }
 
 export async function updateTransaction(transactionId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const type = formData.get('type') as string;
   const amount = parseFloat(formData.get('amount') as string);
@@ -72,6 +85,7 @@ export async function updateTransaction(transactionId: string, formData: FormDat
 }
 
 export async function createSystemUser(formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -107,6 +121,7 @@ export async function createSystemUser(formData: FormData) {
 }
 
 export async function updateSystemUser(userId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const fullName = formData.get('fullName') as string;
   const password = formData.get('password') as string;
@@ -132,6 +147,7 @@ export async function updateSystemUser(userId: string, formData: FormData) {
 }
 
 export async function deleteSystemUser(userId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   
   await supabase.from('profiles').delete().eq('id', userId);
@@ -146,6 +162,7 @@ export async function deleteSystemUser(userId: string) {
 }
 
 export async function deleteAccount(accountId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('accounts').delete().eq('id', accountId);
   if (error) return { error: error.message };
@@ -155,6 +172,7 @@ export async function deleteAccount(accountId: string) {
 }
 
 export async function updateAccount(accountId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const name = formData.get('name') as string;
   const type = formData.get('type') as string;
@@ -168,6 +186,7 @@ export async function updateAccount(accountId: string, formData: FormData) {
 }
 
 export async function deleteCategory(categoryId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('categories').delete().eq('id', categoryId);
   if (error) return { error: error.message };
@@ -177,6 +196,7 @@ export async function deleteCategory(categoryId: string) {
 }
 
 export async function updateCategory(categoryId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const name = formData.get('name') as string;
   const type = formData.get('type') as string;
@@ -195,6 +215,7 @@ export async function updateCategory(categoryId: string, formData: FormData) {
 }
 
 export async function deleteBudget(budgetId: string) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('budgets').delete().eq('id', budgetId);
   if (error) return { error: error.message };
@@ -204,6 +225,7 @@ export async function deleteBudget(budgetId: string) {
 }
 
 export async function updateBudget(budgetId: string, formData: FormData) {
+  await verifyAdmin();
   const supabase = createAdminClient();
   const amount = parseFloat(formData.get('amount') as string);
   const month = formData.get('month') as string;

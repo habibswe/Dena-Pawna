@@ -41,13 +41,19 @@ export default async function AdminDashboardPage() {
     profile: profiles.find(p => p.id === u.id)
   }));
 
-  const { count: peopleCount } = await supabase.from('people').select('*', { count: 'exact', head: true });
-  const { count: transactionsCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true });
-  const { count: categoriesCount } = await supabase.from('categories').select('*', { count: 'exact', head: true });
-  const { count: budgetsCount } = await supabase.from('budgets').select('*', { count: 'exact', head: true });
-  
-  // Fetch all transactions to calculate global metrics
-  const { data: allTransactionsData } = await supabase.from('transactions').select('amount, type');
+  const [
+    { count: peopleCount },
+    { count: transactionsCount },
+    { count: categoriesCount },
+    { count: budgetsCount },
+    { data: allTransactionsData }
+  ] = await Promise.all([
+    supabase.from('people').select('*', { count: 'exact', head: true }),
+    supabase.from('transactions').select('*', { count: 'exact', head: true }),
+    supabase.from('categories').select('*', { count: 'exact', head: true }),
+    supabase.from('budgets').select('*', { count: 'exact', head: true }),
+    supabase.from('transactions').select('amount, type')
+  ]);
   const allTxs = allTransactionsData || [];
   
   let totalMoney = 0;

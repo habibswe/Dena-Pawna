@@ -67,9 +67,19 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
       case 'CASH': return <Banknote className="h-5 w-5 text-emerald-500" />;
       case 'BANK': return <Wallet className="h-5 w-5 text-blue-500" />;
       case 'BKASH':
-      case 'NAGAD': return <Smartphone className="h-5 w-5 text-pink-500" />;
+      case 'NAGAD':
+      case 'ROCKET':
+      case 'UPAY':
+      case 'CELLFIN':
+      case 'TAP':
+      case 'SURECASH':
+      case 'POCKET':
+        return <Smartphone className="h-5 w-5 text-pink-500" />;
       case 'CARD': return <CreditCard className="h-5 w-5 text-purple-500" />;
-      case 'SAVINGS': return <PiggyBank className="h-5 w-5 text-amber-500" />;
+      case 'SAVINGS':
+      case 'DPS':
+      case 'FDR':
+        return <PiggyBank className="h-5 w-5 text-amber-500" />;
       default: return <Wallet className="h-5 w-5 text-primary" />;
     }
   };

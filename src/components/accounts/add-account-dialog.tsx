@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,13 +10,20 @@ import { toast } from 'sonner';
 import { addAccount } from '@/app/(dashboard)/accounts/actions';
 import { Loader2, Plus } from 'lucide-react';
 import { ExpandableFab } from '@/components/ui/expandable-fab';
-
 import { useTranslation } from '@/i18n/client';
+import { fetchActiveAccountTypes, AccountTypeItem, DEFAULT_ACCOUNT_TYPES } from '@/lib/account-types';
 
 export function AddAccountDialog() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [accountTypes, setAccountTypes] = useState<AccountTypeItem[]>(DEFAULT_ACCOUNT_TYPES);
+
+  useEffect(() => {
+    if (open) {
+      fetchActiveAccountTypes().then(setAccountTypes);
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,6 +46,8 @@ export function AddAccountDialog() {
     }
   };
 
+  const defaultVal = accountTypes.length > 0 ? accountTypes[0].code : 'BANK';
+
   return (
     <>
       <ExpandableFab onClick={() => setOpen(true)} label={t.accounts.addAccount} />
@@ -49,7 +58,7 @@ export function AddAccountDialog() {
             {t.accounts.addAccount}
           </Button>
         } />
-        <DialogContent className="sm:max-w-[425px] glass-panel">
+        <DialogContent className="sm:max-w-[425px] glass-panel !bg-background shadow-2xl">
         <DialogHeader>
           <DialogTitle>{t.accounts.addAccount}</DialogTitle>
           <DialogDescription>
@@ -63,17 +72,16 @@ export function AddAccountDialog() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="type">{t.accounts.accountType}</Label>
-            <Select name="type" required defaultValue="BANK">
+            <Select name="type" required defaultValue={defaultVal}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CASH">{t.accounts.cash}</SelectItem>
-                <SelectItem value="BANK">{t.accounts.bank}</SelectItem>
-                <SelectItem value="BKASH">bKash</SelectItem>
-                <SelectItem value="NAGAD">Nagad</SelectItem>
-                <SelectItem value="CARD">Credit/Debit Card</SelectItem>
-                <SelectItem value="SAVINGS">Savings</SelectItem>
+              <SelectContent className="glass-panel !bg-background">
+                {accountTypes.map((at) => (
+                  <SelectItem key={at.code} value={at.code}>
+                    {at.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

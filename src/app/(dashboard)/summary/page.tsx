@@ -37,7 +37,7 @@ export default async function SummaryPage(props: { searchParams: Promise<{ filte
 
   const [{ data: transactionsData }, { data: peopleData }] = await Promise.all([
     query,
-    supabase.from('people').select('*')
+    supabase.from('people').select('id, name')
   ]);
   const transactions = transactionsData || [];
   const people = peopleData || [];

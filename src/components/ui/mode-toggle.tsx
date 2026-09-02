@@ -1,38 +1,45 @@
 'use client';
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-
-import { Button } from "@/components/ui/button"
+import * as React from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
-  // Avoid hydration mismatch by waiting for mount
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
+  React.useEffect(() => setMounted(true), []);
 
   if (!mounted) {
     return (
-      <Button variant="outline" size="icon" className="glass-panel border-primary/20 rounded-full h-10 w-10">
-        <div className="h-4 w-4 bg-primary/20 rounded-full animate-pulse" />
-      </Button>
-    )
+      <div className="w-16 h-9 rounded-full glass-panel border border-primary/20 p-1 flex items-center">
+        <div className="h-7 w-7 rounded-full bg-primary/20 animate-pulse" />
+      </div>
+    );
   }
 
-  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const isDark = (resolvedTheme || theme) === 'dark';
 
   return (
-    <Button 
-      variant="outline" 
-      size="icon" 
+    <button
+      type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="glass-panel border-primary/20 hover:bg-primary/10 transition-colors rounded-full h-10 w-10 relative"
+      className="relative flex items-center bg-secondary/50 rounded-full p-1 w-16 h-9 cursor-pointer border border-primary/20 glass-panel focus:outline-none transition-colors overflow-hidden"
       aria-label="Toggle theme"
     >
-      <Sun className={`h-[1.2rem] w-[1.2rem] text-primary transition-all absolute ${isDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-      <Moon className={`h-[1.2rem] w-[1.2rem] text-primary transition-all absolute ${isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
-    </Button>
-  )
+      {/* Sliding Pill Background */}
+      <div
+        className={`absolute top-1 bottom-1 w-7 bg-primary rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+          isDark ? 'translate-x-7' : 'translate-x-0'
+        }`}
+      />
+      
+      <div className={`flex-1 z-10 flex items-center justify-center transition-colors duration-300 ${!isDark ? 'text-primary-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}>
+        <Sun className="h-4 w-4" />
+      </div>
+      <div className={`flex-1 z-10 flex items-center justify-center transition-colors duration-300 ${isDark ? 'text-primary-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}>
+        <Moon className="h-4 w-4" />
+      </div>
+    </button>
+  );
 }

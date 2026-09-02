@@ -10,7 +10,7 @@ export default async function AccountsPage() {
 
   const [{ data: accounts }, { data: transactions }] = await Promise.all([
     supabase.from('accounts').select('*').order('name'),
-    supabase.from('transactions').select('*')
+    supabase.from('transactions').select('id, account_id, to_account_id, type, amount')
   ]);
 
   const allTransactions = (transactions || []) as Transaction[];

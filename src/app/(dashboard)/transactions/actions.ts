@@ -71,7 +71,7 @@ export async function getPaginatedTransactions(page: number, filter?: string, mo
   const offset = (page - 1) * PAGE_SIZE;
 
   let query = supabase.from('transactions')
-    .select('*', { count: 'exact' })
+    .select('*, people(id, name), categories(id, name), accounts!transactions_account_id_fkey(id, name)', { count: 'exact' })
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -93,35 +93,14 @@ export async function getPaginatedTransactions(page: number, filter?: string, mo
 
   query = query.range(offset, offset + PAGE_SIZE - 1);
 
-  const [
-    { data: transactionsData, count, error: txError },
-    { data: peopleData },
-    { data: categoriesData },
-    { data: accountsData }
-  ] = await Promise.all([
-    query,
-    supabase.from('people').select('id, name'),
-    supabase.from('categories').select('id, name'),
-    supabase.from('accounts').select('id, name')
-  ]);
+  const { data: transactionsData, count, error: txError } = await query;
 
   if (txError) {
     console.error("Error fetching paginated transactions:", txError);
     return { data: [], count: 0 };
   }
 
-  const peopleMap = new Map((peopleData || []).map(p => [p.id, p]));
-  const categoriesMap = new Map((categoriesData || []).map(c => [c.id, c]));
-  const accountsMap = new Map((accountsData || []).map(a => [a.id, a]));
-
-  const data = (transactionsData || []).map(tx => ({
-    ...tx,
-    people: tx.person_id ? peopleMap.get(tx.person_id) : null,
-    categories: tx.category_id ? categoriesMap.get(tx.category_id) : null,
-    accounts: tx.account_id ? accountsMap.get(tx.account_id) : null,
-  }));
-
-  return { data: data || [], count: count || 0 };
+  return { data: transactionsData || [], count: count || 0 };
 }
 
 export async function updateTransaction(id: string, formData: FormData) {
