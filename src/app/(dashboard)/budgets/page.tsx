@@ -80,7 +80,7 @@ async function BudgetsContent({ month }: { month?: string }) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start justify-between w-full sm:w-auto gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">{t.budgets.title}</h2>
@@ -90,10 +90,8 @@ async function BudgetsContent({ month }: { month?: string }) {
             <MonthSelector currentMonth={currentMonth} />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="hidden sm:block">
-            <MonthSelector currentMonth={currentMonth} />
-          </div>
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <MonthSelector currentMonth={currentMonth} />
           <AddBudgetDialog categories={allCategories} defaultMonth={currentMonth} />
         </div>
       </div>

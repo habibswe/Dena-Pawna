@@ -76,7 +76,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start justify-between w-full sm:w-auto gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.title}</h2>
@@ -86,10 +86,8 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
             <MonthSelector currentMonth={currentMonth} from={from} to={to} />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="hidden sm:block">
-            <MonthSelector currentMonth={currentMonth} from={from} to={to} />
-          </div>
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <MonthSelector currentMonth={currentMonth} from={from} to={to} />
           <Link href="/transactions/new" className={cn(buttonVariants(), 'hidden md:inline-flex')}>
             {t.dashboard.addTransaction}
           </Link>

@@ -63,7 +63,7 @@ export function AddBudgetDialog({
       <ExpandableFab onClick={() => setOpen(true)} label={t.budgets.addBudget} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={
-          <Button className="hidden md:flex gap-2">
+          <Button className="hidden md:flex gap-2 h-10 sm:h-11">
             <Plus className="h-4 w-4" />
             {t.budgets.addBudget}
           </Button>

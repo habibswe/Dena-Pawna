@@ -94,6 +94,8 @@ export function AddTransactionForm({
   const [localPeople, setLocalPeople] = useState(people);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [transactionDate, setTransactionDate] = useState<Date>(new Date());
+  const [isDateOpen, setIsDateOpen] = useState(false);
+  const [isDueDateOpen, setIsDueDateOpen] = useState(false);
   const [recurrence, setRecurrence] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -349,7 +351,7 @@ export function AddTransactionForm({
           {(type === 'GIVEN' || type === 'BORROWED') && (
             <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
               <Label htmlFor="due_date">{t.addTransactionForm.expectedReturnDate}</Label>
-              <Popover>
+              <Popover open={isDueDateOpen} onOpenChange={setIsDueDateOpen}>
                 <PopoverTrigger render={
                   <Button
                     variant={'outline'}
@@ -362,11 +364,14 @@ export function AddTransactionForm({
                     {dueDate ? format(dueDate, 'PPP') : <span>{t.addTransactionForm.pickDueDate}</span>}
                   </Button>
                 } />
-                <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl" align="start">
+                <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl !bg-background" align="start">
                   <Calendar
                     mode="single"
                     selected={dueDate}
-                    onSelect={(newDate) => setDueDate(newDate)}
+                    onSelect={(newDate) => {
+                      setDueDate(newDate);
+                      setIsDueDateOpen(false);
+                    }}
                     className="rounded-xl"
                   />
                 </PopoverContent>
@@ -404,7 +409,7 @@ export function AddTransactionForm({
 
           <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
             <Label htmlFor="transaction_date">{t.common.date}</Label>
-            <Popover>
+            <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
               <PopoverTrigger render={
                 <Button
                   variant={'outline'}
@@ -417,11 +422,17 @@ export function AddTransactionForm({
                   {transactionDate ? format(transactionDate, 'PPP') : <span>{t.addTransactionForm.pickDate}</span>}
                 </Button>
               } />
-              <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl" align="start">
+              <PopoverContent className="w-auto p-0 glass-panel border-primary/20 shadow-2xl !bg-background" align="start">
                 <Calendar
                   mode="single"
                   selected={transactionDate}
-                  onSelect={(newDate) => newDate && setTransactionDate(newDate)}
+                  disabled={(date) => date > new Date()}
+                  onSelect={(newDate) => {
+                    if (newDate) {
+                      setTransactionDate(newDate);
+                      setIsDateOpen(false);
+                    }
+                  }}
                   className="rounded-xl"
                 />
               </PopoverContent>
