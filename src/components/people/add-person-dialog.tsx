@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { addPerson } from '@/app/(dashboard)/people/actions';
@@ -24,11 +25,13 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [openingBalanceType, setOpeningBalanceType] = useState('NONE');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
+    formData.set('opening_balance_type', openingBalanceType);
     
     const result = await addPerson(formData);
     
@@ -39,6 +42,7 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
     } else {
       toast.success('Person added successfully');
       setOpen(false);
+      setOpeningBalanceType('NONE');
       if (onSuccess && result.data) onSuccess(result.data);
     }
   };
@@ -54,7 +58,7 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
             </Button>
           )
         } />
-      <DialogContent className="sm:max-w-[425px] glass-panel border-primary/20">
+      <DialogContent className="sm:max-w-[425px] glass-panel border-primary/20 !bg-background shadow-2xl">
         <DialogHeader>
           <DialogTitle>{t.people.addPerson}</DialogTitle>
           <DialogDescription>
@@ -75,9 +79,9 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
               <Label htmlFor="email">{t.people.emailOptional}</Label>
               <Input id="email" name="email" type="email" placeholder="rahim@example.com" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border bg-secondary/10">
+            <div className="grid grid-cols-1 gap-3.5 p-3.5 rounded-xl border bg-secondary/10">
               <div className="grid gap-1.5">
-                <Label htmlFor="opening_balance" className="text-xs">{t.people.openingBalance}</Label>
+                <Label htmlFor="opening_balance" className="text-xs font-medium">{t.people.openingBalance}</Label>
                 <Input 
                   id="opening_balance" 
                   name="opening_balance" 
@@ -85,20 +89,27 @@ export function AddPersonDialog({ children, onSuccess }: { children?: React.Reac
                   step="any" 
                   min="0" 
                   placeholder="৳ 0.00" 
+                  className="h-10 text-sm"
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="opening_balance_type" className="text-xs">{t.people.openingBalanceType}</Label>
-                <select
-                  id="opening_balance_type"
-                  name="opening_balance_type"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  defaultValue="NONE"
-                >
-                  <option value="NONE" className="bg-background text-foreground">{t.people.noOpeningBalance}</option>
-                  <option value="PAYABLE" className="bg-background text-destructive font-medium">{t.people.iOweThem}</option>
-                  <option value="RECEIVABLE" className="bg-background text-emerald-600 dark:text-emerald-400 font-medium">{t.people.theyOweMe}</option>
-                </select>
+                <Label className="text-xs font-medium">{t.people.openingBalanceType}</Label>
+                <Select value={openingBalanceType} onValueChange={(val) => val && setOpeningBalanceType(val)}>
+                  <SelectTrigger className="w-full glass-panel border-primary/20 text-sm h-10">
+                    <SelectValue placeholder={t.people.openingBalanceType}>
+                      {openingBalanceType === 'PAYABLE' 
+                        ? t.people.iOweThem 
+                        : openingBalanceType === 'RECEIVABLE' 
+                          ? t.people.theyOweMe 
+                          : t.people.noOpeningBalance}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="!bg-background shadow-2xl">
+                    <SelectItem value="NONE">{t.people.noOpeningBalance}</SelectItem>
+                    <SelectItem value="PAYABLE" className="text-destructive font-medium">{t.people.iOweThem}</SelectItem>
+                    <SelectItem value="RECEIVABLE" className="text-emerald-600 dark:text-emerald-400 font-medium">{t.people.theyOweMe}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
