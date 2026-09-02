@@ -34,7 +34,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
     { data: categories }
   ] = await Promise.all([
     supabase.from('people').select('id, name'),
-    supabase.from('transactions').select('id, person_id, category_id, type, amount, transaction_date, note, due_date').order('transaction_date', { ascending: false }),
+    supabase.from('transactions').select('id, person_id, category_id, account_id, to_account_id, type, amount, transaction_date, note, due_date').order('transaction_date', { ascending: false }),
     supabase.from('categories').select('id, name')
   ]);
 
@@ -107,7 +107,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
             <div className={`text-2xl font-bold ${timeframeSummary.remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
               {timeframeSummary.remaining >= 0 ? '' : '-'}৳{Math.abs(timeframeSummary.remaining).toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Income - Exp - Saved</p>
+            <p className="text-xs text-muted-foreground mt-1">Net Cash Flow (In - Out)</p>
           </CardContent>
         </Card>
         <Card className="glass-panel">
@@ -210,6 +210,26 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
                   </div>
                   <span className="font-bold text-purple-600 dark:text-purple-400">+৳{timeframeSummary.borrowed.toLocaleString()}</span>
                 </div>
+
+                {timeframeSummary.repaymentsReceived > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 ml-6">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">Loan Repayments Received (In)</span>
+                    </div>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">+৳{timeframeSummary.repaymentsReceived.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {timeframeSummary.repaymentsSent > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 ml-6">
+                    <div className="flex items-center gap-3">
+                      <TrendingDown className="h-5 w-5 text-indigo-500" />
+                      <span className="font-medium text-indigo-600 dark:text-indigo-400">Loan Repayments Made (Out)</span>
+                    </div>
+                    <span className="font-bold text-indigo-600 dark:text-indigo-400">-৳{timeframeSummary.repaymentsSent.toLocaleString()}</span>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between p-4 rounded-xl bg-primary/10 border border-primary/20 mt-2">
                   <div className="flex items-center gap-3">

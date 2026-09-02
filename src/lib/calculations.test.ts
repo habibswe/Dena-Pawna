@@ -1,88 +1,94 @@
-import { calculateBalance, calculateAccountBalance, calculateTimeframeSummary, Transaction } from './calculations';
+import { 
+  calculateBalance, 
+  calculateAccountBalance, 
+  calculateTotalWalletBalance, 
+  calculateTimeframeSummary, 
+  Transaction 
+} from './calculations';
 import { describe, it, expect } from 'vitest';
 
-describe('calculateBalance', () => {
-  it('should calculate correct balance for given and received', () => {
+describe('Credit/Debt & Double-Entry Calculation Rules', () => {
+  const walletA = 'wallet_bank';
+  const personJohn = 'person_john';
+
+  it('1. Give Loan (GIVEN): Wallet decreases, Total balance decreases, Person receivable increases', () => {
     const transactions: Transaction[] = [
-      { id: '1', type: 'GIVEN', amount: 1000, transaction_date: '2026-08-29' },
-      { id: '2', type: 'RECEIVED', amount: 500, transaction_date: '2026-08-29' }
+      { id: '1', type: 'INCOME', amount: 10000, transaction_date: '2026-09-01', account_id: walletA },
+      { id: '2', type: 'GIVEN', amount: 3000, transaction_date: '2026-09-02', account_id: walletA, person_id: personJohn }
     ];
-    expect(calculateBalance(transactions)).toBe(500);
+
+    // Wallet A balance decreases by 3,000 (10,000 - 3,000 = 7,000)
+    expect(calculateAccountBalance(walletA, transactions)).toBe(7000);
+    // Total wallet balance decreases by 3,000
+    expect(calculateTotalWalletBalance(transactions)).toBe(7000);
+    // Person receivable (পাওনা) is +3,000
+    expect(calculateBalance(transactions.filter(t => t.person_id === personJohn))).toBe(3000);
   });
 
-  it('should calculate correct balance for given and borrowed', () => {
+  it('2. Take Loan (BORROWED): Wallet increases, Total balance increases, Person payable increases (negative)', () => {
     const transactions: Transaction[] = [
-      { id: '1', type: 'GIVEN', amount: 1000, transaction_date: '2026-08-29' },
-      { id: '2', type: 'BORROWED', amount: 2000, transaction_date: '2026-08-29' }
+      { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-09-01', account_id: walletA },
+      { id: '2', type: 'BORROWED', amount: 4000, transaction_date: '2026-09-02', account_id: walletA, person_id: personJohn }
     ];
-    expect(calculateBalance(transactions)).toBe(-1000);
+
+    // Wallet A balance increases by 4,000 (5,000 + 4,000 = 9,000)
+    expect(calculateAccountBalance(walletA, transactions)).toBe(9000);
+    // Total wallet balance increases by 4,000
+    expect(calculateTotalWalletBalance(transactions)).toBe(9000);
+    // User owes John (দেনা) is -4,000
+    expect(calculateBalance(transactions.filter(t => t.person_id === personJohn))).toBe(-4000);
   });
 
-  it('should calculate correct balance for multiple transactions', () => {
+  it('3. Receive Loan Payment (RECEIVED): Wallet increases, Total balance increases, Person receivable decreases', () => {
     const transactions: Transaction[] = [
-      { id: '1', type: 'GIVEN', amount: 5000, transaction_date: '2026-08-29' },
-      { id: '2', type: 'RECEIVED', amount: 2000, transaction_date: '2026-08-29' },
-      { id: '3', type: 'RECEIVED', amount: 1000, transaction_date: '2026-08-29' }
+      { id: '1', type: 'INCOME', amount: 10000, transaction_date: '2026-09-01', account_id: walletA },
+      // Gave loan 5,000
+      { id: '2', type: 'GIVEN', amount: 5000, transaction_date: '2026-09-02', account_id: walletA, person_id: personJohn },
+      // John returns 2,000
+      { id: '3', type: 'RECEIVED', amount: 2000, transaction_date: '2026-09-03', account_id: walletA, person_id: personJohn }
     ];
-    expect(calculateBalance(transactions)).toBe(2000);
+
+    // Wallet A balance: 10,000 - 5,000 + 2,000 = 7,000
+    expect(calculateAccountBalance(walletA, transactions)).toBe(7000);
+    // Total wallet balance: 7,000
+    expect(calculateTotalWalletBalance(transactions)).toBe(7000);
+    // Remaining receivable from John is 3,000 (+5,000 - 2,000)
+    expect(calculateBalance(transactions.filter(t => t.person_id === personJohn))).toBe(3000);
   });
 
-  it('should handle zero balance (settled)', () => {
+  it('4. Repay Loan (RETURNED): Wallet decreases, Total balance decreases, Person payable decreases', () => {
     const transactions: Transaction[] = [
-      { id: '1', type: 'BORROWED', amount: 3000, transaction_date: '2026-08-29' },
-      { id: '2', type: 'RETURNED', amount: 3000, transaction_date: '2026-08-29' }
+      // Borrowed 6,000
+      { id: '1', type: 'BORROWED', amount: 6000, transaction_date: '2026-09-01', account_id: walletA, person_id: personJohn },
+      // Repay 2,500
+      { id: '2', type: 'RETURNED', amount: 2500, transaction_date: '2026-09-02', account_id: walletA, person_id: personJohn }
     ];
-    expect(calculateBalance(transactions)).toBe(0);
-  });
-});
 
-describe('calculateAccountBalance', () => {
-  const accountId = 'acc1';
-  
-  it('should increase on INCOME and decrease on EXPENSE', () => {
-    const transactions: Transaction[] = [
-      { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-08-29', account_id: accountId },
-      { id: '2', type: 'EXPENSE', amount: 2000, transaction_date: '2026-08-29', account_id: accountId }
-    ];
-    expect(calculateAccountBalance(accountId, transactions)).toBe(3000);
+    // Wallet A balance: +6,000 - 2,500 = 3,500
+    expect(calculateAccountBalance(walletA, transactions)).toBe(3500);
+    // Total wallet balance: 3,500
+    expect(calculateTotalWalletBalance(transactions)).toBe(3500);
+    // Remaining debt to John is -3,500 (-6,000 + 2,500)
+    expect(calculateBalance(transactions.filter(t => t.person_id === personJohn))).toBe(-3500);
   });
 
-  it('should handle Transfers correctly', () => {
+  it('5. Monthly timeframe net cash flow aggregates loans, repayments, income and expenses correctly', () => {
     const transactions: Transaction[] = [
-      { id: '1', type: 'INCOME', amount: 1000, transaction_date: '2026-08-29', account_id: accountId },
-      // Transfer out of this account
-      { id: '2', type: 'TRANSFER', amount: 300, transaction_date: '2026-08-29', account_id: accountId, to_account_id: 'acc2' },
-      // Transfer into this account
-      { id: '3', type: 'TRANSFER', amount: 500, transaction_date: '2026-08-29', account_id: 'acc3', to_account_id: accountId }
-    ];
-    expect(calculateAccountBalance(accountId, transactions)).toBe(1200); // 1000 - 300 + 500
-  });
-
-  it('should handle Lending and Borrowing correctly', () => {
-    const transactions: Transaction[] = [
-      { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-08-29', account_id: accountId },
-      { id: '2', type: 'GIVEN', amount: 1000, transaction_date: '2026-08-29', account_id: accountId }, // lent 1000
-      { id: '3', type: 'BORROWED', amount: 2000, transaction_date: '2026-08-29', account_id: accountId }, // borrowed 2000
-    ];
-    expect(calculateAccountBalance(accountId, transactions)).toBe(6000); // 5000 - 1000 + 2000
-  });
-});
-
-describe('calculateTimeframeSummary', () => {
-  it('should aggregate monthly stats correctly', () => {
-    const transactions: Transaction[] = [
-      { id: '1', type: 'INCOME', amount: 5000, transaction_date: '2026-08-05' },
-      { id: '2', type: 'EXPENSE', amount: 2000, transaction_date: '2026-08-10' },
-      { id: '3', type: 'GIVEN', amount: 1000, transaction_date: '2026-08-15' }, // Not an expense
-      { id: '4', type: 'SAVING', amount: 500, transaction_date: '2026-08-20' }, // saving
-      { id: '5', type: 'INCOME', amount: 1000, transaction_date: '2026-07-29' } // outside month
+      { id: '1', type: 'INCOME', amount: 20000, transaction_date: '2026-09-01' },
+      { id: '2', type: 'EXPENSE', amount: 5000, transaction_date: '2026-09-02' },
+      { id: '3', type: 'GIVEN', amount: 4000, transaction_date: '2026-09-03' },
+      { id: '4', type: 'BORROWED', amount: 3000, transaction_date: '2026-09-04' },
+      { id: '5', type: 'RECEIVED', amount: 1000, transaction_date: '2026-09-05' },
+      { id: '6', type: 'RETURNED', amount: 1500, transaction_date: '2026-09-06' },
+      { id: '7', type: 'SAVING', amount: 2000, transaction_date: '2026-09-07' }
     ];
 
-    const summary = calculateTimeframeSummary(transactions, '2026-08');
-    expect(summary.income).toBe(5000);
-    expect(summary.expense).toBe(2000);
-    expect(summary.lent).toBe(1000);
-    expect(summary.savings).toBe(500);
-    expect(summary.remaining).toBe(2500); // 5000 - 2000 - 500
+    const summary = calculateTimeframeSummary(transactions, '2026-09');
+    // Total In: 20,000 (inc) + 3,000 (borrowed) + 1,000 (repayments received) = 24,000
+    expect(summary.totalIn).toBe(24000);
+    // Total Out: 5,000 (exp) + 2,000 (saving) + 4,000 (lent) + 1,500 (repayments sent) = 12,500
+    expect(summary.totalOut).toBe(12500);
+    // Net remaining cash flow: 24,000 - 12,500 = 11,500
+    expect(summary.remaining).toBe(11500);
   });
 });

@@ -117,6 +117,12 @@ export function AddTransactionForm({
       setIsLoading(false);
       return;
     }
+
+    if (requiresSingleAccount && !accountId) {
+      toast.error(t.addTransactionForm.selectAccount || 'Please select an account');
+      setIsLoading(false);
+      return;
+    }
     
     if (type === 'TRANSFER' && (!accountId || !toAccountId)) {
       toast.error('Please select both source and destination accounts');

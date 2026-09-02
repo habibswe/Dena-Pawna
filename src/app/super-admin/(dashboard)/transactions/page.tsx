@@ -120,8 +120,14 @@ export default async function AdminTransactionsPage({
               </thead>
               <tbody>
                 {transactions?.map((tx) => {
-                  const isPositive = tx.type === 'GIVEN' || tx.type === 'RETURNED';
-                  const colorClass = isPositive ? 'text-primary' : 'text-destructive';
+                  const isCashInflow = ['INCOME', 'BORROWED', 'RECEIVED'].includes(tx.type);
+                  const isTransfer = tx.type === 'TRANSFER';
+                  const colorClass = isTransfer 
+                    ? 'text-muted-foreground' 
+                    : isCashInflow 
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : 'text-destructive';
+                  const sign = isTransfer ? '' : isCashInflow ? '+' : '-';
 
                   return (
                     <tr key={tx.id} className="border-b border-border/50 last:border-0 hover:bg-secondary/20">
@@ -137,7 +143,7 @@ export default async function AdminTransactionsPage({
                         </span>
                       </td>
                       <td className={`px-6 py-4 font-bold ${colorClass}`}>
-                        ৳{Number(tx.amount).toLocaleString()}
+                        {sign}৳{Number(tx.amount).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

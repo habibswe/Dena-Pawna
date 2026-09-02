@@ -130,9 +130,14 @@ export function TransactionListClient({
   return (
     <div className="divide-y">
       {optimisticTransactions.map(tx => {
-        const isTxPositive = ['GIVEN', 'RETURNED', 'INCOME', 'RECEIVED'].includes(tx.type);
-        const txColor = isTxPositive ? 'text-primary' : 'text-destructive';
-        const sign = isTxPositive ? '+' : '-';
+        const isCashInflow = ['INCOME', 'BORROWED', 'RECEIVED'].includes(tx.type);
+        const isTransfer = tx.type === 'TRANSFER';
+        const txColor = isTransfer 
+          ? 'text-muted-foreground' 
+          : isCashInflow 
+            ? 'text-emerald-600 dark:text-emerald-400' 
+            : 'text-destructive';
+        const sign = isTransfer ? '' : isCashInflow ? '+' : '-';
         
         const displayName = tx.people?.name || tx.categories?.name || tx.accounts?.name || (tx.type ? tx.type.charAt(0) + tx.type.slice(1).toLowerCase() : 'Transaction');
         
@@ -147,6 +152,12 @@ export function TransactionListClient({
         else if (tx.type === 'SAVING') actionText = t.dashboard.saved;
         else actionText = tx.type;
 
+        const subtitleDetails = [
+          actionText,
+          tx.accounts?.name ? `${tx.accounts.name}` : null,
+          format(new Date(tx.transaction_date), 'dd MMM yyyy')
+        ].filter(Boolean).join(' • ');
+
         const isOverdue = tx.due_date ? new Date(tx.due_date) < new Date(new Date().setHours(0, 0, 0, 0)) : false;
 
         return (
@@ -160,7 +171,7 @@ export function TransactionListClient({
               <div className="space-y-1 min-w-0 pr-4">
                 <p className="font-semibold leading-none truncate">{displayName}</p>
                 <p className="text-sm text-muted-foreground truncate">
-                  {actionText} • {format(new Date(tx.transaction_date), 'dd MMM yyyy')}
+                  {subtitleDetails}
                 </p>
               </div>
             </div>

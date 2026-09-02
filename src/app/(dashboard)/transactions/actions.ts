@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { calculateAccountBalance } from '@/lib/calculations';
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient();
@@ -24,13 +25,35 @@ export async function addTransaction(formData: FormData) {
   const recurrence = formData.get('recurrence') as string;
 
   if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !person_id) {
-    return { error: 'Person is required for lending/borrowing' };
+    return { error: 'Person is required for credit/debt transactions' };
   }
   if (!type) return { error: 'Transaction type is required' };
   if (isNaN(amount) || amount <= 0) return { error: 'Amount must be a positive number' };
 
-  if (type === 'TRANSFER' && (!account_id || !to_account_id)) {
-    return { error: 'Transfer requires both source and destination accounts' };
+  if (type === 'TRANSFER') {
+    if (!account_id || !to_account_id) {
+      return { error: 'Transfer requires both source and destination accounts' };
+    }
+    if (account_id === to_account_id) {
+      return { error: 'Source and destination accounts must be different' };
+    }
+  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME', 'SAVING'].includes(type) && !account_id) {
+    return { error: 'Please select an account/wallet for this transaction' };
+  }
+
+  // Insufficient Balance Check on source account
+  if (['EXPENSE', 'GIVEN', 'RETURNED', 'SAVING', 'TRANSFER'].includes(type) && account_id) {
+    const { data: userTxs } = await supabase
+      .from('transactions')
+      .select('id, account_id, to_account_id, type, amount')
+      .eq('user_id', user.id);
+    
+    const availableBalance = calculateAccountBalance(account_id, (userTxs || []) as any);
+    if (availableBalance < amount) {
+      return { 
+        error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
+      };
+    }
   }
 
   const { data, error } = await supabase
@@ -61,6 +84,7 @@ export async function addTransaction(formData: FormData) {
   if (person_id) revalidatePath(`/people/${person_id}`);
   revalidatePath('/transactions', 'page');
   revalidatePath('/accounts');
+  revalidatePath('/dashboard');
   
   return { success: true, data };
 }
@@ -123,13 +147,36 @@ export async function updateTransaction(id: string, formData: FormData) {
   const recurrence = formData.get('recurrence') as string;
 
   if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !person_id) {
-    return { error: 'Person is required for lending/borrowing' };
+    return { error: 'Person is required for credit/debt transactions' };
   }
   if (!type) return { error: 'Transaction type is required' };
   if (isNaN(amount) || amount <= 0) return { error: 'Amount must be a positive number' };
 
-  if (type === 'TRANSFER' && (!account_id || !to_account_id)) {
-    return { error: 'Transfer requires both source and destination accounts' };
+  if (type === 'TRANSFER') {
+    if (!account_id || !to_account_id) {
+      return { error: 'Transfer requires both source and destination accounts' };
+    }
+    if (account_id === to_account_id) {
+      return { error: 'Source and destination accounts must be different' };
+    }
+  } else if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED', 'EXPENSE', 'INCOME', 'SAVING'].includes(type) && !account_id) {
+    return { error: 'Please select an account/wallet for this transaction' };
+  }
+
+  // Insufficient Balance Check on source account (excluding current tx when editing)
+  if (['EXPENSE', 'GIVEN', 'RETURNED', 'SAVING', 'TRANSFER'].includes(type) && account_id) {
+    const { data: userTxs } = await supabase
+      .from('transactions')
+      .select('id, account_id, to_account_id, type, amount')
+      .eq('user_id', user.id);
+    
+    const otherTxs = (userTxs || []).filter(tx => tx.id !== id);
+    const availableBalance = calculateAccountBalance(account_id, otherTxs as any);
+    if (availableBalance < amount) {
+      return { 
+        error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
+      };
+    }
   }
 
   const { data, error } = await supabase
@@ -161,6 +208,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   if (person_id) revalidatePath(`/people/${person_id}`);
   revalidatePath('/transactions', 'page');
   revalidatePath('/accounts');
+  revalidatePath('/dashboard');
   
   return { success: true, data };
 }

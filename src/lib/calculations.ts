@@ -57,14 +57,17 @@ export function calculateSummary(peopleBalances: number[]) {
 }
 
 /**
- * Calculates the balance for a specific account based on transactions.
+ * Calculates the balance for a specific account/wallet based on transactions.
+ * Double-Entry Rules:
+ * - Money IN to account: INCOME, BORROWED, RECEIVED, or TRANSFER/SAVING into to_account_id
+ * - Money OUT from account: EXPENSE, GIVEN, RETURNED, or TRANSFER/SAVING out of account_id
  */
 export function calculateAccountBalance(accountId: string, transactions: Transaction[]): number {
   return transactions.reduce((balance, tx) => {
     const amount = Number(tx.amount);
     if (isNaN(amount)) return balance;
 
-    // If money leaves this account
+    // Outflow from this account
     if (tx.account_id === accountId) {
       if (['EXPENSE', 'GIVEN', 'RETURNED'].includes(tx.type)) {
         balance -= amount;
@@ -77,7 +80,7 @@ export function calculateAccountBalance(accountId: string, transactions: Transac
       }
     }
 
-    // If money enters this account via transfer or saving
+    // Inflow to this account via Transfer or Savings
     if (tx.to_account_id === accountId && ['TRANSFER', 'SAVING'].includes(tx.type)) {
       balance += amount;
     }
@@ -87,7 +90,34 @@ export function calculateAccountBalance(accountId: string, transactions: Transac
 }
 
 /**
- * Calculates a summary of transactions for a specific month (YYYY-MM).
+ * Calculates total available balance across all user accounts/wallets.
+ */
+export function calculateTotalWalletBalance(transactions: Transaction[]): number {
+  return transactions.reduce((total, tx) => {
+    const amount = Number(tx.amount);
+    if (isNaN(amount)) return total;
+
+    switch (tx.type) {
+      case 'INCOME':
+      case 'BORROWED':
+      case 'RECEIVED':
+        return total + amount;
+      case 'EXPENSE':
+      case 'GIVEN':
+      case 'RETURNED':
+        return total - amount;
+      // Internal transfers move between wallets; net total across all wallets remains unchanged
+      case 'TRANSFER':
+      case 'SAVING':
+      default:
+        return total;
+    }
+  }, 0);
+}
+
+/**
+ * Calculates a summary of transactions for a specific month (YYYY-MM) or date range.
+ * Includes all cash movements: Income, Expenses, Savings, Loans Given, Loans Borrowed, and Repayments.
  */
 export function calculateTimeframeSummary(transactions: Transaction[], month?: string, from?: string, to?: string) {
   let filteredTxs = transactions;
@@ -122,6 +152,10 @@ export function calculateTimeframeSummary(transactions: Transaction[], month?: s
       case 'RETURNED': repaymentsSent += amount; break;
     }
   }
+
+  const totalIn = income + borrowed + repaymentsReceived;
+  const totalOut = expense + savings + lent + repaymentsSent;
+  const netCashFlow = totalIn - totalOut;
   
   return {
     income,
@@ -131,6 +165,8 @@ export function calculateTimeframeSummary(transactions: Transaction[], month?: s
     savings,
     repaymentsReceived,
     repaymentsSent,
-    remaining: income - expense - savings
+    totalIn,
+    totalOut,
+    remaining: netCashFlow
   };
 }

@@ -84,8 +84,29 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
     }
   };
 
+  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-6">
+      <Card className="glass-panel border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+        <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" /> Total Wallet Balance Across All Accounts
+            </p>
+            <h3 className={`text-3xl sm:text-4xl font-bold tracking-tight ${totalBalance < 0 ? 'text-destructive' : 'text-primary'}`}>
+              ৳{totalBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+            </h3>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold">
+              {accounts.length} {accounts.length === 1 ? 'Active Wallet' : 'Active Wallets'}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {accounts.map((acc) => (
         <Card key={acc.id} className="glass-panel hover:bg-card/60 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -143,6 +164,7 @@ export function AccountList({ accounts: initialAccounts }: { accounts: Account[]
         description={t.accounts.deleteDesc}
         isDeleting={isDeleting}
       />
+      </div>
     </div>
   );
 }
