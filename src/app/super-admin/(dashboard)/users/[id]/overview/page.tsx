@@ -50,7 +50,7 @@ async function AdminUserOverviewContent({ userId, month, from, to }: { userId: s
     const personTxs = allTransactions.filter(tx => tx.person_id === person.id);
     return {
       ...person,
-      balance: calculateBalance(personTxs)
+      balance: calculateBalance(personTxs, person)
     };
   });
   const { youAreOwed, youOwe, netBalance: totalNetBalance } = calculateSummary(peopleBalances.map(p => p.balance));

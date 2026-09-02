@@ -22,12 +22,16 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
   if (!person) return notFound();
 
   const allTransactions = (transactions || []) as Transaction[];
-  const balance = calculateBalance(allTransactions);
+  const balance = calculateBalance(allTransactions, person);
 
   const isSettled = balance === 0;
   const isPositive = balance > 0;
-  const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-primary' : 'text-destructive';
-  const statusText = isSettled ? `${t.people.netSettled} ✓` : isPositive ? `${person.name} ${t.dashboard.owesYou}` : `${t.dashboard.youOwe} ${person.name}`;
+  const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
+  const statusText = isSettled 
+    ? `${t.people.netSettled} ✓` 
+    : isPositive 
+      ? `${t.people.youAreOwed} (${person.name})` 
+      : `${t.people.youOwe} (${person.name})`;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -67,15 +71,16 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
               <div className="p-6 text-center text-muted-foreground">No transactions found.</div>
             ) : (
               allTransactions.map(tx => {
-                const isTxPositive = tx.type === 'GIVEN' || tx.type === 'RETURNED';
-                const txColor = isTxPositive ? 'text-primary' : 'text-destructive';
-                const sign = isTxPositive ? '+' : '-';
+                const isCashInflow = ['INCOME', 'BORROWED', 'RECEIVED'].includes(tx.type);
+                const txColor = isCashInflow ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
+                const sign = isCashInflow ? '+' : '-';
                 
                 let actionText = '';
-                if (tx.type === 'GIVEN') actionText = 'You gave';
-                if (tx.type === 'RECEIVED') actionText = `${person.name} paid`;
-                if (tx.type === 'BORROWED') actionText = 'You borrowed';
-                if (tx.type === 'RETURNED') actionText = 'You returned';
+                if (tx.type === 'GIVEN') actionText = 'You gave (ধার দেওয়া)';
+                else if (tx.type === 'RECEIVED') actionText = `${person.name} repaid (ধার ফেরত)`;
+                else if (tx.type === 'BORROWED') actionText = 'You borrowed (ধার নেওয়া)';
+                else if (tx.type === 'RETURNED') actionText = 'You repaid (ধার পরিশোধ)';
+                else actionText = tx.type;
 
                 return (
                   <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-secondary/20 transition-colors">
@@ -98,7 +103,7 @@ export default async function PersonDetailsPage({ params }: { params: Promise<{ 
       </Card>
       
       <div className="pt-4 flex justify-center">
-        <p className="text-sm font-medium">Current Balance: <span className={color}>৳{Math.abs(balance).toLocaleString()}</span></p>
+        <p className="text-sm font-medium">Net Balance: <span className={color}>{isSettled ? `৳0 (${t.people.netSettled} ✓)` : `${isPositive ? t.people.youAreOwed : t.people.youOwe} ৳${Math.abs(balance).toLocaleString()}`}</span></p>
       </div>
     </div>
   );

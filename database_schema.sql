@@ -56,6 +56,8 @@ create table if not exists public.people (
     phone text,
     email text,
     notes text,
+    opening_balance numeric(12, 2) default 0,
+    opening_balance_type text default 'NONE',
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -275,6 +277,8 @@ on conflict (code) do nothing;
 
 alter table if exists public.budgets add column if not exists is_default boolean default false;
 alter table if exists public.accounts alter column type type text using type::text;
+alter table if exists public.people add column if not exists opening_balance numeric(12, 2) default 0;
+alter table if exists public.people add column if not exists opening_balance_type text default 'NONE';
 
 -- Refresh PostgREST schema cache
 notify pgrst, 'reload schema';

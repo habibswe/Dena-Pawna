@@ -20,7 +20,7 @@ export default async function PeoplePage() {
     const personTxs = allTransactions.filter(tx => tx.person_id === person.id);
     return {
       ...person,
-      balance: calculateBalance(personTxs)
+      balance: calculateBalance(personTxs, person)
     };
   });
 

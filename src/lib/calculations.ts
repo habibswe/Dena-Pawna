@@ -13,32 +13,80 @@ export interface Transaction {
   note?: string | null;
 }
 
+export interface PersonMetadata {
+  id?: string;
+  name?: string;
+  opening_balance?: number | null;
+  opening_balance_type?: string | null; // 'RECEIVABLE' | 'PAYABLE' | 'NONE'
+}
+
 /**
- * Calculates the balance for a person based on their transactions.
- * Positive = person owes user (User is net positive on this person).
- * Negative = user owes person (User is net negative on this person).
- * Zero = settled.
+ * Calculates the balance for a person based on their transactions and optional opening balance.
  * 
- * Formula: GIVEN - RECEIVED + BORROWED - RETURNED
+ * Positive (> 0) = Person owes user (Receivable / আপনি পাবেন).
+ * Negative (< 0) = User owes person (Payable / আপনি দেবেন).
+ * Zero (= 0) = Settled (সব পরিশোধিত).
+ * 
+ * Smart Edge Case Guard:
+ * - A 'RETURNED' (repayment paid by user) reduces active borrowing liability.
+ *   If user had no prior borrowing liability (borrowedPool is 0) or pays off the entire debt,
+ *   net payable liability becomes 0. It NEVER creates an artificial receivable asset.
+ * - Similarly, a 'RECEIVED' (repayment received by user) reduces active lending asset.
+ *   If user had no active lentPool, net receivable becomes 0 and never creates an artificial payable liability.
  */
-export function calculateBalance(transactions: Transaction[]): number {
-  return transactions.reduce((balance, tx) => {
+export function calculateBalance(
+  transactions: Transaction[], 
+  person?: PersonMetadata
+): number {
+  const openingAmount = Number(person?.opening_balance || 0);
+  const openingType = person?.opening_balance_type || 'NONE';
+
+  let initialReceivable = 0;
+  let initialPayable = 0;
+
+  if (openingType === 'RECEIVABLE' && !isNaN(openingAmount) && openingAmount > 0) {
+    initialReceivable = openingAmount;
+  } else if (openingType === 'PAYABLE' && !isNaN(openingAmount) && openingAmount > 0) {
+    initialPayable = openingAmount;
+  }
+
+  let totalGiven = 0;
+  let totalReceived = 0;
+  let totalBorrowed = 0;
+  let totalReturned = 0;
+
+  for (const tx of transactions) {
     const amount = Number(tx.amount);
-    if (isNaN(amount)) return balance;
+    if (isNaN(amount) || amount <= 0) continue;
 
     switch (tx.type) {
       case 'GIVEN':
-        return balance + amount;
+        totalGiven += amount;
+        break;
       case 'RECEIVED':
-        return balance - amount;
+        totalReceived += amount;
+        break;
       case 'BORROWED':
-        return balance - amount;
+        totalBorrowed += amount;
+        break;
       case 'RETURNED':
-        return balance + amount;
+        totalReturned += amount;
+        break;
       default:
-        return balance;
+        break;
     }
-  }, 0);
+  }
+
+  // 1. Lending pool (Money user lent to contact)
+  const lentPool = initialReceivable + totalGiven;
+  const netReceivable = Math.max(0, lentPool - totalReceived);
+
+  // 2. Borrowing pool (Money user borrowed from contact)
+  const borrowedPool = initialPayable + totalBorrowed;
+  const netPayable = Math.max(0, borrowedPool - totalReturned);
+
+  // Net outstanding balance between user and contact
+  return netReceivable - netPayable;
 }
 
 /**

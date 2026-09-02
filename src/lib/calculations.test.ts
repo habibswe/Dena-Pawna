@@ -91,4 +91,30 @@ describe('Credit/Debt & Double-Entry Calculation Rules', () => {
     // Net remaining cash flow: 24,000 - 12,500 = 11,500
     expect(summary.remaining).toBe(11500);
   });
+
+  it('6. Opening Balance: Correctly factors opening payable and receivable without past transactions', () => {
+    // Contact with initial payable (I owe them 5,000)
+    const personPayable = { id: 'p1', name: 'Bkash Loan', opening_balance: 5000, opening_balance_type: 'PAYABLE' };
+    expect(calculateBalance([], personPayable)).toBe(-5000);
+
+    // Contact with initial receivable (They owe me 7,000)
+    const personReceivable = { id: 'p2', name: 'Karim', opening_balance: 7000, opening_balance_type: 'RECEIVABLE' };
+    expect(calculateBalance([], personReceivable)).toBe(7000);
+
+    // Repay 5,000 of the opening payable debt -> Settles to 0
+    const repaymentTx: Transaction[] = [
+      { id: '1', type: 'RETURNED', amount: 5000, transaction_date: '2026-09-02', person_id: 'p1' }
+    ];
+    expect(calculateBalance(repaymentTx, personPayable)).toBe(0);
+  });
+
+  it('7. Smart Repayment Guard: Orphan repayment without previous borrowing history settles to 0 (never flips to positive)', () => {
+    // User repays 5,500 to a contact where no prior borrowing was logged
+    const orphanRepayment: Transaction[] = [
+      { id: '1', type: 'RETURNED', amount: 5500, transaction_date: '2026-09-01', person_id: 'p_orphan' }
+    ];
+
+    // Must be 0 (Settled), NOT +5500
+    expect(calculateBalance(orphanRepayment)).toBe(0);
+  });
 });

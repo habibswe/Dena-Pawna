@@ -118,6 +118,11 @@
     "fullNamePlaceholder": "e.g. Rahim",
     "phoneOptional": "Phone (Optional)",
     "emailOptional": "Email (Optional)",
+    "openingBalance": "Opening Balance (Optional)",
+    "openingBalanceType": "Balance Type",
+    "noOpeningBalance": "No Opening Balance (0)",
+    "iOweThem": "I owe them (Payable)",
+    "theyOweMe": "They owe me (Receivable)",
     "savePerson": "Save Person",
     "deleteTitle": "Delete Person?",
     "deleteDesc": "Are you sure you want to delete this person?"

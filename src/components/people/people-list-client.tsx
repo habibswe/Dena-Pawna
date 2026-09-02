@@ -72,8 +72,12 @@ export function PeopleListClient({ peopleBalances }: { peopleBalances: any[] }) 
           {filteredPeople.map(person => {
             const isSettled = person.balance === 0;
             const isPositive = person.balance > 0;
-            const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-primary' : 'text-destructive';
-            const statusText = isSettled ? `${t.people.netSettled} ✓` : isPositive ? `${t.dashboard.owesYou} ৳${Math.abs(person.balance).toLocaleString()}` : `${t.dashboard.youOwe} ৳${Math.abs(person.balance).toLocaleString()}`;
+            const color = isSettled ? 'text-muted-foreground' : isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
+            const statusText = isSettled 
+              ? `${t.people.netSettled} ✓` 
+              : isPositive 
+                ? `${t.people.youAreOwed}: ৳${Math.abs(person.balance).toLocaleString()}` 
+                : `${t.people.youOwe}: ৳${Math.abs(person.balance).toLocaleString()}`;
             
             return (
               <Link key={person.id} href={`/people/${person.id}`}>

@@ -49,7 +49,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
     const personTxs = allTransactions.filter(tx => tx.person_id === person.id);
     return {
       ...person,
-      balance: calculateBalance(personTxs)
+      balance: calculateBalance(personTxs, person)
     };
   });
   const { youAreOwed, youOwe, netBalance: totalNetBalance } = calculateSummary(peopleBalances.map(p => p.balance));
@@ -259,7 +259,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
             <div className="grid grid-cols-2 gap-4 mb-6">
                <div className="p-4 rounded-xl border bg-card/50">
                  <p className="text-sm text-muted-foreground mb-1">{t.dashboard.peopleOweYou}</p>
-                 <p className="text-xl font-bold text-primary">৳{youAreOwed.toLocaleString()}</p>
+                 <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">৳{youAreOwed.toLocaleString()}</p>
                </div>
                <div className="p-4 rounded-xl border bg-card/50">
                  <p className="text-sm text-muted-foreground mb-1">{t.dashboard.youOweOthers}</p>
@@ -269,7 +269,7 @@ async function DashboardContent({ month, from, to }: { month?: string; from?: st
             <div className="space-y-4">
               {peopleBalances.filter(p => p.balance !== 0).slice(0, 4).map(person => {
                 const isPositive = person.balance > 0;
-                const color = isPositive ? 'text-primary' : 'text-destructive';
+                const color = isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
                 return (
                   <div key={person.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

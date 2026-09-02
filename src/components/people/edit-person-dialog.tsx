@@ -72,6 +72,33 @@ export function EditPersonDialog({
               <Label htmlFor="email">{t.people.emailOptional}</Label>
               <Input id="email" name="email" type="email" defaultValue={person.email || ''} placeholder="rahim@example.com" />
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border bg-secondary/10">
+              <div className="grid gap-1.5">
+                <Label htmlFor="opening_balance" className="text-xs">{t.people.openingBalance}</Label>
+                <Input 
+                  id="opening_balance" 
+                  name="opening_balance" 
+                  type="number" 
+                  step="any" 
+                  min="0" 
+                  defaultValue={person.opening_balance || ''}
+                  placeholder="৳ 0.00" 
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="opening_balance_type" className="text-xs">{t.people.openingBalanceType}</Label>
+                <select
+                  id="opening_balance_type"
+                  name="opening_balance_type"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  defaultValue={person.opening_balance_type || 'NONE'}
+                >
+                  <option value="NONE" className="bg-background text-foreground">{t.people.noOpeningBalance}</option>
+                  <option value="PAYABLE" className="bg-background text-destructive font-medium">{t.people.iOweThem}</option>
+                  <option value="RECEIVABLE" className="bg-background text-emerald-600 dark:text-emerald-400 font-medium">{t.people.theyOweMe}</option>
+                </select>
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading} className="w-full">
