@@ -31,36 +31,34 @@ export function NotificationBell({ className }: { className?: string }) {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const { t } = useTranslation();
 
-  // Load dismissed notifications from localStorage on mount
+  // Load dismissed notifications and fetch notifications on mount
   useEffect(() => {
+    let savedIds: string[] = [];
     const saved = localStorage.getItem('dismissed_notifications');
     if (saved) {
       try {
-        setDismissedIds(JSON.parse(saved));
+        savedIds = JSON.parse(saved);
+        setDismissedIds(savedIds);
       } catch (e) {
         console.error(e);
       }
     }
-  }, []);
 
-  useEffect(() => {
     async function fetchNotifications() {
       try {
         const { data, error } = await getPendingNotifications();
-        let fetchedData = (!error && data) ? (data as any) : [];
+        const fetchedData = (!error && data) ? (data as unknown as NotificationItem[]) : [];
         
         // Filter out dismissed notifications
-        const activeNotifications = fetchedData.filter((item: NotificationItem) => !dismissedIds.includes(item.id));
+        const activeNotifications = fetchedData.filter((item: NotificationItem) => !savedIds.includes(item.id));
         setNotifications(activeNotifications);
-
       } catch (e) {
         console.error("Failed to fetch notifications", e);
       }
     }
     
-    // Only fetch if we have loaded the dismissed IDs from local storage (to prevent flash)
     fetchNotifications();
-  }, [dismissedIds]);
+  }, []);
 
   const handleDismiss = (id: string, e?: React.MouseEvent) => {
     if (e) {

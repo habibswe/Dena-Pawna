@@ -81,6 +81,8 @@ export function ExpandableFab({ href, onClick, label, className }: ExpandableFab
           }
         }}
         className="flex items-center justify-center bg-primary text-primary-foreground rounded-full shadow-xl w-14 h-14 transition-transform active:scale-95"
+        aria-label={label}
+        title={label}
       >
         <Plus className="h-6 w-6" />
       </button>

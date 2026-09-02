@@ -32,8 +32,9 @@ export function DeleteButton({
         setIsOpen(false);
         router.refresh();
       }
-    } catch (e: any) {
-      toast.error(e.message || `Failed to delete ${itemType.toLowerCase()}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : `Failed to delete ${itemType.toLowerCase()}`;
+      toast.error(msg);
     } finally {
       setIsDeleting(false);
     }

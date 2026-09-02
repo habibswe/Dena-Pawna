@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/i18n/client';
@@ -22,7 +22,7 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="glass-panel border-destructive/20 sm:max-w-[400px]">
+      <DialogContent showCloseButton={false} className="glass-panel border-destructive/20 sm:max-w-[400px] !bg-background shadow-2xl">
         <DialogHeader className="flex flex-row items-center gap-4 space-y-0">
           <div className="bg-destructive/10 p-3 rounded-full shrink-0">
             <AlertCircle className="w-6 h-6 text-destructive" />

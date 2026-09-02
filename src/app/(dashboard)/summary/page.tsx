@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, CreditCard } from 'lucide-react';
+import { format } from 'date-fns';
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { DateFilter } from '@/components/ui/date-filter';
 import { ExportButtons } from '@/components/ui/export-buttons';
 import { getDictionary } from '@/i18n/server';
@@ -18,16 +18,16 @@ export default async function SummaryPage(props: { searchParams: Promise<{ filte
   let subtitleText = '';
 
   if (fromDate && toDate) {
-    query = query.gte('transaction_date', new Date(fromDate).toISOString()).lte('transaction_date', new Date(`${toDate}T23:59:59.999Z`).toISOString());
-    titleText = `Summary from ${format(new Date(fromDate), 'dd MMM yyyy')} to ${format(new Date(toDate), 'dd MMM yyyy')}`;
+    query = query.gte('transaction_date', fromDate).lte('transaction_date', toDate);
+    titleText = `Summary from ${format(new Date(fromDate + 'T00:00:00'), 'dd MMM yyyy')} to ${format(new Date(toDate + 'T00:00:00'), 'dd MMM yyyy')}`;
     subtitleText = 'Total transaction volume for selected dates';
   } else if (fromDate) {
-    query = query.gte('transaction_date', new Date(fromDate).toISOString());
-    titleText = `Summary from ${format(new Date(fromDate), 'dd MMM yyyy')}`;
+    query = query.gte('transaction_date', fromDate);
+    titleText = `Summary from ${format(new Date(fromDate + 'T00:00:00'), 'dd MMM yyyy')}`;
     subtitleText = 'Total transaction volume since selected date';
   } else if (toDate) {
-    query = query.lte('transaction_date', new Date(`${toDate}T23:59:59.999Z`).toISOString());
-    titleText = `Summary up to ${format(new Date(toDate), 'dd MMM yyyy')}`;
+    query = query.lte('transaction_date', toDate);
+    titleText = `Summary up to ${format(new Date(toDate + 'T00:00:00'), 'dd MMM yyyy')}`;
     subtitleText = 'Total transaction volume up to selected date';
   } else {
     // Default to lifetime if nothing is set

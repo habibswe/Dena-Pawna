@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Download, FileText, FileSpreadsheet, Loader2, ChevronDown } from 'lucide-react';
-import { exportToCSV, exportToExcel, exportToPDF } from '@/lib/exportUtils';
+import { exportToCSV, exportToExcel, exportToPDF, Person } from '@/lib/exportUtils';
+import { Transaction } from '@/lib/calculations';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
 
 import { buttonVariants } from '@/components/ui/button';
 
-export function ExportButtons({ transactions, people }: { transactions: any[], people: any[] }) {
+export function ExportButtons({ transactions, people }: { transactions: Transaction[], people: Person[] }) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (type: 'csv' | 'excel' | 'pdf') => {
