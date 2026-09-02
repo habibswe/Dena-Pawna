@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useOptimistic } from 'react';
+import { useState, useEffect, useRef, useCallback, useOptimistic, startTransition } from 'react';
 import { getPaginatedTransactions } from '@/app/(dashboard)/transactions/actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
@@ -43,29 +43,28 @@ export function TransactionListClient({
     (state, idToRemove: string) => state.filter((tx) => tx.id !== idToRemove)
   );
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deletingId) return;
     const idToDelete = deletingId;
     setIsDeleting(true);
-    
-    // Store previous state for fallback
-    const previousTransactions = [...transactions];
-    
-    // Optimistically remove from UI
-    addOptimisticTransaction(idToDelete);
     setDeletingId(null); // Close dialog instantly
     
-    const result = await deleteTransaction(idToDelete);
-    
-    if (result.error) {
-      toast.error(result.error);
-      // Revert optimistic update
-      setTransactions(previousTransactions);
-    } else {
-      toast.success("Transaction deleted successfully");
-      router.refresh(); // Update server cache for dashboard
-    }
-    setIsDeleting(false);
+    startTransition(async () => {
+      // Optimistically remove from UI
+      addOptimisticTransaction(idToDelete);
+      
+      const result = await deleteTransaction(idToDelete);
+      
+      if (result.error) {
+        toast.error(result.error);
+        router.refresh();
+      } else {
+        toast.success("Transaction deleted successfully");
+        setTransactions(prev => prev.filter(tx => tx.id !== idToDelete));
+        router.refresh(); // Update server cache for dashboard
+      }
+      setIsDeleting(false);
+    });
   };
 
   const loadMore = useCallback(async () => {
