@@ -17,7 +17,15 @@ export const metadata: Metadata = {
   description: 'Track money you lend and borrow with ease. A modern fintech application for personal finance.',
   icons: {
     icon: '/icon.svg',
-    apple: '/logo-icon.jpg',
+    apple: [
+      { url: '/logo-green.svg' },
+      { url: '/logo-icon.jpg', sizes: '180x180' },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Dena Pawna',
   },
 };
 
