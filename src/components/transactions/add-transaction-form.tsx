@@ -97,6 +97,7 @@ export function AddTransactionForm({
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [isDueDateOpen, setIsDueDateOpen] = useState(false);
   const [recurrence, setRecurrence] = useState<string>('');
+  const [recurringMode, setRecurringMode] = useState<string>('REMINDER_ONLY');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -108,7 +109,10 @@ export function AddTransactionForm({
     if (accountId) formData.set('account_id', accountId);
     if (toAccountId) formData.set('to_account_id', toAccountId);
     if (categoryId) formData.set('category_id', categoryId);
-    if (recurrence) formData.set('recurrence', recurrence);
+    if (recurrence) {
+      formData.set('recurrence', recurrence);
+      formData.set('recurring_mode', recurringMode);
+    }
     
     if (dueDate && (type === 'GIVEN' || type === 'BORROWED')) {
       formData.set('due_date', format(dueDate, 'yyyy-MM-dd'));
@@ -380,25 +384,49 @@ export function AddTransactionForm({
           )}
 
           {/* RECURRING OPTIONS */}
-          {['INCOME', 'EXPENSE'].includes(type) && (
-            <div className="space-y-2 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
-              <Label>{t.addTransactionForm.recurring}</Label>
-              <Select value={recurrence} onValueChange={(val) => val !== null && setRecurrence(val)}>
-                <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
-                  <SelectValue placeholder={t.addTransactionForm.oneTime}>
-                    {recurrence === 'MONTHLY' ? t.addTransactionForm.monthly :
-                     recurrence === 'YEARLY' ? t.addTransactionForm.yearly :
-                     recurrence === 'WEEKLY' ? t.addTransactionForm.weekly :
-                     t.addTransactionForm.oneTime}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="glass-panel border-primary/20 shadow-2xl !bg-background">
-                  <SelectItem value="">{t.addTransactionForm.oneTime}</SelectItem>
-                  <SelectItem value="WEEKLY">{t.addTransactionForm.weekly}</SelectItem>
-                  <SelectItem value="MONTHLY">{t.addTransactionForm.monthly}</SelectItem>
-                  <SelectItem value="YEARLY">{t.addTransactionForm.yearly}</SelectItem>
-                </SelectContent>
-              </Select>
+          {['INCOME', 'EXPENSE', 'SAVING', 'TRANSFER', 'RETURNED'].includes(type) && (
+            <div className="space-y-3 flex flex-col p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <div className="space-y-2">
+                <Label>{t.addTransactionForm.recurring}</Label>
+                <Select value={recurrence} onValueChange={(val) => val !== null && setRecurrence(val)}>
+                  <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
+                    <SelectValue placeholder={t.addTransactionForm.oneTime}>
+                      {recurrence === 'DAILY' ? t.addTransactionForm.daily :
+                       recurrence === 'WEEKLY' ? t.addTransactionForm.weekly :
+                       recurrence === 'MONTHLY' ? t.addTransactionForm.monthly :
+                       recurrence === 'YEARLY' ? t.addTransactionForm.yearly :
+                       t.addTransactionForm.oneTime}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="glass-panel border-primary/20 shadow-2xl !bg-background">
+                    <SelectItem value="">{t.addTransactionForm.oneTime}</SelectItem>
+                    <SelectItem value="DAILY">{t.addTransactionForm.daily}</SelectItem>
+                    <SelectItem value="WEEKLY">{t.addTransactionForm.weekly}</SelectItem>
+                    <SelectItem value="MONTHLY">{t.addTransactionForm.monthly}</SelectItem>
+                    <SelectItem value="YEARLY">{t.addTransactionForm.yearly}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {recurrence !== '' && (
+                <div className="space-y-2 pt-1 border-t border-primary/10">
+                  <Label>{t.addTransactionForm.recurringMode}</Label>
+                  <Select value={recurringMode} onValueChange={(val) => val !== null && setRecurringMode(val)}>
+                    <SelectTrigger className="w-full glass-panel border-primary/20 bg-background/50">
+                      <SelectValue>
+                        {recurringMode === 'AUTO_CREATE' ? t.addTransactionForm.autoCreate : t.addTransactionForm.reminderOnly}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="glass-panel border-primary/20 shadow-2xl !bg-background">
+                      <SelectItem value="AUTO_CREATE">{t.addTransactionForm.autoCreate}</SelectItem>
+                      <SelectItem value="REMINDER_ONLY">{t.addTransactionForm.reminderOnly}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground italic px-1">
+                    {recurringMode === 'AUTO_CREATE' ? t.addTransactionForm.autoCreateDesc : t.addTransactionForm.reminderOnlyDesc}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { calculateAccountBalance } from '@/lib/calculations';
+import { calculateNextRecurringDate } from '@/lib/recurring-utils';
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient();
@@ -23,6 +24,7 @@ export async function addTransaction(formData: FormData) {
   const to_account_id = formData.get('to_account_id') as string;
   const category_id = formData.get('category_id') as string;
   const recurrence = formData.get('recurrence') as string;
+  const recurring_mode = (formData.get('recurring_mode') as string) || 'REMINDER_ONLY';
 
   if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !person_id) {
     return { error: 'Person is required for credit/debt transactions' };
@@ -71,6 +73,8 @@ export async function addTransaction(formData: FormData) {
       category_id: category_id || null,
       is_recurring: !!recurrence,
       recurrence: recurrence || null,
+      recurring_mode: recurrence ? recurring_mode : null,
+      next_recurring_date: recurrence ? calculateNextRecurringDate(transaction_date, recurrence) : null,
     }])
     .select()
     .single();
@@ -145,6 +149,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   const to_account_id = formData.get('to_account_id') as string;
   const category_id = formData.get('category_id') as string;
   const recurrence = formData.get('recurrence') as string;
+  const recurring_mode = (formData.get('recurring_mode') as string) || 'REMINDER_ONLY';
 
   if (['GIVEN', 'RECEIVED', 'BORROWED', 'RETURNED'].includes(type) && !person_id) {
     return { error: 'Person is required for credit/debt transactions' };
@@ -193,6 +198,8 @@ export async function updateTransaction(id: string, formData: FormData) {
       category_id: category_id || null,
       is_recurring: !!recurrence,
       recurrence: recurrence || null,
+      recurring_mode: recurrence ? recurring_mode : null,
+      next_recurring_date: recurrence ? calculateNextRecurringDate(transaction_date, recurrence) : null,
     })
     .eq('id', id)
     .eq('user_id', user.id)

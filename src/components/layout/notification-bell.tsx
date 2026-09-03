@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, Check, CheckCircle2, Trash2, X } from 'lucide-react';
 import { getPendingNotifications } from '@/app/(dashboard)/notifications/actions';
+import { confirmRecurringReminder, dismissRecurringReminder } from '@/app/(dashboard)/transactions/recurring-actions';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -20,7 +21,12 @@ type NotificationItem = {
   type: string;
   amount: number;
   due_date: string;
-  people: { name: string } | null;
+  people?: { name: string } | null;
+  note?: string | null;
+  recurrence?: string | null;
+  categoryName?: string;
+  accountName?: string;
+  isRecurringReminder?: boolean;
   isTest?: boolean;
 };
 
@@ -84,6 +90,30 @@ export function NotificationBell({ className }: { className?: string }) {
     
     setNotifications([]);
     toast.success(t.notifications.allCleared);
+  };
+
+  const handleConfirmRecurring = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const res = await confirmRecurringReminder(id);
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success(t.notifications.confirmed);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }
+  };
+
+  const handleSkipRecurring = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const res = await dismissRecurringReminder(id);
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success(t.notifications.skipped);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }
   };
 
   // Show toast on initial load if there are notifications
@@ -163,20 +193,24 @@ export function NotificationBell({ className }: { className?: string }) {
                 dateStr = item.due_date || '';
               }
 
+              const isRecurring = item.isRecurringReminder;
               const personName = item.people?.name || 'someone';
-              const message = item.type === 'GIVEN'
+              const message = isRecurring
+                ? t.notifications.recurringMessage.replace('{type}', item.type).replace('{amount}', item.amount.toString())
+                : item.type === 'GIVEN'
                 ? t.notifications.receiveMessage.replace('{amount}', item.amount.toString()).replace('{name}', personName)
                 : t.notifications.returnMessage.replace('{amount}', item.amount.toString()).replace('{name}', personName);
 
               return (
                 <div key={item.id} className="relative group p-1">
                   <DropdownMenuItem 
-                    className="flex flex-col items-start p-3 gap-1.5 focus:bg-primary/5 rounded-lg border border-transparent hover:border-primary/10 transition-all pr-8"
+                    className="flex flex-col items-start p-3 gap-1.5 focus:bg-primary/5 rounded-lg border border-transparent hover:border-primary/10 transition-all pr-8 cursor-default"
+                    onSelect={(e) => e.preventDefault()}
                   >
                     <div className="flex justify-between w-full items-center">
                       <span className="font-semibold text-primary flex items-center gap-1.5">
-                        <div className={cn("w-2 h-2 rounded-full", item.type === 'GIVEN' ? "bg-emerald-500" : "bg-blue-500")} />
-                        {item.type === 'GIVEN' ? t.notifications.paymentExpected : t.notifications.paymentDue}
+                        <div className={cn("w-2 h-2 rounded-full", isRecurring ? "bg-amber-500" : item.type === 'GIVEN' ? "bg-emerald-500" : "bg-blue-500")} />
+                        {isRecurring ? t.notifications.recurringReminder : item.type === 'GIVEN' ? t.notifications.paymentExpected : t.notifications.paymentDue}
                         {item.isTest && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded ml-1">TEST</span>}
                       </span>
                       <span className="text-xs text-muted-foreground font-medium bg-background/50 px-1.5 py-0.5 rounded">
@@ -185,17 +219,46 @@ export function NotificationBell({ className }: { className?: string }) {
                     </div>
                     <p className="text-sm text-foreground/80 leading-snug">
                       {message}
+                      {isRecurring && (item.categoryName || item.note) && (
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          {item.categoryName ? `• ${item.categoryName}` : ''} {item.note ? `(${item.note})` : ''}
+                        </span>
+                      )}
                     </p>
+
+                    {isRecurring && (
+                      <div className="flex items-center gap-2 mt-2 w-full pt-1.5 border-t border-border/40">
+                        <Button 
+                          size="sm" 
+                          variant="default"
+                          className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-2.5 flex-1"
+                          onClick={(e) => handleConfirmRecurring(item.id, e)}
+                        >
+                          <Check className="w-3 h-3 mr-1" />
+                          {t.notifications.confirmAndAdd}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="h-7 text-xs rounded-md px-2.5 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => handleSkipRecurring(item.id, e)}
+                        >
+                          {t.notifications.skip}
+                        </Button>
+                      </div>
+                    )}
                   </DropdownMenuItem>
                   
                   {/* Clear single notification button */}
-                  <button
-                    onClick={(e) => handleDismiss(item.id, e)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all border border-border shadow-sm"
-                    title="Dismiss"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+                  {!isRecurring && (
+                    <button
+                      onClick={(e) => handleDismiss(item.id, e)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all border border-border shadow-sm"
+                      title="Dismiss"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               );
             })

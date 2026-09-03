@@ -111,6 +111,9 @@ create table if not exists public.transactions (
     due_date date,
     is_recurring boolean default false,
     recurrence recurrence_interval,
+    recurring_mode text default 'REMINDER_ONLY' check (recurring_mode in ('AUTO_CREATE', 'REMINDER_ONLY')),
+    next_recurring_date date,
+    last_processed_date date,
     parent_transaction_id uuid references public.transactions on delete set null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -279,6 +282,9 @@ alter table if exists public.budgets add column if not exists is_default boolean
 alter table if exists public.accounts alter column type type text using type::text;
 alter table if exists public.people add column if not exists opening_balance numeric(12, 2) default 0;
 alter table if exists public.people add column if not exists opening_balance_type text default 'NONE';
+alter table if exists public.transactions add column if not exists recurring_mode text default 'REMINDER_ONLY' check (recurring_mode in ('AUTO_CREATE', 'REMINDER_ONLY'));
+alter table if exists public.transactions add column if not exists next_recurring_date date;
+alter table if exists public.transactions add column if not exists last_processed_date date;
 
 -- Refresh PostgREST schema cache
 notify pgrst, 'reload schema';
