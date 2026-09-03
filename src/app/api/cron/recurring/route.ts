@@ -66,6 +66,44 @@ export async function GET(request: Request) {
       processedCount++;
     }
 
+    // Fetch all due AUTO_CREATE recurring accounts (DPS/Savings installments)
+    const { data: dueAccounts } = await supabase
+      .from('accounts')
+      .select('*')
+      .not('recurrence', 'is', null)
+      .eq('recurring_mode', 'AUTO_CREATE')
+      .not('source_account_id', 'is', null)
+      .gt('monthly_installment', 0)
+      .lte('next_recurring_date', today);
+
+    if (dueAccounts && dueAccounts.length > 0) {
+      for (const acc of dueAccounts) {
+        const executionDate = acc.next_recurring_date || today;
+
+        const { error: insertErr } = await supabase
+          .from('transactions')
+          .insert([{
+            user_id: acc.user_id,
+            type: 'SAVING',
+            amount: acc.monthly_installment,
+            transaction_date: executionDate,
+            note: `${acc.name} (${acc.recurrence === 'WEEKLY' ? 'Weekly' : 'Monthly'} Auto-Deposit)`,
+            account_id: acc.source_account_id,
+            to_account_id: acc.id,
+            is_recurring: false
+          }]);
+
+        if (!insertErr) {
+          const nextDate = calculateNextRecurringDate(executionDate, acc.recurrence);
+          await supabase
+            .from('accounts')
+            .update({ next_recurring_date: nextDate })
+            .eq('id', acc.id);
+          processedCount++;
+        }
+      }
+    }
+
     return NextResponse.json({ success: true, processedCount });
   } catch (err: any) {
     console.error('Cron endpoint error:', err);

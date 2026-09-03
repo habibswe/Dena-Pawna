@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { calculateAccountBalance } from '@/lib/calculations';
 import { calculateNextRecurringDate } from '@/lib/recurring-utils';
+import { isCreditAccountType } from '@/lib/account-types';
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient();
@@ -43,18 +44,26 @@ export async function addTransaction(formData: FormData) {
     return { error: 'Please select an account/wallet for this transaction' };
   }
 
-  // Insufficient Balance Check on source account
+  // Insufficient Balance Check on source account (bypassed for Credit Card / Liability accounts)
   if (['EXPENSE', 'GIVEN', 'RETURNED', 'SAVING', 'TRANSFER'].includes(type) && account_id) {
-    const { data: userTxs } = await supabase
-      .from('transactions')
-      .select('id, account_id, to_account_id, type, amount')
-      .eq('user_id', user.id);
-    
-    const availableBalance = calculateAccountBalance(account_id, (userTxs || []) as any);
-    if (availableBalance < amount) {
-      return { 
-        error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
-      };
+    const { data: accountData } = await supabase
+      .from('accounts')
+      .select('type')
+      .eq('id', account_id)
+      .single();
+
+    if (!isCreditAccountType(accountData?.type)) {
+      const { data: userTxs } = await supabase
+        .from('transactions')
+        .select('id, account_id, to_account_id, type, amount')
+        .eq('user_id', user.id);
+      
+      const availableBalance = calculateAccountBalance(account_id, (userTxs || []) as any);
+      if (availableBalance < amount) {
+        return { 
+          error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
+        };
+      }
     }
   }
 
@@ -168,19 +177,27 @@ export async function updateTransaction(id: string, formData: FormData) {
     return { error: 'Please select an account/wallet for this transaction' };
   }
 
-  // Insufficient Balance Check on source account (excluding current tx when editing)
+  // Insufficient Balance Check on source account (excluding current tx when editing, bypassed for Credit Cards)
   if (['EXPENSE', 'GIVEN', 'RETURNED', 'SAVING', 'TRANSFER'].includes(type) && account_id) {
-    const { data: userTxs } = await supabase
-      .from('transactions')
-      .select('id, account_id, to_account_id, type, amount')
-      .eq('user_id', user.id);
-    
-    const otherTxs = (userTxs || []).filter(tx => tx.id !== id);
-    const availableBalance = calculateAccountBalance(account_id, otherTxs as any);
-    if (availableBalance < amount) {
-      return { 
-        error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
-      };
+    const { data: accountData } = await supabase
+      .from('accounts')
+      .select('type')
+      .eq('id', account_id)
+      .single();
+
+    if (!isCreditAccountType(accountData?.type)) {
+      const { data: userTxs } = await supabase
+        .from('transactions')
+        .select('id, account_id, to_account_id, type, amount')
+        .eq('user_id', user.id);
+      
+      const otherTxs = (userTxs || []).filter(tx => tx.id !== id);
+      const availableBalance = calculateAccountBalance(account_id, otherTxs as any);
+      if (availableBalance < amount) {
+        return { 
+          error: `Insufficient balance in selected account. Available balance is ৳${availableBalance.toLocaleString()}` 
+        };
+      }
     }
   }
 

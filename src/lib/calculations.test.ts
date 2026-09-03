@@ -148,4 +148,54 @@ describe('Credit/Debt & Double-Entry Calculation Rules', () => {
     expect(updatedDebt).toBe(500);
     expect(updatedNetWorth).toBe(6000);
   });
+
+  it('9. Credit Card Expense: Account balance becomes negative, Total wallet & Net Worth decrease correctly', () => {
+    const cardAccount = 'account_cc';
+    const bankAccount = 'account_bank';
+
+    // User has 10,000 in bank and 0 on Credit Card
+    const initialTxs: Transaction[] = [
+      { id: '1', type: 'INCOME', amount: 10000, transaction_date: '2026-09-01', account_id: bankAccount }
+    ];
+
+    expect(calculateAccountBalance(bankAccount, initialTxs)).toBe(10000);
+    expect(calculateAccountBalance(cardAccount, initialTxs)).toBe(0);
+    expect(calculateTotalWalletBalance(initialTxs)).toBe(10000);
+
+    // User spends 3,500 on Food using Credit Card
+    const txsAfterSwipe: Transaction[] = [
+      ...initialTxs,
+      { id: '2', type: 'EXPENSE', amount: 3500, transaction_date: '2026-09-02', account_id: cardAccount, category_id: 'cat_food' }
+    ];
+
+    // Card balance is negative (-3,500 due)
+    expect(calculateAccountBalance(cardAccount, txsAfterSwipe)).toBe(-3500);
+    // Bank balance remains intact (10,000)
+    expect(calculateAccountBalance(bankAccount, txsAfterSwipe)).toBe(10000);
+    // Total wallet balance reflects net liquidity: 10,000 - 3,500 = 6,500
+    expect(calculateTotalWalletBalance(txsAfterSwipe)).toBe(6500);
+  });
+
+  it('10. Credit Card Bill Settlement: Transfer from Bank to Card restores card balance to 0 without mutating Net Worth', () => {
+    const cardAccount = 'account_cc';
+    const bankAccount = 'account_bank';
+
+    const txsWithDebt: Transaction[] = [
+      { id: '1', type: 'INCOME', amount: 10000, transaction_date: '2026-09-01', account_id: bankAccount },
+      { id: '2', type: 'EXPENSE', amount: 3500, transaction_date: '2026-09-02', account_id: cardAccount, category_id: 'cat_food' }
+    ];
+
+    // User pays off full Credit Card bill (3,500) via Transfer from Bank -> Card
+    const txsAfterSettlement: Transaction[] = [
+      ...txsWithDebt,
+      { id: '3', type: 'TRANSFER', amount: 3500, transaction_date: '2026-09-10', account_id: bankAccount, to_account_id: cardAccount }
+    ];
+
+    // Card balance is restored to 0 (No due)
+    expect(calculateAccountBalance(cardAccount, txsAfterSettlement)).toBe(0);
+    // Bank balance is reduced to 6,500 (10,000 - 3,500)
+    expect(calculateAccountBalance(bankAccount, txsAfterSettlement)).toBe(6500);
+    // Total net wallet balance remains 6,500 (Stable, no double-counting of expense)
+    expect(calculateTotalWalletBalance(txsAfterSettlement)).toBe(6500);
+  });
 });

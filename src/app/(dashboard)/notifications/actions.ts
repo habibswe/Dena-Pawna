@@ -44,6 +44,16 @@ export async function getPendingNotifications() {
     console.error("Error fetching recurring notifications:", recError);
   }
 
+  // 3. Fetch Due Account DPS/Savings Reminders (REMINDER_ONLY with next_recurring_date <= today)
+  const { data: dpsNotifications } = await supabase
+    .from('accounts')
+    .select('id, name, type, monthly_installment, recurrence, next_recurring_date')
+    .eq('user_id', user.id)
+    .not('recurrence', 'is', null)
+    .eq('recurring_mode', 'REMINDER_ONLY')
+    .gt('monthly_installment', 0)
+    .lte('next_recurring_date', today);
+
   const items = [
     ...(debtNotifications || []).map(item => ({
       ...item,
@@ -58,6 +68,16 @@ export async function getPendingNotifications() {
       recurrence: item.recurrence,
       categoryName: Array.isArray(item.categories) ? (item.categories[0] as any)?.name : (item.categories as any)?.name,
       accountName: Array.isArray(item.accounts) ? (item.accounts[0] as any)?.name : (item.accounts as any)?.name,
+      isRecurringReminder: true,
+    })),
+    ...(dpsNotifications || []).map(item => ({
+      id: `dps-${item.id}`,
+      type: 'SAVING',
+      amount: item.monthly_installment,
+      due_date: item.next_recurring_date,
+      note: `${item.name} Installment`,
+      recurrence: item.recurrence,
+      accountName: item.name,
       isRecurringReminder: true,
     })),
   ];

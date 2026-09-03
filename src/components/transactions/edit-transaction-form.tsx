@@ -18,7 +18,8 @@ import {
   Send, 
   Handshake, 
   Download, 
-  Upload 
+  Upload,
+  AlertTriangle 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateTransaction } from '@/app/(dashboard)/transactions/actions';
@@ -278,6 +279,32 @@ export function EditTransactionForm({
               </div>
             </div>
           )}
+
+          {/* Early Withdrawal Warning for DPS / FDR accounts */}
+          {(() => {
+            const selectedSourceAccount = accounts.find(a => a.id === accountId);
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isEarlyWithdrawal = selectedSourceAccount?.maturity_date && 
+              selectedSourceAccount.maturity_date > todayStr && 
+              ['DPS', 'FDR'].includes(selectedSourceAccount.type) && 
+              ['TRANSFER', 'EXPENSE', 'GIVEN'].includes(currentType);
+
+            if (!isEarlyWithdrawal) return null;
+
+            return (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2.5 animate-in fade-in">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-semibold">
+                    {(t.accounts as any)?.earlyWithdrawalNotice || 'Early Withdrawal Notice'}
+                  </div>
+                  <div className="text-[11px] opacity-90">
+                    {((t.accounts as any)?.earlyWithdrawalDesc || 'This DPS/Savings account has a maturity date of {date}. You are withdrawing funds prior to maturity.').replace('{date}', selectedSourceAccount.maturity_date)}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* CATEGORY SELECTOR */}
           {requiresCategory && (

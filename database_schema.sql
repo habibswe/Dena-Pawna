@@ -73,12 +73,19 @@ create table if not exists public.categories (
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 7. Accounts Table (User's Wallets/Bank Accounts)
+-- 7. Accounts Table (User's Wallets/Bank Accounts/DPS/Savings Goals)
 create table if not exists public.accounts (
     id uuid default uuid_generate_v4() primary key,
     user_id uuid references auth.users on delete cascade not null,
     name text not null,
-    type text not null, -- Stores code like 'CASH', 'BANK', 'BKASH', 'ROCKET', 'DPS', etc.
+    type text not null, -- Stores code like 'CASH', 'BANK', 'BKASH', 'ROCKET', 'DPS', 'CREDIT_CARD', etc.
+    target_amount numeric(12, 2), -- Optional goal target amount
+    monthly_installment numeric(12, 2), -- Optional recurring installment amount
+    maturity_date date, -- Optional goal target completion date
+    recurrence text, -- 'WEEKLY' | 'MONTHLY'
+    recurring_mode text, -- 'AUTO_CREATE' | 'REMINDER_ONLY'
+    source_account_id uuid references public.accounts(id) on delete set null,
+    next_recurring_date date,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -268,7 +275,8 @@ values
   ('Tap', 'TAP', 'Smartphone', true),
   ('SureCash', 'SURECASH', 'Smartphone', true),
   ('Pocket (AB Bank)', 'POCKET', 'Smartphone', true),
-  ('Credit/Debit Card', 'CARD', 'CreditCard', true),
+  ('Credit Card', 'CREDIT_CARD', 'CreditCard', true),
+  ('Debit Card', 'DEBIT_CARD', 'CreditCard', true),
   ('Savings Account', 'SAVINGS', 'PiggyBank', true),
   ('DPS (Monthly Deposit)', 'DPS', 'Vault', true),
   ('FDR (Fixed Deposit)', 'FDR', 'Landmark', true)
@@ -280,11 +288,34 @@ on conflict (code) do nothing;
 
 alter table if exists public.budgets add column if not exists is_default boolean default false;
 alter table if exists public.accounts alter column type type text using type::text;
+alter table if exists public.accounts add column if not exists target_amount numeric(12, 2);
+alter table if exists public.accounts add column if not exists monthly_installment numeric(12, 2);
+alter table if exists public.accounts add column if not exists maturity_date date;
+alter table if exists public.accounts add column if not exists recurrence text;
+alter table if exists public.accounts add column if not exists recurring_mode text;
+alter table if exists public.accounts add column if not exists source_account_id uuid references public.accounts(id) on delete set null;
+alter table if exists public.accounts add column if not exists next_recurring_date date;
 alter table if exists public.people add column if not exists opening_balance numeric(12, 2) default 0;
 alter table if exists public.people add column if not exists opening_balance_type text default 'NONE';
 alter table if exists public.transactions add column if not exists recurring_mode text default 'REMINDER_ONLY' check (recurring_mode in ('AUTO_CREATE', 'REMINDER_ONLY'));
 alter table if exists public.transactions add column if not exists next_recurring_date date;
-alter table if exists public.transactions add column if not exists last_processed_date date;
+-- Safe idempotent migration for Credit Card & Debit Card
+do $$ 
+begin
+    update public.accounts set type = 'CREDIT_CARD' where type = 'CARD';
+
+    if exists (select 1 from public.account_types where code = 'CREDIT_CARD') then
+        delete from public.account_types where code = 'CARD';
+        update public.account_types set name = 'Credit Card', icon = 'CreditCard', is_active = true where code = 'CREDIT_CARD';
+    else
+        update public.account_types set name = 'Credit Card', code = 'CREDIT_CARD', icon = 'CreditCard' where code = 'CARD';
+    end if;
+
+    if not exists (select 1 from public.account_types where code = 'DEBIT_CARD') then
+        insert into public.account_types (name, code, icon, is_active)
+        values ('Debit Card', 'DEBIT_CARD', 'CreditCard', true);
+    end if;
+end $$;
 
 -- Refresh PostgREST schema cache
 notify pgrst, 'reload schema';

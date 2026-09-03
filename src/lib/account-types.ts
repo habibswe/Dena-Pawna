@@ -19,11 +19,21 @@ export const DEFAULT_ACCOUNT_TYPES: AccountTypeItem[] = [
   { id: '8', name: 'Tap', code: 'TAP', icon: 'Smartphone' },
   { id: '9', name: 'SureCash', code: 'SURECASH', icon: 'Smartphone' },
   { id: '10', name: 'Pocket (AB Bank)', code: 'POCKET', icon: 'Smartphone' },
-  { id: '11', name: 'Credit/Debit Card', code: 'CARD', icon: 'CreditCard' },
-  { id: '12', name: 'Savings Account', code: 'SAVINGS', icon: 'PiggyBank' },
-  { id: '13', name: 'DPS (Monthly Deposit)', code: 'DPS', icon: 'Vault' },
-  { id: '14', name: 'FDR (Fixed Deposit)', code: 'FDR', icon: 'Landmark' },
+  { id: '11', name: 'Credit Card', code: 'CREDIT_CARD', icon: 'CreditCard' },
+  { id: '12', name: 'Debit Card', code: 'DEBIT_CARD', icon: 'CreditCard' },
+  { id: '13', name: 'Savings Account', code: 'SAVINGS', icon: 'PiggyBank' },
+  { id: '14', name: 'DPS (Monthly Deposit)', code: 'DPS', icon: 'Vault' },
+  { id: '15', name: 'FDR (Fixed Deposit)', code: 'FDR', icon: 'Landmark' },
 ];
+
+/**
+ * Checks if the given account type acts as a liability / negative-balance credit account.
+ */
+export function isCreditAccountType(type?: string | null): boolean {
+  if (!type) return false;
+  const upper = type.toUpperCase();
+  return upper === 'CREDIT_CARD' || upper === 'CARD';
+}
 
 export async function fetchActiveAccountTypes(): Promise<AccountTypeItem[]> {
   try {
@@ -38,7 +48,30 @@ export async function fetchActiveAccountTypes(): Promise<AccountTypeItem[]> {
       return DEFAULT_ACCOUNT_TYPES;
     }
 
-    return data;
+    const hasDebitCard = data.some(d => d.code === 'DEBIT_CARD');
+
+    // Map legacy 'CARD' / 'Credit/Debit Card' to explicit 'Credit Card'
+    const mappedData = data.map(item => {
+      if (item.code === 'CARD' || item.name === 'Credit/Debit Card') {
+        return { ...item, name: 'Credit Card', code: 'CREDIT_CARD' };
+      }
+      return item;
+    });
+
+    if (!hasDebitCard) {
+      const ccIndex = mappedData.findIndex(d => d.code === 'CREDIT_CARD' || d.code === 'CARD');
+      if (ccIndex !== -1) {
+        mappedData.splice(ccIndex + 1, 0, {
+          id: 'debit_card_virtual',
+          name: 'Debit Card',
+          code: 'DEBIT_CARD',
+          icon: 'CreditCard',
+          is_active: true
+        });
+      }
+    }
+
+    return mappedData;
   } catch (err) {
     return DEFAULT_ACCOUNT_TYPES;
   }

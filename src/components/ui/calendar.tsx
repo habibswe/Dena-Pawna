@@ -23,11 +23,13 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "label",
+  captionLayout = "dropdown",
   buttonVariant = "ghost",
   locale,
   formatters,
   components,
+  startMonth = new Date(1970, 0),
+  endMonth = new Date(2050, 11),
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -37,6 +39,8 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      startMonth={startMonth}
+      endMonth={endMonth}
       className={cn(
         "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
@@ -76,15 +80,15 @@ function Calendar({
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
-          "flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium",
+          "flex h-9 w-full items-center justify-center gap-2 text-sm font-medium z-10",
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          "relative rounded-(--cell-radius)",
+          "relative inline-flex items-center",
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
-          "absolute inset-0 bg-popover opacity-0",
+          "hidden",
           defaultClassNames.dropdown
         ),
         caption_label: cn(
@@ -184,13 +188,13 @@ function Calendar({
                 if (val) handleChange(val)
               }}
             >
-              <SelectTrigger className="pr-1.5 focus:ring-0 focus:ring-offset-0 w-fit gap-2 border-none h-8 px-3 font-semibold bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-colors">
+              <SelectTrigger className="cursor-pointer focus:ring-1 focus:ring-primary/50 min-w-[76px] h-8 px-2.5 text-xs font-semibold bg-secondary/80 hover:bg-secondary text-foreground rounded-lg border border-border/50 transition-all flex items-center justify-between gap-1.5 shadow-xs">
                 <SelectValue>{selected?.label}</SelectValue>
               </SelectTrigger>
-              <SelectContent className="max-h-[250px] glass-panel shadow-2xl rounded-xl z-[9999] border-primary/20">
-                <div className="overflow-y-auto max-h-[240px] px-1 py-1 custom-scrollbar">
+              <SelectContent className="max-h-[260px] glass-panel !bg-background shadow-2xl rounded-xl z-[9999] border-primary/20">
+                <div className="overflow-y-auto max-h-[250px] p-1">
                   {options?.map((option, id: number) => (
-                    <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ""} className="rounded-lg cursor-pointer my-0.5 font-medium">
+                    <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ""} className="rounded-lg cursor-pointer my-0.5 text-xs font-medium">
                       {option.label}
                     </SelectItem>
                   ))}

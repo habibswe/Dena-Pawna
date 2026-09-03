@@ -30,10 +30,10 @@ export default async function AccountsPage() {
           <h2 className="text-3xl font-bold tracking-tight">{t.accounts.title}</h2>
           <p className="text-muted-foreground">{t.accounts.subtitle}</p>
         </div>
-        <AddAccountDialog />
+        <AddAccountDialog accounts={allAccounts} />
       </div>
 
-      <AccountList accounts={accountBalances} />
+      <AccountList accounts={accountBalances} allAccounts={allAccounts} />
     </div>
   );
 }
